@@ -11,7 +11,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev --workspace=client",
-    "dev:server": "npm run start --workspace=server"
+    "dev:server": "npm run start --workspace=server",
+    "docker": "docker-compose up --build"
   },
   "keywords": [],
   "author": "",
