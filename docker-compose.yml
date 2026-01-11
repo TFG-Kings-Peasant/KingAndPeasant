@@ -9,6 +9,8 @@ services:
     environment: 
       MYSQL_ROOT_PASSWORD: password #Estoy hay que cambiarlo luego al .env
       MYSQL_DATABASE: king_and_peasant
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports: 
       - "3307:3306"
     volumes:
@@ -23,6 +25,8 @@ services:
       timeout: 3s
       retries: 5
     command: ["redis-server"]
+    volumes:
+      - redis_data:/data
     
 
   server:
@@ -36,8 +40,7 @@ services:
       - ./packages/server:/app
       - /app/node_modules
     depends_on:
-      - redis:
-          condition: service_healthy
+      - redis
       - mariadb
 
   client:
@@ -53,3 +56,4 @@ services:
   
 volumes:
   mariadb_data:
+  redis_data:
