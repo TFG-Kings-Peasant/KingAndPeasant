@@ -12,6 +12,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mariadb": "^3.4.5",
+    "redis": "^5.10.0"
   }
 }
