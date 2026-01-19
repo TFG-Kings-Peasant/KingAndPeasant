@@ -1,0 +1,18 @@
+name: CD - Deploy to Render
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - trunk
+
+jobs:
+  deploy:
+    name: Call Render Deploy Hook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deploy
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          echo "🚀 Despliegue solicitado a Render."
