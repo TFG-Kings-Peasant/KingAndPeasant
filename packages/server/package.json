@@ -1,6 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,12 +11,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
-  },
-  "devDependencies": {
+    "express": "^5.2.1",
     "jest": "^30.2.0",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "mariadb": "^3.4.5",
+    "redis": "^5.10.0"
   }
 }
