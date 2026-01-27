@@ -1,0 +1,91 @@
+.body-container{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 2rem;
+    width: 100%;
+}
+
+.body-container > div{
+    width: 90%;  
+    width: 100%;
+    max-width: 1200px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.button-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e5e5e5;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.lobby-table{
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- LÓGICA DE LA TABLA (CSS GRID) --- */
+/* Usamos Grid en lugar de <table> nativa para mayor control del espaciado */
+.table-header, .table-row {
+  display: grid;
+  /* Definimos 4 columnas. La primera (Nombre) ocupa más espacio (2fr) */
+  grid-template-columns: 2fr 1.5fr 1fr 1fr; 
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.table-header {
+  font-weight: bold;
+  background-color: #e5e5e5;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.table-row {
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.table-row:hover {
+  background-color: #e5e5e5; /* Efecto hover para interactividad */
+}
+
+/* --- ESTILOS DE BOTONES (ESTADO) --- */
+.status-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  text-transform: uppercase;
+}
+
+/* Estilo para "UNIRSE" */
+.status-btn.join {
+  background-color: #4CAF50; /* Verde */
+  color: white;
+}
+
+/* Estilo para "PRIVADA" */
+.status-btn.private {
+  background-color: #e5e5e5; /* Naranja/Amarillo */
+  color: #333;
+  cursor: not-allowed;
+}
+
+/* Estilo para "LLENA" */
+.status-btn.full {
+  background-color: #F44336; /* Rojo */
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
