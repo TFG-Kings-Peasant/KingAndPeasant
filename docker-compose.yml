@@ -36,6 +36,7 @@ services:
       - "3000:3000"
     environment: 
       - PORT=3000
+      - DATABASE_URL=mysql://root:password@mariadb:3306/king_and_peasant
     volumes:
       - ./packages/server:/app
       - /app/node_modules
