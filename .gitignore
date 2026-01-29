@@ -12,6 +12,9 @@ server/.env
 
 server/generated/prisma
 
+mariadb_data
+*.sqlite
+
 build/
 dist/
 client/build/

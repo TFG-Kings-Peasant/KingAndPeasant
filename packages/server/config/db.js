@@ -1,3 +1,4 @@
+/*
 import mariadb from "mariadb";
 
 let createUserQuery = "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50) UNIQUE, password VARCHAR(255))";
@@ -32,3 +33,11 @@ async function runQuery(connection, query) {
 }
 
 export default pool;
+*/
+
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
+
+export const prisma = new PrismaClient();
+
+export default prisma;

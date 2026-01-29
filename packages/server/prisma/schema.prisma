@@ -1,16 +1,20 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
+  url = env("DATABASE_URL")
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
+  idUser  Int      @id @default(autoincrement())
+  name    String   @unique
   email   String   @unique
-  name    String
-  lastname String?
+  password  String
+  games   Int      @default(0)
+  wins    Int      @default(0)
+  losses  Int      @default(0)
+  //ProfilePicture  String 
 }

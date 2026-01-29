@@ -1,11 +1,11 @@
+import 'dotenv/config';
 import express from 'express';
-import { connectDB, pool } from './config/db.js';
+import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
 
 const app = express();
 const port = 3000;
 
-connectDB();
 connectRedis();
 
 // Middleware to parse JSON bodies
@@ -15,6 +15,7 @@ app.get("/api", (req, res) => { //.get only responds to HTTP GET requests
     res.send("Hello World!");
 });
 
+/* ANTIGUA PRUEBA!
 app.post("/api/create-user", async (req, res) => {
     const {username, password} = req.body;
     let conn;
@@ -31,6 +32,31 @@ app.post("/api/create-user", async (req, res) => {
         //console log y status 500
     } finally {
         if (conn) conn.release();
+    }
+});
+*/
+
+app.post("/api/create-user", async (req,res) => {
+    
+    const { username, password } = req.body;
+    
+    try {
+        const user = await prisma.user.create({
+            data: {
+                name: username,
+                email: 'user1@example.com',
+                password: password
+            },
+        }) 
+        console.log("User created: ", user);
+        await redisClient.set('user_created', JSON.stringify({
+            userId: Number(user.idUser),
+            username: user.name
+            }));
+        res.status(201).send({message: "User created", userId: user.idUser});
+    } catch (err) {
+        console.error("Error creating user:", err);
+        res.status(500).send({message: "Error creating user"});
     }
 });
 

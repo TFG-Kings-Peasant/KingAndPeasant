@@ -3,7 +3,7 @@ version: '3.8'
 services: 
 
   mariadb:
-    image: mariadb:latest
+    image: mariadb:10.11
     container_name: king_and_peasant_mariadb
     restart: always
     environment: 
@@ -12,13 +12,15 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports: 
-      - "3307:3306"
+      - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - ./mariadb_data:/var/lib/mysql
   
   redis:
     image: redis:alpine
     container_name: king_and_peasant_redis
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 1s
@@ -36,7 +38,7 @@ services:
       - "3000:3000"
     environment: 
       - PORT=3000
-      - DATABASE_URL=mysql://root:password@mariadb:3306/king_and_peasant
+      - DATABASE_URL=mysql://user:password@mariadb:3306/king_and_peasant_mariadb
     volumes:
       - ./packages/server:/app
       - /app/node_modules
