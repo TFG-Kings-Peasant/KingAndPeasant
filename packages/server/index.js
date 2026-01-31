@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
+import lobbyRoutes from './src/routes/LobbyRoutes.js';
 
 const app = express();
 const port = 3000;
@@ -35,6 +36,8 @@ app.post("/api/create-user", async (req, res) => {
     }
 });
 */
+
+app.use('/api/lobbies', lobbyRoutes);
 
 app.post("/api/create-user", async (req,res) => {
     
