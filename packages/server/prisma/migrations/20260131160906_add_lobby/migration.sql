@@ -1,0 +1,19 @@
+-- CreateTable
+CREATE TABLE `Lobby` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `status` ENUM('WAITING', 'ONGOING') NOT NULL DEFAULT 'WAITING',
+    `privacy` ENUM('PUBLIC', 'PRIVATE') NOT NULL DEFAULT 'PUBLIC',
+    `player1Id` INTEGER NOT NULL,
+    `player2Id` INTEGER NULL,
+
+    UNIQUE INDEX `Lobby_name_key`(`name`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Lobby` ADD CONSTRAINT `Lobby_player1Id_fkey` FOREIGN KEY (`player1Id`) REFERENCES `User`(`idUser`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Lobby` ADD CONSTRAINT `Lobby_player2Id_fkey` FOREIGN KEY (`player2Id`) REFERENCES `User`(`idUser`) ON DELETE SET NULL ON UPDATE CASCADE;
