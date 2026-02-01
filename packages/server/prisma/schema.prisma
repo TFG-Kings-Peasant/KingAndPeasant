@@ -16,6 +16,7 @@ model User {
   games   Int      @default(0)
   wins    Int      @default(0)
   losses  Int      @default(0)
+  //Campos virtuales, no existen en la base de datos. "La referencia se guarda siempre en el lado del 'Hijo' (el lado Muchos), nunca en el 'Padre'."
   lobbiesAsPlayer1 Lobby[] @relation("Player1")
   lobbiesAsPlayer2 Lobby[] @relation("Player2")
 }
