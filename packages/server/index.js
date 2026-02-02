@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
 
@@ -57,6 +59,77 @@ app.post("/api/create-user", async (req,res) => {
     } catch (err) {
         console.error("Error creating user:", err);
         res.status(500).send({message: "Error creating user"});
+    }
+});
+
+app.post("/api/auth/register", async (req,res) => {
+    //Recogemos la información
+    const { username, email, password} = req.body;
+
+    try{
+        //Por hacer: Comprobar que el correo!
+        //Buscamos en la db si existe el usuario
+        const possibleUser = await prisma.user.findMany({
+            where: { 
+                OR: [{
+                    name: String(username), 
+                },
+                {
+                    email: String(email),
+                },
+            ]}
+        });
+        console.log(possibleUser.toString());
+        if(possibleUser.length != 0)  {
+            return res.status(409).send({message: "This user is already registered!"});
+        }
+        //Encriptamos la contraseña
+        const hash = await bcrypt.hash(password, 10);
+        //Guardamos el usuario
+        const user = await prisma.user.create({
+            data: {
+                name: username,
+                email: email,
+                password: hash
+            },
+        }) 
+        res.status(201).send({message: "User created", userId: user.idUser});
+    } catch (err) {
+        console.error("Error creating user:", err);
+        res.status(500).send({message: "Error creating user"});
+    }
+});
+
+app.post("/api/auth/login", async (req,res) => {
+    //Recogemos la información
+    const { email, password} = req.body;
+
+    try{
+        //Buscamos en la db si existe el usuario
+        const user = await prisma.user.findUnique({
+            where: { 
+                email: String(email),
+            }
+        });
+
+        if (!user) {
+            //Por hacer: Comprobar si 409 es el código apropieado!         
+            res.status(409).send({message: "This email is not registered!"});
+        }
+        //Comprobamos si la contraseña es la correcta
+        const match = await bcrypt.compare(password, user.password);
+        if(match) {
+            const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET)
+            res.setHeader("token", token);
+            //Por hacer: Enviar a otra pantalla!
+        } else {
+            res.status(409).send({message: "Incorrect Password"})
+        }
+        console.log("User Logged: ", user);
+        res.status(201).send({message: "Successful login!", userId: user.idUser});
+    } catch (err) {
+        console.error("Error logging in:", err);
+        res.status(500).send({message: "Error logging in"});
     }
 });
 

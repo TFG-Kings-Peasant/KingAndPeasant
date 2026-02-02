@@ -16,5 +16,6 @@ model User {
   games   Int      @default(0)
   wins    Int      @default(0)
   losses  Int      @default(0)
+  createdAt  DateTime  @default(now())
   //ProfilePicture  String 
 }
