@@ -5,7 +5,9 @@ const getLobbies = async (req, res) => {
         const lobbies = await lobbyService.getAllLobbies();
         res.status(200).json(lobbies);
     } catch (error) {
-        res.status(500).json({ error: 'Error al obtener lobbies' });
+        console.error("🔴 ERROR CRÍTICO EN GET LOBBIES:");
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener lobbies', details: error.message });
     }
 };
 

@@ -33,8 +33,8 @@
 /* Usamos Grid en lugar de <table> nativa para mayor control del espaciado */
 .table-header, .table-row {
   display: grid;
-  /* Definimos 4 columnas. La primera (Nombre) ocupa más espacio (2fr) */
-  grid-template-columns: 2fr 1.5fr 1fr 1fr; 
+  /* Definimos 5 columnas. La primera (Nombre) ocupa más espacio (2fr) */
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
   align-items: center;
   padding: 1rem;
   gap: 1rem;
@@ -58,7 +58,7 @@
 }
 
 /* --- ESTILOS DE BOTONES (ESTADO) --- */
-.status-btn {
+.join-btn {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 4px;
@@ -69,20 +69,13 @@
 }
 
 /* Estilo para "UNIRSE" */
-.status-btn.join {
+.join-btn.allowed {
   background-color: #4CAF50; /* Verde */
   color: white;
 }
 
-/* Estilo para "PRIVADA" */
-.status-btn.private {
-  background-color: #e5e5e5; /* Naranja/Amarillo */
-  color: #333;
-  cursor: not-allowed;
-}
-
 /* Estilo para "LLENA" */
-.status-btn.full {
+.join-btn.not-allowed {
   background-color: #F44336; /* Rojo */
   color: white;
   cursor: not-allowed;
