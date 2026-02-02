@@ -35,8 +35,24 @@ async function main() {
     },
   });
 
-  console.log('👤 Usuarios creados:', [user1.name, user2.name, user3.name]);
 
+  const user4 = await prisma.user.create({
+    data: {
+      name: 'Galahad',
+      email: 'galahad@camelot.com',
+      password: 'password123',
+    },
+  });
+
+    const user5 = await prisma.user.create({
+    data: {
+      name: 'Guille',
+      email: 'guille@klk.com',
+      password: 'password123', // En producción deberías hashearla
+    },
+  });
+
+  console.log('👤 Usuarios creados:', [user1.name, user2.name, user3.name, user4.name, user5.name]);
   // 3. Crear Lobbies
   // Lobby 1: Creado por Arturo, esperando jugador
   await prisma.lobby.create({
@@ -60,6 +76,16 @@ async function main() {
     },
   });
 
+  // Lobby 3: Creado por Galahad, esperando jugador
+  await prisma.lobby.create({
+    data: {
+      name: 'Cacería del Grial',
+      status: LobbyStatus.WAITING, // Esperando jugadores
+      privacy: LobbyPrivacy.PRIVATE,
+      player1Id: user4.idUser, // Galahad es el líder
+      player2Id: null,         // Hueco libre
+    },
+  });
   console.log('🏰 Lobbies creados con éxito.');
 }
 

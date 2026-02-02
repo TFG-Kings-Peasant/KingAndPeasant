@@ -13,7 +13,7 @@ const createLobby = async (data) => {
             name: data.name,
             status: data.status,
             privacy: data.privacy,
-            player1: data.player1
+            player1Id: data.player1Id
         },
     });
 };

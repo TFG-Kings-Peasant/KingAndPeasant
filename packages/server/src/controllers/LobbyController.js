@@ -13,14 +13,16 @@ const getLobbies = async (req, res) => {
 
 const createLobby = async (req, res) => {
     try {
-        const { name, status, privacy, player1 } = req.body;
+        const { name, privacy, player1Id } = req.body;
         
+        console.log("📥 Datos recibidos para crear lobby:", req.body);
+
         // Validación básica de entrada
-        if (!name || !status || !privacy || !player1) {
+        if (!name || !player1Id) {
             return res.status(400).json({ message: "Faltan datos requeridos" });
         }
 
-        const newLobby = await lobbyService.createLobby({ name, status, privacy, player1 });
+        const newLobby = await lobbyService.createLobby({ name, privacy, player1Id });
         res.status(201).json(newLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
