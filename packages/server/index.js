@@ -2,16 +2,19 @@ import 'dotenv/config';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import cors from 'cors';
 import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
 
 const app = express();
 const port = 3000;
 
+
 connectRedis();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(cors());
 
 app.get("/api", (req, res) => { //.get only responds to HTTP GET requests
     res.send("Hello World!");
@@ -64,7 +67,7 @@ app.post("/api/create-user", async (req,res) => {
 
 app.post("/api/auth/register", async (req,res) => {
     //Recogemos la información
-    const { username, email, password} = req.body;
+    const { name, email, password} = req.body;
 
     try{
         //Por hacer: Comprobar que el correo!
@@ -72,7 +75,7 @@ app.post("/api/auth/register", async (req,res) => {
         const possibleUser = await prisma.user.findMany({
             where: { 
                 OR: [{
-                    name: String(username), 
+                    name: String(name), 
                 },
                 {
                     email: String(email),
@@ -88,7 +91,7 @@ app.post("/api/auth/register", async (req,res) => {
         //Guardamos el usuario
         const user = await prisma.user.create({
             data: {
-                name: username,
+                name: name,
                 email: email,
                 password: hash
             },
@@ -113,15 +116,19 @@ app.post("/api/auth/login", async (req,res) => {
         });
 
         if (user.length == 0) {
-            //Por hacer: Comprobar si 409 es el código apropieado!         
             return res.status(401).send({message: "This email is not registered!"});
         }
         //Comprobamos si la contraseña es la correcta
         const match = await bcrypt.compare(password, user.password);
         if(match) {
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET)
-            res.setHeader("token", token);
-            //Por hacer: Enviar a otra pantalla!
+            return res.status(200).send({
+                message: "Successful login!",
+                userId: user.idUser,
+                name: user.name,
+                email: user.email,
+                authToken: token
+            });
         } else {
             return res.status(401).send({message: "Incorrect Password"})
         }
