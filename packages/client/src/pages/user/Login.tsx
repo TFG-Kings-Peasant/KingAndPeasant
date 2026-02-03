@@ -1,7 +1,8 @@
 import { useUser } from "../../hooks/useUser";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import type { User } from  "../../context/AuthContext";
+import "./Auth.css";
 
 const Login = () => {
     const { addUser } = useUser();
@@ -12,6 +13,8 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
         fetch("http://localhost:3000/api/auth/login", {
             method: "POST",
             headers: {
@@ -31,7 +34,7 @@ const Login = () => {
                 }
 
                 addUser(user!);
-                navigate("/home");
+                navigate("/");
             } else {
                 const data = await res.json();
                 setError(data.message || "Login failed");
@@ -43,26 +46,35 @@ const Login = () => {
     };
     
     return (
-        <div>
-            <h2>Register</h2>
-            <form onSubmit = {handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+        <div className="auth-container">
+            <div className="auth-card">
+                <h2 className="auth-title">Welcome Lord</h2>
+                <form className="auth-form" onSubmit = {handleSubmit}>
+                    <input
+                        className="auth-input"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        className="auth-input"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button className="auth-button" type="submit">Login</button>
+                </form>
+                {error && <div className="auth-error">{error}</div>}
+
+                <Link to="/register" className="auth-link">
+                    Don't you have a crown yet? Register here
+                </Link>
+
+            </div>
         </div>
     )
 

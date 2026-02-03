@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import "./Auth.css";
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -10,6 +11,8 @@ const Register = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
         fetch("http://localhost:3000/api/auth/register", {
             method: "POST",
             headers: {
@@ -31,33 +34,43 @@ const Register = () => {
     };
 
     return (
-        <div>
-            <h2>Register</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Register</button>
-            </form>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+        <div className = "auth-container">
+            <div className = "auth-card">
+                <h2 className = "auth-title">New Lord</h2>
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <input
+                        className="auth-input"
+                        type="text"
+                        placeholder="Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                    <input
+                        className="auth-input"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        className="auth-input"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button className="auth-button" type="submit">Register</button>
+                </form>
+                {error && <div className="auth-error">{error}</div>}
+
+                <Link to="/login" className="auth-link">
+                    Do you already have a crown? Enter here
+                </Link>
+
+            </div>
         </div>
     );      
 }
