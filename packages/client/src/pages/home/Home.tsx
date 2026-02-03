@@ -20,14 +20,13 @@ function Home() {
           onClick={logout} 
           style={{ backgroundColor: 'red', color: 'white', padding: '10px' }}
           >
-          Cerrar Sesión
+          Sign Out
         </button>
       ) : (
         <Link to="/register">
           Don't you have a crown yet? Register here
         </Link>
       )}  
-      
       </div>
     </div>
   )
