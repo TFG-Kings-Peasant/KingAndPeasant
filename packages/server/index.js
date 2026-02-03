@@ -93,7 +93,7 @@ app.post("/api/auth/register", async (req,res) => {
                 password: hash
             },
         }) 
-        res.status(201).send({message: "User created", userId: user.idUser});
+        res.status(200).send({message: "User created", userId: user.idUser});
     } catch (err) {
         console.error("Error creating user:", err);
         res.status(500).send({message: "Error creating user"});
@@ -112,9 +112,9 @@ app.post("/api/auth/login", async (req,res) => {
             }
         });
 
-        if (!user) {
+        if (user.length == 0) {
             //Por hacer: Comprobar si 409 es el código apropieado!         
-            res.status(409).send({message: "This email is not registered!"});
+            return res.status(401).send({message: "This email is not registered!"});
         }
         //Comprobamos si la contraseña es la correcta
         const match = await bcrypt.compare(password, user.password);
@@ -123,10 +123,10 @@ app.post("/api/auth/login", async (req,res) => {
             res.setHeader("token", token);
             //Por hacer: Enviar a otra pantalla!
         } else {
-            res.status(409).send({message: "Incorrect Password"})
+            return res.status(401).send({message: "Incorrect Password"})
         }
         console.log("User Logged: ", user);
-        res.status(201).send({message: "Successful login!", userId: user.idUser});
+        res.status(200).send({message: "Successful login!", userId: user.idUser});
     } catch (err) {
         console.error("Error logging in:", err);
         res.status(500).send({message: "Error logging in"});
