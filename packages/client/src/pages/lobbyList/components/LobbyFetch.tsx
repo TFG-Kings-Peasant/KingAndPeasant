@@ -38,3 +38,13 @@ export const createLobby = async (name: string, privacy: string) => {
     }
     return await response.json();
 };
+
+export const getLobbyById = async (lobbyId : number) => {
+    const response = await fetch(API_URL + `/${lobbyId}`);
+    if (!response.ok) {
+        const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
+        console.error("❌ ERROR DEL SERVER:", response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+    return await response.json();
+}

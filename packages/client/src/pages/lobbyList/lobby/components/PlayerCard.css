@@ -1,0 +1,93 @@
+/* PlayerCard.css */
+
+/* 1. El contenedor principal (La tarjeta) */
+.player-card {
+    background-color: #252525; /* Fondo oscuro */
+    border: 2px solid #333;    /* Borde sutil */
+    width: 360px;          
+    height: 540px;         
+    border-radius: 20px;  
+    padding: 20px;
+    color: white;
+    transition: all 0.3s ease; /* Suavizar animaciones */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Efecto Hover: La tarjeta se eleva y se ilumina al pasar el ratón */
+.player-card:hover {
+    transform: translateY(-5px);
+    border-color: #ffd700;     /* Dorado */
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
+}
+
+/* 2. El contenedor de información (Alineación interna) */
+.player-info {
+    display: flex;
+    flex-direction: column;    /* Apilar Avatar arriba, Texto abajo */
+    align-items: center;       /* Centrar todo horizontalmente */
+    height: 100%;
+    width: 100%;
+    gap: 1rem;                 /* Espacio entre el avatar y el texto */
+}
+
+/* 3. El círculo del avatar */
+.player-avatar {
+    width: 100%;
+    flex: 0.5;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.img-container{
+    width: 180px;  
+    height: 180px;
+    border-radius: 50%;        /* Esto lo hace redondo */
+    border: 3px solid #555;    /* Borde del círculo */
+    overflow: hidden;          /* ¡IMPORTANTE! Recorta la imagen sobrante */
+    background-color: #1a1a1a; /* Fondo por si la imagen tarda en cargar */
+}
+
+.player-card:hover .img-container {
+    border-color: #ffd700;
+}
+
+/* 4. La imagen en sí misma */
+img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ¡CLAVE! Hace que la imagen llene el círculo sin estirarse ni deformarse */
+}
+
+/* 5. Contenedor de texto */
+.player-details {
+    text-align: center;
+    flex: 2rem;
+    padding: 1.5rem;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: baseline;
+    align-items: center;
+}
+
+/* El nombre del jugador */
+.player-details h3 {
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+/* El estado (Status) */
+.player-details p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #aaa;              /* Gris claro */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}

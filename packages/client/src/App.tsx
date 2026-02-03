@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/home/Home";
 import LobbyList from "./pages/lobbyList/LobbyList";
+import Lobby from "./pages/lobbyList/lobby/Lobby";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       
       {/* Rutas conectadas a los nuevos archivos */}
       <Route path="/lobbyList" element={<LobbyList />} />
+      <Route path="/lobby/:lobbyId" element={<Lobby />} />
     </Routes>
   )
 }
