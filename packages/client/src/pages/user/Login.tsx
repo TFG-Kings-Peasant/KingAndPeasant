@@ -5,7 +5,7 @@ import type { User } from  "../../context/AuthContext";
 import "./Auth.css";
 
 const Login = () => {
-    const { addUser } = useUser();
+    const { login } = useUser();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ const Login = () => {
                     authToken: data.authToken
                 }
 
-                addUser(user!);
+                login(user!);
                 navigate("/");
             } else {
                 const data = await res.json();

@@ -77,7 +77,7 @@ app.post("/api/auth/register", async (req,res) => {
     try{
         //Por hacer: Comprobar que el correo!
         //Buscamos en la db si existe el usuario
-        const possibleUser = await prisma.user.findMany({
+        const possibleUser = await prisma.user.findFirst({
             where: { 
                 OR: [{
                     name: String(name), 
@@ -87,8 +87,8 @@ app.post("/api/auth/register", async (req,res) => {
                 },
             ]}
         });
-        console.log(possibleUser.toString());
-        if(possibleUser.length != 0)  {
+        console.log(possibleUser);
+        if(!possibleUser)  {
             return res.status(409).send({message: "This user is already registered!"});
         }
         //Encriptamos la contraseña
@@ -120,13 +120,13 @@ app.post("/api/auth/login", async (req,res) => {
             }
         });
 
-        if (user.length == 0) {
+        if (!user) {
             return res.status(401).send({message: "This email is not registered!"});
         }
         //Comprobamos si la contraseña es la correcta
         const match = await bcrypt.compare(password, user.password);
         if(match) {
-            const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET)
+            const token = jwt.sign({ id: user.userId, name: user.name }, process.env.JWT_SECRET)
             return res.status(200).send({
                 message: "Successful login!",
                 userId: user.idUser,
