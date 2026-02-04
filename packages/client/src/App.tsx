@@ -11,7 +11,7 @@ function App() {
       
       {/* Rutas conectadas a los nuevos archivos */}
       <Route path="/lobbyList" element={<LobbyList />} />
-      <Route path="/lobby/:lobbyId" element={<Lobby />} />
+      <Route path="/lobby/:id" element={<Lobby />} />
     </Routes>
   )
 }
