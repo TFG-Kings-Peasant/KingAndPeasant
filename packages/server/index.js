@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
+import { authenticateToken } from './middleware.js';
 
 const app = express();
 const port = 3000;
@@ -40,6 +41,10 @@ app.post("/api/create-user", async (req, res) => {
     }
 });
 */
+
+app.get("/api/protected", authenticateToken, (req, res) => {
+    res.send(`Hello, ${req.user.name}. This is a protected route.`);
+})
 
 app.post("/api/create-user", async (req,res) => {
     
