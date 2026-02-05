@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router";
 
 // --- TEMPORAL: CAMBIAR ESTO CUANDO TENGAS LOGIN ---
 const CURRENT_USER_ID = 1; 
+const USER_5 = 5; // ID del jugador 5 para unirse a la sala
 // --------------------------------------------------
 
 function Lobby() {
@@ -36,7 +37,9 @@ function Lobby() {
   const handleToggleReady = async () => {
       if (!lobby) return;
       try {
-          await setPlayerReady(lobby.id, !lobby.player1Ready); // Cambiamos el estado del jugador actual
+        const isPlayer1 = lobby.player1Id === CURRENT_USER_ID;
+        const currentReadyStatus = isPlayer1 ? lobby.player1Ready : lobby.player2Ready;
+          await setPlayerReady(lobby.id, !currentReadyStatus); // Cambiamos el estado del jugador actual
           fetchLobby(); // Refrescamos manual para ver el cambio al instante
       } catch (err) {
           setError("Error al cambiar estado");
@@ -66,7 +69,7 @@ function Lobby() {
       <div className="lobby-body">
         <PlayerCard playerId={lobby.player1Id} 
             isReady={lobby.player1Ready}
-            isCurrentUser={lobby.player1Id === CURRENT_USER_ID} // ¿Soy yo?
+            isCurrentUser={lobby.player1Id === USER_5} // ¿Soy yo?
             onToggleReady={handleToggleReady}/>
 
         <h1 className="vs-divider">VS</h1>

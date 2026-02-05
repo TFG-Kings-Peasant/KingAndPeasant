@@ -49,7 +49,9 @@ const createLobby = async (req, res) => {
 
 const joinLobby = async (req, res) => {
     try {
-        const { lobbyId, player2Id } = req.body;
+        const { id } = req.params;
+        const lobbyId = Number(id);
+        const { player2Id } = req.body;
 
         if (!lobbyId || !player2Id) {
             return res.status(400).json({ message: "Faltan datos requeridos" });

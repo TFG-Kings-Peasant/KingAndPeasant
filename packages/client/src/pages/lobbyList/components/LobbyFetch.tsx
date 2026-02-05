@@ -11,7 +11,7 @@ export interface LobbyBackend {
 }
 
 const API_URL = 'http://localhost:3000/api/lobby';
-const USER_20 = 20; // ID de usuario hardcodeado para la creación de lobbies
+const USER_5 = 5; // ID de usuario hardcodeado para la creación de lobbies
 
 export const getAllLobbies = async (): Promise<LobbyBackend[]> => {
     const response = await fetch(API_URL);
@@ -30,7 +30,7 @@ export const createLobby = async (name: string, privacy: string) => {
         body: JSON.stringify({ 
             name, 
             privacy,
-            player1Id: USER_20 // Enviamos el ID hardcodeado
+            player1Id: USER_5 // Enviamos el ID hardcodeado
         }),
     });
     if (!response.ok) {
@@ -56,7 +56,7 @@ export const joinLobby = async (lobbyId: number) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            player2Id: USER_20 // Enviamos el ID hardcodeado
+            player2Id: USER_5 // Enviamos el ID hardcodeado
         }),
     });
     if (!response.ok) {
@@ -88,7 +88,7 @@ export const setPlayerReady = async (lobbyId: number, isReady: boolean) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            playerId: 1, // Enviamos el ID hardcodeado
+            playerId: USER_5, // Enviamos el ID hardcodeado
             isReady: isReady
         }),
     });
