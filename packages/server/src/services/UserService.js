@@ -1,0 +1,58 @@
+import { prisma } from '../../config/db.js';
+import bcrypt from 'bcryptjs';
+
+const getAllUsers = async () => {
+    return await prisma.user.findMany();
+};
+
+const createUser = async (data) => {
+    const hash = await bcrypt.hash(data.password, 10);
+    const user = await prisma.user.create({
+        data: {
+            name: data.name,
+            email: data.email,
+            password: hash
+        },
+    });
+    return user;
+};
+
+const checkIfUserExists = async (name, email) => {
+    const possibleUser = await prisma.user.findFirst({
+        where: { 
+            OR: [{
+                name: String(name), 
+            },
+            {
+                email: String(email),
+            },
+        ]}
+    });
+    if(!possibleUser) {
+        return true;
+    }
+    return false;
+}
+
+const getUserByEmail  = async (email, password) => {
+    const user = await prisma.user.findUnique({
+        where: { 
+            email: String(email),
+        }
+    });
+    if (!user) {
+        return null;
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+        return null;
+    }
+    return user;
+};
+
+export const userService = {
+    getAllUsers,
+    createUser,
+    checkIfUserExists,
+    getUserByEmail
+};
