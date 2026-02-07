@@ -50,9 +50,23 @@ const getUserByEmail  = async (email, password) => {
     return user;
 };
 
+const getUserById = async (id) => {
+    console.log(id);
+    const user = await prisma.user.findFirst({
+        where: {
+            idUser: parseInt(id),
+        }
+    });
+    if (!user) {
+        return null;
+    }
+    return user;
+}
+
 export const userService = {
     getAllUsers,
     createUser,
     checkIfUserExists,
-    getUserByEmail
+    getUserByEmail,
+    getUserById
 };

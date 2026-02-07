@@ -5,6 +5,7 @@ import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
 import Game from "./pages/game/Game";
+import User from "./pages/user/User";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/lobbyList" element={<LobbyList />} />
       <Route path="/lobby/:id" element={<Lobby />} />
       <Route path="/game/:id" element={<Game />} />
+      <Route path="user" element={<User/>}/>
     </Routes>
   )
 }
