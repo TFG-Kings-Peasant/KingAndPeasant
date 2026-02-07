@@ -3,6 +3,7 @@ import Home from "./pages/home/Home";
 import LobbyList from "./pages/lobbyList/LobbyList";
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
+import User from "./pages/user/User";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route path="/register" element={<Register/>}/>
       {/* Rutas conectadas a los nuevos archivos */}
       <Route path="/lobbyList" element={<LobbyList />} />
+      <Route path="user" element={<User/>}/>
     </Routes>
   )
 }

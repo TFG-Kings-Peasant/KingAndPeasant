@@ -7,11 +7,22 @@ const getUsers = async (req, res) => {
         res.status(200).json(users);
     } catch (err) {
         console.error("Error getting users: ", err);
-        res.status(500).send({message: "Error getting users"});
+        res.status(500).send({message: "Error getting users!"});
     }
 }
 
+const getUserById = async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const user = await userService.getUserById(userId);
+        console.log(user);
+        res.status(200).send(user);
+    } catch (err) {
+        console.error("Error getting user by id: ", err);
+        res.status(500).send({message: "Error getting user by id!"})
+    }
 
+}
 
 const registerUser = async (req, res) => {
     const data = req.body;
@@ -61,5 +72,6 @@ const loginUser = async (req, res) => {
 export const userController = {
     getUsers,
     registerUser,
-    loginUser
+    loginUser,
+    getUserById
 };
