@@ -78,20 +78,28 @@ const updateUserById = async (id, name, email, password) => {
         return null; 
     }
 
-    const user = await prisma.user.update({
-        data: {
-            name: name,
-            email: email,
-            password: password
-        },
-        where: {
-            idUser: idNum,
-        }
-    });
-    if (!user) {
-        return null;
+    const dataToUpdate = {
+        name: name,
+        email: email
+    };
+
+    if (password && password.trim !== "") {
+        dataToUpdate.password = await bcrypt.hash(password, 10);
     }
-    return user;
+
+    try {
+        const user = await prisma.user.update({
+        where: {idUser: idNum},
+        data: dataToUpdate,
+        });
+        return user;
+    } catch (err) {
+        if (err.code === 'P2025') {
+            console.error("Error: User not found for update with id:", id);
+            return null; 
+        }
+        throw err;
+    }
 }
 
 export const userService = {
