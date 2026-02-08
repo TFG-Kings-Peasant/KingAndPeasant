@@ -94,7 +94,7 @@ app.post("/api/auth/register", async (req,res) => {
             ]}
         });
         console.log(possibleUser);
-        if(!possibleUser)  {
+        if(possibleUser)  {
             return res.status(409).send({message: "This user is already registered!"});
         }
         //Encriptamos la contraseña
@@ -132,7 +132,7 @@ app.post("/api/auth/login", async (req,res) => {
         //Comprobamos si la contraseña es la correcta
         const match = await bcrypt.compare(password, user.password);
         if(match) {
-            const token = jwt.sign({ id: user.userId, name: user.name }, process.env.JWT_SECRET)
+            const token = jwt.sign({ id: user.idUser, name: user.name }, process.env.JWT_SECRET)
             return res.status(200).send({
                 message: "Successful login!",
                 userId: user.idUser,

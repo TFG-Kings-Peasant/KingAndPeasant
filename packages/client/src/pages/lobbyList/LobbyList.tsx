@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import Header from "../home/components/Header";
 import './LobbyList.css'
-import { createLobby, getAllLobbies, type LobbyBackend } from "./components/LobbyFetch";
+import { createLobby, getAllLobbies, joinLobby, type LobbyBackend } from "./components/LobbyFetch";
 import { useNavigate } from "react-router";
+import { useUser } from "../../hooks/useUser";
+
 
 function LobbyList() {
     const [lobbies, setLobbies] = useState<LobbyBackend[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const { user, isLogin} = useUser();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newLobbyName, setNewLobbyName] = useState("");
@@ -49,11 +52,17 @@ function LobbyList() {
             return;
         }
 
+        if(!isLogin) {
+            alert("Debes iniciar sesión para crear una sala");
+            return;
+        }
+
         try {
             // Llamamos a tu servicio pasando AMBOS datos
-            await createLobby(newLobbyName, newLobbyPrivacy);
+            const newLobby = await createLobby(newLobbyName, newLobbyPrivacy, user?.id || null); // Pasamos el ID del usuario actual
             setIsModalOpen(false); // Cerrar modal
             fetchLobbies(); // Recargar lista
+            navigate(`/lobby/${newLobby.id}`);
         } catch (err) {
             if (err instanceof Error) {
                 alert(err.message);
@@ -62,6 +71,25 @@ function LobbyList() {
             }
         }
     };;
+
+    const handleJoinLobby = async (lobbyId: number) => {
+        if(!isLogin) {
+            alert("Debes iniciar sesión para unirte a una sala");
+            return;
+        }else{
+            try {
+                await joinLobby(lobbyId, user?.id || null); // Pasamos el ID del usuario actual
+                navigate(`/lobby/${lobbyId}`); // Redirige a la página de la sala
+            } catch (err) {
+                if (err instanceof Error) {
+                    alert(err.message);
+                } else {
+                    alert("Ocurrió un error desconocido al intentar unirse a la sala");
+                }
+            }
+        }
+
+    }
 
     const joinLobbyCheck = (player2Id: number | null, privacy: string, status: string) => {
         if (status === 'ONGOING') {
@@ -77,7 +105,7 @@ function LobbyList() {
     };
 
     return <div>
-        <Header username="Guille"/>
+      <Header username = {user == null?"" : user.name}/>
         <div className="body-container">
             <div className="button-container">
                 <button onClick={openCreateModal}>Crear Sala</button>
@@ -106,7 +134,7 @@ function LobbyList() {
                             <span className="col-privacy">{lobby.privacy}</span>
                             <span className="col-status">{lobby.status}</span>
                             <span className="col-join">
-                                <button className={`join-btn ${joinStatus.allowed}`} onClick={() => navigate(`/lobby/${lobby.id}`)} disabled={joinStatus.allowed === "not-allowed"}>
+                                <button className={`join-btn ${joinStatus.allowed}`} onClick={() => handleJoinLobby(lobby.id)} disabled={joinStatus.allowed === "not-allowed"}>
                                     {joinStatus.reason}
                                 </button>
                             </span>
