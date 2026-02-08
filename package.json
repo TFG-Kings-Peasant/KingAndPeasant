@@ -11,10 +11,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:server":"npm run test --prefix packages/server",
     "test:client":"npm run test --prefix packages/client",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "npm run docker:db && concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev --workspace=client",
     "dev:server": "npm run start --workspace=server",
     "docker": "docker-compose up --build",
+    "docker:db": "docker-compose up -d mariadb redis",
     "start:all": "npm install && npm run dev"
   },
   "keywords": [],

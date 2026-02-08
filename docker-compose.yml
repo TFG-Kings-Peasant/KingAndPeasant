@@ -1,18 +1,54 @@
 version: '3.8'
 
 services: 
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: king_and_peasant_mariadb
+    restart: always
+    environment: 
+      MYSQL_ROOT_PASSWORD: password #Estoy hay que cambiarlo luego al .env
+      MYSQL_DATABASE: king_and_peasant
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports: 
+      - "3306:3306"
+    volumes:
+      - ./mariadb_data:/var/lib/mysql
+  
+  redis:
+    image: redis:alpine
+    container_name: king_and_peasant_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command: ["redis-server"]
+    volumes:
+      - redis_data:/data
+    
+
   server:
     build: ./packages/server
+    container_name: king_and_peasant_server
     ports: 
       - "3000:3000"
     environment: 
       - PORT=3000
+      - DATABASE_URL=mysql://user:password@mariadb:3306/king_and_peasant_mariadb
     volumes:
       - ./packages/server:/app
       - /app/node_modules
+    depends_on:
+      - redis
+      - mariadb
 
   client:
     build: ./packages/client
+    container_name: king_and_peasant_client
     ports: 
       - "5173:5173"
     volumes:
@@ -20,3 +56,7 @@ services:
       - /app/node_modules
     depends_on:
       - server
+  
+volumes:
+  mariadb_data:
+  redis_data:
