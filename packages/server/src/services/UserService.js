@@ -28,7 +28,7 @@ const checkIfUserExists = async (name, email) => {
             },
         ]}
     });
-    if(!possibleUser) {
+    if(possibleUser) {
         return true;
     }
     return false;
@@ -51,10 +51,41 @@ const getUserByEmail  = async (email, password) => {
 };
 
 const getUserById = async (id) => {
-    console.log(id);
-    const user = await prisma.user.findFirst({
+    
+    const idNum = parseInt(id);
+
+    if (isNaN(idNum)) {
+        console.error("Error: Invalid Id received in getUserById:", id);
+        return null; 
+    }
+
+    const user = await prisma.user.findUnique({
         where: {
-            idUser: parseInt(id),
+            idUser: idNum,
+        }
+    });
+    if (!user) {
+        return null;
+    }
+    return user;
+}
+
+const updateUserById = async (id, name, email, password) => {
+    const idNum = parseInt(id);
+
+    if (isNaN(idNum)) {
+        console.error("Error: Invalid Id received in updateUserById:", id);
+        return null; 
+    }
+
+    const user = await prisma.user.update({
+        data: {
+            name: name,
+            email: email,
+            password: password
+        },
+        where: {
+            idUser: idNum,
         }
     });
     if (!user) {
@@ -68,5 +99,6 @@ export const userService = {
     createUser,
     checkIfUserExists,
     getUserByEmail,
-    getUserById
+    getUserById,
+    updateUserById
 };

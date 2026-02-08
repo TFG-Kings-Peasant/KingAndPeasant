@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import "./Auth.css";
+import "./User.css";
 
 const User = () => {
     const [name, setName] = useState("");
@@ -19,7 +19,7 @@ const User = () => {
         if(!isLogin || !user) return;
         const localData = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/auth/user", {
+                const response = await fetch("http://localhost:3000/api/auth/profile", {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${user.authToken}`
@@ -49,7 +49,7 @@ const User = () => {
             <div className="auth-container">
                 <div className="auth-card">
                     <div className="auth-error">{error}</div>
-                    <Link to="/" className="auth-link">Volver al Reino</Link>
+                    <Link to="/" className="auth-link">Return to the Kingdom</Link>
                 </div>
             </div>
         );
@@ -58,29 +58,29 @@ const User = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2 className="auth-title">Perfil de Lord {name}</h2>
+                <h2 className="auth-title">Lord Profile {name}</h2>
 
                 {/* SECCIÓN 1: Datos Personales */}
                 <div className="profile-info">
                     <p className="profile-text">
-                        <strong>📧 Email:</strong> {email}
+                        <strong>Email:</strong> {email}
                     </p>
                     <p className="profile-date">
-                        <strong>📅 Unido el:</strong> {createdAt ? new Date(createdAt).toLocaleDateString() : 'Desconocido'}
+                        <strong>Joined on the:</strong> {createdAt ? new Date(createdAt).toLocaleDateString() : 'Desconocido'}
                     </p>
                 </div>
 
                 <hr className="profile-divider" />
 
                 {/* SECCIÓN 2: Estadísticas */}
-                <h3 className="stats-title">Estadísticas de Guerra</h3>
+                <h3 className="stats-title">War statistics</h3>
                 
                 <div className="stats-grid">
                     {/* Partidas */}
                     <div className="stat-box">
                         <span className="stat-icon">⚔️</span>
                         <strong className="stat-number">{games}</strong>
-                        <div className="stat-label">Partidas</div>
+                        <div className="stat-label">Games</div>
                     </div>
 
                     {/* Victorias */}
@@ -88,25 +88,25 @@ const User = () => {
                         <span className="stat-icon">🏆</span>
                         {/* Fíjate cómo combino clases aquí */}
                         <strong className="stat-number win">{wins}</strong>
-                        <div className="stat-label">Victorias</div>
+                        <div className="stat-label">Wins</div>
                     </div>
 
                     {/* Derrotas */}
                     <div className="stat-box">
                         <span className="stat-icon">☠️</span>
                         <strong className="stat-number loss">{losses}</strong>
-                        <div className="stat-label">Derrotas</div>
+                        <div className="stat-label">Defeats</div>
                     </div>
                 </div>
 
                 {/* SECCIÓN 3: Botones */}
                 {/* Añadimos la clase 'btn-block' para que ocupe el ancho */}
-                <Link to="/edit-profile" className="auth-button btn-block">
-                    Editar Mis Datos
+                <Link to="/editProfile" state={{name, email}} className="auth-button btn-block">
+                    Edit my profile.
                 </Link>
 
                 <Link to="/" className="auth-link link-block">
-                    Volver al Menú Principal
+                    Return to the Kingdom.
                 </Link>
 
             </div>
