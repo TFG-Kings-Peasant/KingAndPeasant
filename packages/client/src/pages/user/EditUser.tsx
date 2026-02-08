@@ -61,8 +61,7 @@ const EditUser = () => {
                 });
             }
 
-            setSuccess(true);
-            setTimeout(() => navigate("/user"), 1500); // Volver al perfil tras 1.5s
+            navigate("/profile"); // Volver a la vista de perfil después de guardar
 
         } catch (err) {
             setError("An error ocurred: " + err + ". Please try again.")
@@ -122,7 +121,7 @@ const EditUser = () => {
                         Guardar Cambios
                     </button>
 
-                    <Link to="/user" className="auth-link" style={{ display: 'block', marginTop: '15px' }}>
+                    <Link to="/profile" className="auth-link" style={{ display: 'block', marginTop: '15px' }}>
                         Cancelar
                     </Link>
                 </form>

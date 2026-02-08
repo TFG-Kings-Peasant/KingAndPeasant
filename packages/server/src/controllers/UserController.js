@@ -25,13 +25,16 @@ const getUserById = async (req, res) => {
 
 const editUser = async (req, res) => {
     //Por Hacer: El email tendría que ir por otro lado ahora mismo junto con la contraseña.
-    const {userId, name, email, password} = req.body;
+    const userId = req.user.id;
+    const {name, email, password} = req.body;
+    console.log(parseInt(userId));
     try{
         const user = await userService.updateUserById(userId, name, email,password);
+        console.log(user);
         if(user == null) {
             return res.status(401).send({message: "The User you are trying to Edit is not found"});
         }
-        res.status(200);
+        res.status(200).json(user);
     } catch (err) {
         console.error("Error updating user information: ", err);
         res.status(500).send({message: "Error updating user information"});
@@ -42,8 +45,8 @@ const registerUser = async (req, res) => {
     const data = req.body;
     try {
         const exists = await userService.checkIfUserExists(data.name, data.email);
-        if (!exists) {
-        return res.status(409).send({message: "This user is already registered!"});
+        if (exists) {
+            return res.status(409).send({message: "This user is already registered!"});
         }
         const user = userService.createUser(data);
         const token = jwt.sign({ id: (await user).idUser, name: user.name }, process.env.JWT_SECRET)
