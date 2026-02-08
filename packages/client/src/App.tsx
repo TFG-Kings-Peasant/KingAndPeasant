@@ -6,6 +6,7 @@ import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
 import Game from "./pages/game/Game";
 import User from "./pages/user/User";
+import EditUser from "./pages/user/EditUser";
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
       <Route path="/lobby/:id" element={<Lobby />} />
       <Route path="/game/:id" element={<Game />} />
       <Route path="user" element={<User/>}/>
+      <Route path="/profile" element={<User/>}/>
+      <Route path="/editProfile" element={<EditUser/>}/>
     </Routes>
   )
 }
