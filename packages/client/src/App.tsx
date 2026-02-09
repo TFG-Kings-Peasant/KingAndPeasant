@@ -14,7 +14,6 @@ interface FriendRequestPayload {
   senderId: string;
   senderName: string; // Lo pongo opcional (?) por si en el futuro decides enviarlo también
 }
-
 function App() {
 
   const {socket} = useAuth();
@@ -47,6 +46,7 @@ function App() {
       <Route path="user" element={<User/>}/>
       <Route path="/profile" element={<User/>}/>
       <Route path="/editProfile" element={<EditUser/>}/>
+      <Route path="/game" element={<Game />} />
     </Routes>
   )
 }
