@@ -60,7 +60,6 @@ const User = () => {
             <div className="auth-card">
                 <h2 className="auth-title">Lord Profile {name}</h2>
 
-                {/* SECCIÓN 1: Datos Personales */}
                 <div className="profile-info">
                     <p className="profile-text">
                         <strong>Email:</strong> {email}
@@ -72,26 +71,22 @@ const User = () => {
 
                 <hr className="profile-divider" />
 
-                {/* SECCIÓN 2: Estadísticas */}
                 <h3 className="stats-title">War statistics</h3>
                 
                 <div className="stats-grid">
-                    {/* Partidas */}
+
                     <div className="stat-box">
                         <span className="stat-icon">⚔️</span>
                         <strong className="stat-number">{games}</strong>
                         <div className="stat-label">Games</div>
                     </div>
 
-                    {/* Victorias */}
                     <div className="stat-box">
                         <span className="stat-icon">🏆</span>
-                        {/* Fíjate cómo combino clases aquí */}
                         <strong className="stat-number win">{wins}</strong>
                         <div className="stat-label">Wins</div>
                     </div>
 
-                    {/* Derrotas */}
                     <div className="stat-box">
                         <span className="stat-icon">☠️</span>
                         <strong className="stat-number loss">{losses}</strong>
@@ -99,8 +94,6 @@ const User = () => {
                     </div>
                 </div>
 
-                {/* SECCIÓN 3: Botones */}
-                {/* Añadimos la clase 'btn-block' para que ocupe el ancho */}
                 <Link to="/editProfile" state={{name, email}} className="auth-button btn-block">
                     Edit my profile.
                 </Link>

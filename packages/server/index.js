@@ -13,11 +13,10 @@ const port = 3000;
 
 connectRedis();
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cors());
 
-app.get("/api", (req, res) => { //.get only responds to HTTP GET requests
+app.get("/api", (req, res) => {
     res.send("Hello World!");
 });
 
