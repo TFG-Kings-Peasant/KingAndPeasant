@@ -1,6 +1,6 @@
 import { LobbyPrivacy, LobbyStatus } from "@prisma/client";
 import { prisma } from "../config/db.js";
-
+import bcrypt from 'bcryptjs';
 
 async function main() {
   console.log('🌱 Empezando el seeding...');
@@ -11,11 +11,13 @@ async function main() {
   console.log('🗑️  Datos antiguos eliminados.');
 
   // 2. Crear Usuarios (Necesarios para ser dueños de los lobbies)
+  const password = "1234"
+  const hash = await bcrypt.hash(password, 10);
   const user1 = await prisma.user.create({
     data: {
       name: 'ReyArturo',
       email: 'arturo@camelot.com',
-      password: 'password123', // En producción deberías hashearla
+      password: hash, 
     },
   });
 
@@ -23,7 +25,7 @@ async function main() {
     data: {
       name: 'SirLancelot',
       email: 'lancelot@camelot.com',
-      password: 'password123',
+      password: hash,
     },
   });
 
@@ -31,7 +33,7 @@ async function main() {
     data: {
       name: 'Merlin',
       email: 'merlin@wizard.com',
-      password: 'magic',
+      password: hash,
     },
   });
 
@@ -40,7 +42,7 @@ async function main() {
     data: {
       name: 'Galahad',
       email: 'galahad@camelot.com',
-      password: 'password123',
+      password: hash,
     },
   });
 
@@ -48,7 +50,7 @@ async function main() {
     data: {
       name: 'Guille',
       email: 'guille@klk.com',
-      password: 'password123', // En producción deberías hashearla
+      password: hash,
     },
   });
 
