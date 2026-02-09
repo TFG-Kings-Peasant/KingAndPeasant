@@ -4,6 +4,7 @@ import LobbyList from "./pages/lobbyList/LobbyList";
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
+import Game from "./pages/game/Game";
 
 function App() {
   return (
@@ -12,9 +13,9 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login/>}/>
       <Route path="/register" element={<Register/>}/>
-      {/* Rutas conectadas a los nuevos archivos */}
       <Route path="/lobbyList" element={<LobbyList />} />
       <Route path="/lobby/:id" element={<Lobby />} />
+      <Route path="/game" element={<Game />} />
     </Routes>
   )
 }

@@ -61,7 +61,7 @@ function Lobby() {
       }
   };
 
-// Manejar salir
+
   const handleLeave = async () => {
     if (!lobby) return;
     if (window.confirm("¿Seguro que quieres salir?")) {
@@ -70,6 +70,19 @@ function Lobby() {
             navigate("/lobbyList"); // Volver al inicio
         } catch (err) {
             setError("No se pudo salir del lobby");
+            console.error(err);
+        }
+    }
+  };
+
+    const handleStartGame = async () => {
+    if (!lobby) return;
+    if (window.confirm("¿Seguro que quieres comenzar la partida?")) {
+        try {
+            await leaveLobby(lobby.id, user?.id || ""); // Pasamos el ID del usuario actual
+            navigate("/game"); // Ir a la pantalla de juego
+        } catch (err) {
+            setError("No se pudo comenzar la partida");
             console.error(err);
         }
     }
@@ -107,10 +120,18 @@ function Lobby() {
             {lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores..."}
             </span>
         </div>
-                  
-          <button className="exit-btn" onClick={handleLeave}>
-                SALIR DEL LOBBY
-          </button>
+        
+        {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
+            <button className="start-btn" onClick={handleStartGame}>
+                COMENZAR PARTIDA
+            </button>
+        )
+        : (<div></div>)}
+
+
+        <button className="exit-btn" onClick={handleLeave}>
+            SALIR DEL LOBBY
+        </button>
       </footer>
     </div>
   );
