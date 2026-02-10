@@ -21,7 +21,8 @@ app.get("/api", (req, res) => {
 });
 
 app.use('/api/lobby', lobbyRoutes);
-app.use('/api/auth', userRoutes)
+app.use('/api/auth', userRoutes);
+app.use('/api/friendship', friendshipRoutes);
 
 
 app.listen(port, () => {
