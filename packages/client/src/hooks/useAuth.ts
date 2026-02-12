@@ -2,10 +2,13 @@ import { useEffect } from "react";
 import { useUser } from "./useUser";
 import { useLocalStorage } from "./useLocalStorage";
 import type { User } from "../context/AuthContext.ts";
+import { io } from "socket.io-client"
 
 export const useAuth = () => {
     const  { user, isLogin, login, logout } = useUser();
     const { getItem } = useLocalStorage();
+
+    const socket = io();
 
     useEffect(() => {
         const userJson = getItem("user");
@@ -17,5 +20,5 @@ export const useAuth = () => {
         }
     }, [getItem, login]);
 
-    return { user, isLogin, login, logout }; 
+    return { user, isLogin, login, logout, socket }; 
 }

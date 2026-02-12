@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { useLocalStorage} from "../hooks/useLocalStorage";
+import { useLocalStorage} from "../hooks/useLocalStorage.ts";
 import type { User } from "./AuthContext.ts"
 import { AuthContext } from "./AuthContext.ts"
 
@@ -20,6 +20,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     });
     const [isLogin, setIsLogin] = useState<boolean>(!!user);
+
+    
 
     function login( userData: User) {
         setUser(userData);

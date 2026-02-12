@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:server":"npm run test --prefix packages/server",
-    "test:client":"npm run test --prefix packages/client",
+    "test:server": "npm run test --prefix packages/server",
+    "test:client": "npm run test --prefix packages/client",
     "dev": "npm run docker:db && concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev --workspace=client",
     "dev:server": "npm run start --workspace=server",
@@ -24,5 +24,8 @@
   "type": "commonjs",
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
   }
 }
