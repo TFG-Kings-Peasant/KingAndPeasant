@@ -5,29 +5,49 @@ const createFriendship = async (senderId, receiverId) => {
     const sender = await getUserById(senderId);
     const receiver = await getUserById(receiverId);
     
-    if (!sender || !receiver) {
+
+
+    if (!sender || !receiver || senderId === receiverId) {
         console.error("Error: Invalid sender or receiver ID in createFriendship:", senderId, receiverId);
+        return null; 
+    }
+
+    const existingFriendship = await checkIfFriendshipExists(senderId, receiverId);
+    if (existingFriendship) {
+        console.error("Error: Friendship already exists between sender and receiver in createFriendship:", senderId, receiverId);
         return null; 
     }
 
     const friendship = await prisma.friendship.create({
         data: {
-            senderId: senderId, 
+            idSender: senderId, 
             sender: sender,
-            receiverId: receiverId,
+            idReceiver: receiverId,
             receiver: receiver
         }
     })
     return friendship;
 };
 
-const deleteFriendship = async (sennderId, receiverId) => {
+const checkIfFriendshipExists = async (senderId, receiverId) => {
+    const friendship = await prisma.friendship.findFirst({
+        where: {
+            OR: [
+                { idSender: senderId, idReceiver: receiverId },
+                { idSender: receiverId, idReceiver: senderId }
+            ]
+        }
+    });
+    return friendship;
+}
+
+const deleteFriendship = async (senderId, receiverId) => {
     const friendship = await prisma.friendship.delete({
         where: {
-            idSender_idReceiver: {
-                senderId: sennderId,
-                receiverId: receiverId
-            }
+            OR: [
+                { idSender: senderId, idReceiver: receiverId },
+                { idSender: receiverId, idReceiver: senderId }
+            ]
         }
     })
     return friendship;
@@ -67,5 +87,6 @@ const getAllFriendsById = async (userId) => {
 export const friendshipService = {
     createFriendship,
     deleteFriendship,
-    getAllFriendsById
+    getAllFriendsById,
+    checkIfFriendshipExists
 }

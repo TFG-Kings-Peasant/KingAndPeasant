@@ -35,9 +35,6 @@ const listFriends = async (req, res) => {
     const userId = req.user.id;
     try {
         const friends = await friendshipService.getAllFriendsById(userId);
-        if (friends == null || friends.length === 0) {
-            return res.status(400).send({message: "No friends found!"}); 
-        }
         res.status(200).json(friends);
     } catch (err) {
         console.error("Error listing friends: ", err);
