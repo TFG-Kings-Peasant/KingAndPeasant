@@ -1,4 +1,5 @@
 import { friendshipService } from '../services/FriendshipService.js';
+import { io, userSockets } from '../../index.js';
 
 const addFriend = async (req, res) => {
     const senderId = req.user.id;
@@ -7,6 +8,10 @@ const addFriend = async (req, res) => {
         const friendship = await friendshipService.createFriendship(senderId, receiverId);
         if (friendship == null) {
             return res.status(400).send({message: "Error sending friendship request!"});
+        }
+        const socketId = userSockets.get(receiverId);
+        if (socketId) {
+            io.to(socketId).emit('friendRequest', { senderId });
         }
         res.status(200).json(friendship); 
     } catch (err) {
