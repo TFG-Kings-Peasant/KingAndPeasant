@@ -1,30 +1,36 @@
 import { redisClient } from '../../config/redis.js';
 
-const CreateGame = async (gameData) => {
+const createGame = async ( lobbyId, player1Id, player2Id) => {
 
     const initialState = {
         era: 1, 
         turnNumber: 1,
         turn: "peasant",
-        deck: gameData.deck,
-        discardPile: gameData.discardPile,
+        deck: [1,2,3,4,5,6,7,8,9,10],
+        discardPile: [],
         players:{
             king: {
-                id: gameData.player1Id,
-                hand: gameData.player1Hand,
-                town: gameData.player1Town
+                id: player1Id,
+                hand: [11,12,13],
+                town: []
             },
             peasant: {
-                id: gameData.player2Id,
-                hand: gameData.player2Hand,
-                town: gameData.player2Town
+                id: player2Id,
+                hand:[14,15,16],
+                town: []
             }
         }
     }
-    return await redisClient.set(`game:${gameData.lobbyId}`, JSON.stringify(initialState))
+    return await redisClient.set(`game:${lobbyId}`, JSON.stringify(initialState))
 
 };
 
-export const GameService = {
-    CreateGame
+const getGameStateById = async (id) => {
+    const gameState = await redisClient.get(`game:${id}`);
+    return JSON.parse(gameState);
+}
+
+export const gameService = {
+    createGame,
+    getGameStateById
 };

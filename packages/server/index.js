@@ -4,6 +4,7 @@ import cors from 'cors';
 import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
 import lobbyRoutes from './src/routes/LobbyRoutes.js';
+import gameRoutes from './src/routes/GameRoutes.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { authenticateToken } from './middleware.js';
@@ -47,6 +48,8 @@ app.post("/api/create-user", async (req, res) => {
 
 
 app.use('/api/lobby', lobbyRoutes);
+
+app.use('/api/game', gameRoutes);
 
 app.get("/api/protected", authenticateToken, (req, res) => {
     res.send(`Hello, ${req.user.name}. This is a protected route.`);
