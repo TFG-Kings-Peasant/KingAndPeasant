@@ -1,6 +1,5 @@
 import { redisClient } from '../../config/redis.js';
 
-
 const createGame = async ( lobbyId, player1Id, player2Id) => {
 
     const initialState = {
