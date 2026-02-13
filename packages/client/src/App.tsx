@@ -6,8 +6,34 @@ import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
 import User from "./pages/user/User";
 import EditUser from "./pages/user/EditUser";
+import { useAuth } from "./hooks/useAuth"
+import { useEffect } from "react";
+
+interface FriendRequestPayload {
+  senderId: string;
+  senderName: string; // Lo pongo opcional (?) por si en el futuro decides enviarlo también
+}
 
 function App() {
+
+  const {socket} = useAuth();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleFriendRequest = (data: FriendRequestPayload) =>{
+      console.log("Friend Request received: ", data);
+      alert(`¡${data.senderName || 'Alguien'} quiere ser tu amigo!`);
+    }
+
+    socket.on('friendRequest', handleFriendRequest);
+
+    return () => {
+      socket.off('friendRequest', handleFriendRequest);
+    };
+    
+  }, [socket]);
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

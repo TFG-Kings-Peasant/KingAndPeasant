@@ -1,11 +1,9 @@
 import { prisma } from '../../config/db.js';
-import { getUserById } from './UserService.js';
+import { userService } from './UserService.js';
 
 const createFriendship = async (senderId, receiverId) => {
-    const sender = await getUserById(senderId);
-    const receiver = await getUserById(receiverId);
-    
-
+    const sender = await userService.getUserById(senderId);
+    const receiver = await userService.getUserById(receiverId);    
 
     if (!sender || !receiver || senderId === receiverId) {
         console.error("Error: Invalid sender or receiver ID in createFriendship:", senderId, receiverId);
