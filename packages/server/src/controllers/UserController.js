@@ -86,10 +86,26 @@ const loginUser = async (req, res) => {
     }
 };
 
+const searchUsers = async (req, res) => {
+    const userId = req.user.id;
+    const query = req.query.q;
+    try {
+        const users = await userService.getUsersbyName(query, userId);
+        if(users == null || users.length === 0) {
+            return res.status(404).send({message: "No users found with that name!"});
+        }
+        res.status(200).json(users);
+    } catch (err) {
+        console.error("Error searching for users by name:", err);
+        res.status(500).send({message: "Error searching for users by name"});
+    }
+}
+
 export const userController = {
     getUsers,
     registerUser,
     loginUser,
     getUserById,
-    editUser
+    editUser,
+    searchUsers
 };
