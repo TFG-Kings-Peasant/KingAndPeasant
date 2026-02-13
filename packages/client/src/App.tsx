@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 interface FriendRequestPayload {
   senderId: string;
-  senderName: string; // Lo pongo opcional (?) por si en el futuro decides enviarlo también
+  senderName: string;
 }
 
 function App() {
