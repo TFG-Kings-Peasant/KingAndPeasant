@@ -26,8 +26,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [socket, setSocket] = useState<Socket | null>(null); 
     
     useEffect(() => {
-        if (!user) 
-    }, [user]);
+        if (!user) return;
+        
+        if (socket && socket.connected) return;
+
+        console.log("registering socket connection for user:", user.name);
+        const newSocket = io("http://localhost:3000");
+
+        newSocket.emit("register", user.id);
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
 
     function login( userData: User) {
         setUser(userData);
@@ -39,6 +53,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setIsLogin(false);
         setUser(null);
         removeItem("user");
+        if (socket) {
+            socket.disconnect();
+            setSocket(null);
+        }
     }
 
     const value = { user, isLogin, login, logout, socket };
