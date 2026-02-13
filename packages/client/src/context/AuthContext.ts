@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import { Socket } from "socket.io-client"
 
 export interface User {
     id: string;
@@ -12,6 +13,7 @@ interface AuthContextType {
   isLogin: boolean;
   login: ( userData: User ) => void;
   logout: () => void;
+  socket: Socket | null;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
