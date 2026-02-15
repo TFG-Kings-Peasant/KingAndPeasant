@@ -109,7 +109,7 @@ const getUsersbyName = async (name, id) => {
         return []; 
     }
 
-    const friends = await prisma.friend.findMany({
+    const friends = await prisma.friendship.findMany({
         where: {
             OR: [
                 { idSender: parseInt(id) },
@@ -124,13 +124,17 @@ const getUsersbyName = async (name, id) => {
         where: {
             name: {
                 contains: String(name),
-                mode: 'insensitive'
             },
             idUser: {
                 not: parseInt(id),
                 notIn: friendIds.length > 0 ? friendIds : undefined
             }
         },
+        select: {
+            idUser: true, 
+            name: true,
+            email: true,
+        }
     });
     return users;
 }

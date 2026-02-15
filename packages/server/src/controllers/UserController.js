@@ -88,7 +88,7 @@ const loginUser = async (req, res) => {
 
 const searchUsers = async (req, res) => {
     const userId = req.user.id;
-    const query = req.query.q;
+    const {query} = req.query;
     try {
         const users = await userService.getUsersbyName(query, userId);
         if(users == null || users.length === 0) {
