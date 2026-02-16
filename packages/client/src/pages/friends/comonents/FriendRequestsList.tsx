@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import "./FriendRequests.css"; 
+import "../SocialPanel.css"; 
 
 interface FriendRequest {
     idFriendship: number;
@@ -84,15 +84,15 @@ export default function FriendRequestsList() {
     if (requests.length === 0) return null; 
 
     return (
-        <div className="requests-container">
+        <div className="social-panel">
             <h3>Friend Requests({requests.length})</h3>
-            <div className="requests-list">
+            <div className="user-list">
                 {requests.map((req) => (
-                    <div key={req.idFriendship} className="request-card">
+                    <div key={req.idFriendship} className="user-card request">
                         <p><strong>{req.sender.name}</strong></p>
-                        <div className="request-actions">
-                            <button onClick={() => handleResponse(req.idFriendship, "ACCEPTED")} className="btn-accept">✔</button>
-                            <button onClick={() => handleResponse(req.idFriendship, "DENIED")} className="btn-reject">✖</button>
+                        <div className="user-info">
+                            <button onClick={() => handleResponse(req.idFriendship, "ACCEPTED")} className="action-btn btn-green">✔</button>
+                            <button onClick={() => handleResponse(req.idFriendship, "DENIED")} className="action-btn btn-red">✖</button>
                         </div>
                     </div>
                 ))}

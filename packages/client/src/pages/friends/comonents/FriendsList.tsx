@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import "./FriendRequests.css";
+import "../SocialPanel.css";
 
 interface User {
     idUser: number;
@@ -37,28 +37,25 @@ export default function FriendsList() {
     };
 
     return (
-        <div className="requests-container"> {/* Reutilizamos la clase del contenedor */}
-            <h3>Mis Amigos ({friends.length})</h3>
+        <div className="social-panel"> {/* Reutilizamos la clase del contenedor */}
+            <h3>My Friends ({friends.length})</h3>
             
             {friends.length === 0 ? (
-                <p style={{ color: '#888' }}>Aún no tienes amigos agregados.</p>
+                <p style={{ color: '#888' }}>You do not have any friends yet</p>
             ) : (
-                <div className="requests-list">
+                <div className="user-list">
                     {friends.map((friend) => (
-                        <div key={friend.idUser} className="request-card">
-                            <div className="friend-info">
-                                <span className="friend-name">🟢 {friend.name}</span>
+                        <div key={friend.idUser} className="user-card friend">
+                            <div className="user-info">
+                                <span className="user-name">🟢 {friend.name}</span>
                             </div>
-                            <div className="request-actions">
-                                {/* Botón para futura funcionalidad */}
-                                <button 
-                                    onClick={() => handleInvite(friend.idUser)} 
-                                    className="btn-accept" 
-                                    style={{ backgroundColor: '#3b82f6' }} // Azul para diferenciar
-                                >
-                                    Jugar 🎮
-                                </button>
-                            </div>
+                           
+                            <button 
+                                onClick={() => handleInvite(friend.idUser)} 
+                                className="action-btn btn-blue" 
+                            >
+                                Play
+                            </button>
                         </div>
                     ))}
                 </div>

@@ -6,9 +6,9 @@ import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
 import User from "./pages/user/User";
 import EditUser from "./pages/user/EditUser";
-import SearchUsers from "./pages/friends/SearchUsers";
 import { useAuth } from "./hooks/useAuth"
 import { useEffect } from "react";
+import Dashboard from "./pages/friends/Dashboard";
 
 interface FriendRequestPayload {
   senderId: string;
@@ -44,7 +44,7 @@ function App() {
       <Route path="/lobby/:id" element={<Lobby />} />
       <Route path="/profile" element={<User/>}/>
       <Route path="/editProfile" element={<EditUser/>}/>
-      <Route path="/searchUsers" element={<SearchUsers/>}/>
+      <Route path="/searchUsers" element={<Dashboard/>}/>
     </Routes>
   )
 }

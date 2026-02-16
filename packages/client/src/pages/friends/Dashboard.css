@@ -1,0 +1,75 @@
+/* Contenedor principal centrado */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* Cabecera */
+.dashboard-header {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 15px;
+}
+
+.dashboard-header h1 {
+    color: #eab308; /* Dorado King */
+    margin: 0;
+    font-size: 2rem;
+}
+
+.dashboard-subtitle {
+    color: #aaa;
+    margin-top: 5px;
+}
+
+/* --- GRID LAYOUT --- */
+.dashboard-grid {
+    display: grid;
+    /* La columna izquierda ocupa 2 partes, la derecha 1 parte */
+    grid-template-columns: 2fr 1fr; 
+    gap: 25px; /* Espacio entre columnas */
+    align-items: start; /* Alineación superior */
+}
+
+/* Columnas */
+.dashboard-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espacio vertical entre elementos de la misma columna */
+}
+
+/* Clases específicas por si quieres ajustar anchos */
+.main-column {
+    /* Aquí irá el buscador y quizás futuras estadísticas */
+}
+
+.sidebar-column {
+    /* Aquí van las listas de amigos */
+}
+
+/* Bloques dentro de la barra lateral */
+.social-block {
+    width: 100%;
+}
+
+/* --- RESPONSIVE (Móvil) --- */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        /* En pantallas pequeñas, pasamos a una sola columna */
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Invertimos el orden si quieres que las notificaciones salgan primero en móvil
+       (Opcional: descomenta 'order' si prefieres eso) */
+    /*
+    .sidebar-column {
+        order: -1; 
+    }
+    */
+}
