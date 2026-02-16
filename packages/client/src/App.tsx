@@ -46,7 +46,6 @@ function App() {
       <Route path="user" element={<User/>}/>
       <Route path="/profile" element={<User/>}/>
       <Route path="/editProfile" element={<EditUser/>}/>
-      <Route path="/game/:id" element={<Game />} />
     </Routes>
   )
 }
