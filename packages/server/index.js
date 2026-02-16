@@ -1,18 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
 import lobbyRoutes from './src/routes/LobbyRoutes.js';
 import gameRoutes from './src/routes/GameRoutes.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import userRoutes from './src/routes/UserRoutes.js';
-import friendshipRoutes from './src/routes/FriendshipRoutes.js';
-import gameRoutes from './src/routes/GameRoutes.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { authenticateToken } from './middleware.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 
@@ -39,8 +31,6 @@ app.get("/api", (req, res) => {
 
 app.use('/api/lobby', lobbyRoutes);
 app.use('/api/auth', userRoutes)
-app.use('/api/game', gameRoutes);
-
 app.use('/api/game', gameRoutes);
 
 
