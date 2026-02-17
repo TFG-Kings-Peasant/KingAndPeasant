@@ -14,7 +14,8 @@ export const useUser = () => {
        user: context.user, 
        login: context.login,      // Alias para mantener compatibilidad con tu código
        logout: context.logout,  // Alias para mantener compatibilidad
-       isLogin: context.isLogin
+       isLogin: context.isLogin,
+       socket: context.socket
     }
 
 }

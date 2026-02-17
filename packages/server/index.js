@@ -42,6 +42,11 @@ io.on('connection', (socket) => {
         console.log(`User ${userId} registered with socket ID: ${socket.id}`);
     });
 
+    socket.on('joinGame', (roomName) => {
+        socket.join(roomName);
+        console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
+    });
+
     socket.on('disconnect', () => {
         for (const [userId, socketId] of userSockets.entries()) {
             if (socketId === socket.id) {

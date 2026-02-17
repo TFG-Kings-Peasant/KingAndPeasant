@@ -35,7 +35,7 @@ const exampleAction = async (id, playerId) => {
 
     if(gameState.turn == "peasant" && playerId==gameState.players.peasant.id){
         gameState.turn = "king"
-        console.log("Cambio a king"+ gameState.turn)
+        console.log("Cambio a king: "+ gameState.turn)
     }else if(gameState.turn == "king" && playerId==gameState.players.king.id){
         gameState.turn = "peasant"
         console.log("Cambio a peasant: " + gameState.turn)

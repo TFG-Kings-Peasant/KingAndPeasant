@@ -11,19 +11,6 @@ function Game() {
   
   const {socket, user} = useAuth()
 
-  useEffect(() => {
-    if(!socket) return;
-    socket.on('action', fetchGameState);
-    return () => {
-      socket.off('action', fetchGameState);
-    };
-
-  }, [socket]);
-
-  useEffect(() => {
-    fetchGameState();
-  }, [id]);
-
   const fetchGameState = async () => {
     try {
       const data = await getGameStateById(Number(id));
@@ -36,17 +23,34 @@ function Game() {
     }
   };
 
+  useEffect(() => {
+    if (!socket) {
+        console.log("Socket no disponible aún...");
+        return;
+    }
+    socket.emit('joinGame', `game_${id}`);
+    socket.on('action', fetchGameState);
+    return () => {
+      socket.off('action', fetchGameState);
+    };
+
+  }, [socket, id]);
+
+  useEffect(() => {
+    fetchGameState();
+  }, [id]);
+
   const handleMakeAction = async () => {
     try{
-      if(!id || !user || !gameState) return;
-      console.log((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
-          || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
-      if((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
-          || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
-      {
-        await makeExampleAction(Number(id), Number(user.id))
+       if(!id || !user || !gameState) return;
+       console.log((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
+           || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
+       if((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
+           || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
+       {
+         await makeExampleAction(Number(id), Number(user.id))
         fetchGameState();
-      }
+       }
     }catch (err) {
       if (err instanceof Error) {
                 alert(err.message);
