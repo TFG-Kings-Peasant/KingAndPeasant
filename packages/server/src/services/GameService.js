@@ -30,7 +30,24 @@ const getGameStateById = async (id) => {
     return JSON.parse(gameState);
 }
 
+const exampleAction = async (id, playerId) => {
+    var gameState = await getGameStateById(id)
+
+    if(gameState.turn == "peasant" && playerId==gameState.players.peasant.id){
+        gameState.turn = "king"
+        console.log("Cambio a king"+ gameState.turn)
+    }else if(gameState.turn == "king" && playerId==gameState.players.king.id){
+        gameState.turn = "peasant"
+        console.log("Cambio a peasant: " + gameState.turn)
+    }else{
+        throw new Error('No es el turno del jugador');
+    }
+
+    return await redisClient.set(`game:${id}`, JSON.stringify(gameState))
+}
+
 export const gameService = {
     createGame,
-    getGameStateById
+    getGameStateById,
+    exampleAction
 };

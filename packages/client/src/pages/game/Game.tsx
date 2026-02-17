@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { getGameStateById, type GameState } from "./components/GameService";
+import { getGameStateById, makeExampleAction, type GameState } from "./components/GameService";
 import { useParams } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 function Game() {
   const { id } = useParams();
@@ -8,6 +9,17 @@ function Game() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
+  const {socket, user} = useAuth()
+
+  useEffect(() => {
+    if(!socket) return;
+    socket.on('action', fetchGameState);
+    return () => {
+      socket.off('action', fetchGameState);
+    };
+
+  }, [socket]);
+
   useEffect(() => {
     fetchGameState();
   }, [id]);
@@ -23,6 +35,25 @@ function Game() {
       setLoading(false);
     }
   };
+
+  const handleMakeAction = async () => {
+    try{
+      if(!id || !user || !gameState) return;
+      console.log((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
+          || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
+      if((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
+          || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
+      {
+        await makeExampleAction(Number(id), Number(user.id))
+        fetchGameState();
+      }
+    }catch (err) {
+      if (err instanceof Error) {
+                alert(err.message);
+            } else {
+                alert("Ocurrió un error desconocido");
+            }
+  }};
   
   return (
     <div>
@@ -34,7 +65,9 @@ function Game() {
       <h2>Jugador Campesino: {gameState?.players.peasant.id}</h2>
       <p>Mano: {gameState?.players.peasant.hand.join(", ")}</p>
       <p>Pueblo: {gameState?.players.peasant.town.join(", ")}</p>
+      
 
+      <button onClick={handleMakeAction}>Accion</button>
       {error && <p style={{color: "red"}}>{error}</p>}
     </div>
   );

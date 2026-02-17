@@ -1,4 +1,5 @@
 import { gameService } from '../services/GameService.js';
+import { io, userSockets } from '../../index.js';
 
 const createGame = async (req, res) => {
     try {
@@ -21,7 +22,27 @@ const getGameStateById = async (req, res) => {
     }
 }
 
+const exampleAction = async (req, res) => {
+    try{
+        const { id } = req.params;
+        const { playerId } = req.body;
+
+        if (!id || !playerId) {
+            return res.status(400).json({ message: "Faltan datos requeridos" });
+        }
+
+        const gameState = await gameService.exampleAction(id, playerId)
+
+        io.emit('action')
+
+        res.status(201).json(gameState);
+    }catch(error){
+        res.status(500).json({ error: error.message});
+    }
+}
+
 export const gameController = {
     createGame,
-    getGameStateById
+    getGameStateById,
+    exampleAction
 }

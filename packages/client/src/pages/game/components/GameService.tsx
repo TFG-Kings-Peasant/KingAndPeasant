@@ -47,3 +47,18 @@ export const getGameStateById = async (gameId: number) => {
     }
     return await response.json();
 }
+
+export const makeExampleAction = async (gameId: number, playerId: number) => {
+    const response = await fetch(API_URL + `/${gameId}`+ `/example-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            playerId
+        })
+    });
+    if(!response.ok){
+        const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
+        console.error("❌ ERROR DEL SERVER:", response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+}
