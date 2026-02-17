@@ -1,12 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { prisma } from './config/db.js';
 import { connectRedis, redisClient } from './config/redis.js';
 import lobbyRoutes from './src/routes/LobbyRoutes.js';
 import userRoutes from './src/routes/UserRoutes.js';
 import friendshipRoutes from './src/routes/FriendshipRoutes.js';
 import { authenticateToken } from './middleware.js';
+import gameRoutes from './src/routes/GameRoutes.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 
@@ -34,12 +34,19 @@ app.get("/api", (req, res) => {
 app.use('/api/lobby', lobbyRoutes);
 app.use('/api/auth', userRoutes)
 
+app.use('/api/game', gameRoutes);
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     socket.on('register', (userId) => {
         userSockets.set(userId, socket.id);
         console.log(`User ${userId} registered with socket ID: ${socket.id}`);
+    });
+
+    socket.on('joinGame', (roomName) => {
+        socket.join(roomName);
+        console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
     });
 
     socket.on('disconnect', () => {

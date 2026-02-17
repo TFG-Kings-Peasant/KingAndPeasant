@@ -4,10 +4,12 @@ import LobbyList from "./pages/lobbyList/LobbyList";
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
+import Game from "./pages/game/Game";
 import User from "./pages/user/User";
 import EditUser from "./pages/user/EditUser";
 import { useAuth } from "./hooks/useAuth"
 import { useEffect } from "react";
+
 
 interface FriendRequestPayload {
   senderId: string;
@@ -41,6 +43,7 @@ function App() {
       <Route path="/register" element={<Register/>}/>
       <Route path="/lobbyList" element={<LobbyList />} />
       <Route path="/lobby/:id" element={<Lobby />} />
+      <Route path="/game/:id" element={<Game />} />
       <Route path="/profile" element={<User/>}/>
       <Route path="/editProfile" element={<EditUser/>}/>
     </Routes>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PlayerCard from "./components/PlayerCard";
 import "./Lobby.css";
 import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "../components/LobbyFetch";
+import { startGame } from "../../game/components/GameService";
 import { useNavigate, useParams } from "react-router";
 import { useUser } from "../../../hooks/useUser";
 
@@ -61,7 +62,7 @@ function Lobby() {
       }
   };
 
-// Manejar salir
+
   const handleLeave = async () => {
     if (!lobby) return;
     if (window.confirm("¿Seguro que quieres salir?")) {
@@ -70,6 +71,20 @@ function Lobby() {
             navigate("/lobbyList"); // Volver al inicio
         } catch (err) {
             setError("No se pudo salir del lobby");
+            console.error(err);
+        }
+    }
+  };
+
+    const handleStartGame = async () => {
+    if (!lobby) return;
+    if (window.confirm("¿Seguro que quieres comenzar la partida?")) {
+        try {
+            await startGame(lobby.id, lobby.player1Id, lobby.player2Id!); // Iniciar la partida con ambos jugadores
+            await leaveLobby(lobby.id, user?.id || ""); // Pasamos el ID del usuario actual
+            navigate("/game/" + lobby.id); // Ir a la pantalla de juego
+        } catch (err) {
+            setError("No se pudo comenzar la partida");
             console.error(err);
         }
     }
@@ -107,10 +122,18 @@ function Lobby() {
             {lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores..."}
             </span>
         </div>
-                  
-          <button className="exit-btn" onClick={handleLeave}>
-                SALIR DEL LOBBY
-          </button>
+        
+        {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
+            <button className="start-btn" onClick={handleStartGame}>
+                COMENZAR PARTIDA
+            </button>
+        )
+        : (<div></div>)}
+
+
+        <button className="exit-btn" onClick={handleLeave}>
+            SALIR DEL LOBBY
+        </button>
       </footer>
     </div>
   );
