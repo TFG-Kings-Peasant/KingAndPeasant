@@ -1,26 +1,36 @@
 /* packages/client/src/pages/friends/SocialPanel.css */
 
-/* --- Contenedores Generales --- */
+/* --- Contenedores Generales (ESTILO PERGAMINO) --- */
 .social-panel {
-    background-color: #1f1f1f; /* Fondo base oscuro */
-    border: 1px solid #333;
-    border-radius: 12px;
+    /* Fondo Pergamino */
+    background-color: #f5e6c8; 
+    
+    /* Borde Madera */
+    border: 3px solid #8b5a2b; 
+    border-radius: 8px;
     padding: 20px;
-    height: 100%; /* Para que ocupen la misma altura si están lado a lado */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    color: #e0e0e0;
+    height: 100%; 
+    
+    /* Sombra fuerte para dar profundidad */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    
+    /* Texto Marrón Oscuro (Tinta) */
+    color: #4a3b2a; 
 }
 
 .social-panel h3, .social-panel h2 {
-    color: #eab308; /* Dorado King */
+    color: #4a3b2a; /* Tinta oscura */
     margin-top: 0;
-    border-bottom: 1px solid #444;
+    border-bottom: 2px solid #c4a484; /* Línea separadora suave */
     padding-bottom: 10px;
     margin-bottom: 15px;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
 }
 
 /* --- Buscador e Inputs --- */
@@ -32,59 +42,79 @@
 
 .social-input {
     flex: 1;
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-    color: white;
+    /* Fondo papel blanco antiguo */
+    background-color: #fffaf0; 
+    border: 2px solid #c4a484;
+    color: #4a3b2a;
     padding: 10px 12px;
-    border-radius: 6px;
+    border-radius: 4px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
 }
 
 .social-input:focus {
-    border-color: #eab308; /* Foco dorado */
+    border-color: #8b5a2b; /* Foco madera oscura */
+    background-color: #fff;
 }
 
-/* --- Lista de Tarjetas (Usuarios, Amigos, Solicitudes) --- */
+.social-input::placeholder {
+    color: #a1887f;
+    font-style: italic;
+}
+
+/* --- Lista de Tarjetas --- */
 .user-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 400px; /* Scroll si hay muchos */
+    max-height: 400px;
     overflow-y: auto;
-    padding-right: 5px; /* Espacio para el scrollbar */
+    padding-right: 5px;
 }
 
-/* Scrollbar personalizada */
+/* Scrollbar personalizada (Estilo rústico) */
 .user-list::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
+}
+.user-list::-webkit-scrollbar-track {
+    background: #e0d0b0;
+    border-radius: 4px;
 }
 .user-list::-webkit-scrollbar-thumb {
-    background-color: #444;
-    border-radius: 3px;
+    background-color: #8b5a2b;
+    border-radius: 4px;
+    border: 1px solid #5d4037;
 }
 
-/* --- La Tarjeta de Usuario --- */
+/* --- La Tarjeta de Usuario (Papel sobre el pergamino) --- */
 .user-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #2a2a2a;
+    
+    /* Fondo un poco más claro que el pergamino base */
+    background-color: #fff8e1; 
+    border: 1px solid #c4a484;
     padding: 12px;
-    border-radius: 8px;
-    border-left: 4px solid transparent; /* Borde izquierdo para estado */
-    transition: transform 0.1s ease, background-color 0.2s;
+    border-radius: 4px;
+    
+    /* Mantenemos el borde izquierdo de color para identificar */
+    border-left: 5px solid transparent; 
+    transition: transform 0.1s ease, box-shadow 0.2s;
 }
 
 .user-card:hover {
-    background-color: #333;
+    background-color: #ffffff;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     transform: translateX(2px);
 }
 
-/* Variantes de borde según tipo */
-.user-card.result { border-left-color: #eab308; } /* Búsqueda: Dorado */
-.user-card.request { border-left-color: #3b82f6; } /* Solicitud: Azul */
-.user-card.friend { border-left-color: #22c55e; } /* Amigo: Verde */
+/* Variantes de borde (Colores medievales un poco más apagados) */
+.user-card.result { border-left-color: #b8860b; } /* Búsqueda: Oro oscuro */
+.user-card.request { border-left-color: #1e3a8a; } /* Solicitud: Azul real */
+.user-card.friend { border-left-color: #14532d; } /* Amigo: Verde bosque */
 
 .user-info {
     display: flex;
@@ -93,42 +123,75 @@
 
 .user-name {
     font-weight: bold;
-    font-size: 1rem;
-    color: #f0f0f0;
+    font-size: 1.1rem;
+    color: #2c2c2c;
 }
 
 .user-email {
-    font-size: 0.8rem;
-    color: #888;
+    font-size: 0.85rem;
+    color: #6d4c41; /* Marrón rojizo */
+    font-style: italic;
 }
 
-/* --- Botones --- */
+/* --- Botones (Estilo Lacre/Sello Real) --- */
 .action-btn {
-    border: none;
+    border: 2px solid rgba(0,0,0,0.2);
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: bold;
     font-size: 0.9rem;
-    transition: opacity 0.2s, transform 0.1s;
+    font-family: 'Georgia', serif;
+    text-transform: uppercase;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 5px;
     color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.action-btn:hover { opacity: 0.9; }
-.action-btn:active { transform: scale(0.95); }
-.action-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+.action-btn:hover { 
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+.action-btn:active { transform: scale(0.98); }
+.action-btn:disabled { 
+    opacity: 0.6; 
+    cursor: not-allowed; 
+    filter: grayscale(1); 
+    background-color: #5d4037 !important;
+}
 
-/* Colores de botones */
-.btn-gold { background-color: #eab308; color: black; }
-.btn-green { background-color: #22c55e; }
-.btn-red { background-color: #ef4444; }
-.btn-blue { background-color: #3b82f6; }
+/* Colores de botones (Temática Medieval) */
 
-/* Grupo de botones (para aceptar/rechazar) */
+/* Botón Dorado (Buscar) */
+.btn-gold { 
+    background-color: #b8860b; /* Dark Goldenrod */
+    color: #fff;
+    border-color: #8b6508;
+}
+
+/* Botón Verde (Aceptar/Amigo) */
+.btn-green { 
+    background-color: #2e7d32; /* Forest Green */
+    border-color: #1b5e20;
+}
+
+/* Botón Rojo (Rechazar/Auth style) */
+.btn-red { 
+    background-color: #8b0000; /* Dark Red */
+    border-color: #5a0000;
+}
+
+/* Botón Azul (Retar) */
+.btn-blue { 
+    background-color: #1565c0; /* Imperial Blue */
+    border-color: #0d47a1;
+}
+
+/* Grupo de botones */
 .actions-group {
     display: flex;
-    gap: 5px;
+    gap: 8px;
 }
