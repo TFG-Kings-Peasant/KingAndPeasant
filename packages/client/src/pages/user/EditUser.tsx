@@ -59,6 +59,7 @@ const EditUser = () => {
             navigate("/profile");
 
         } catch (err) {
+            console.error(err)
             setError("An error ocurred: " + err + ". Please try again.")
         }
     };

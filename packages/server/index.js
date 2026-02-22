@@ -32,7 +32,8 @@ app.get("/api", (req, res) => {
 });
 
 app.use('/api/lobby', lobbyRoutes);
-app.use('/api/auth', userRoutes)
+app.use('/api/auth', userRoutes);
+app.use('/api/friendship', friendshipRoutes);
 
 app.use('/api/game', gameRoutes);
 
@@ -59,6 +60,9 @@ io.on('connection', (socket) => {
         console.log('A user disconnected:', socket.id);
     });
 });
+
+app.set('io', io);
+app.set('userSockets', userSockets);
 
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);

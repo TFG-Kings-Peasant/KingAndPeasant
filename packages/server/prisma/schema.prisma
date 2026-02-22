@@ -17,8 +17,20 @@ model User {
   wins    Int      @default(0)
   losses  Int      @default(0)
   createdAt  DateTime  @default(now())
-  lobbiesAsPlayer1 Lobby[] @relation("Player1")
-  lobbiesAsPlayer2 Lobby[] @relation("Player2")
+  lobbiesAsPlayer1  Lobby[]  @relation("Player1")
+  lobbiesAsPlayer2  Lobby[]  @relation("Player2")
+  friendshipsSent  Friendship[]  @relation("Sender")
+  friendshipsReceived  Friendship[]  @relation("Receiver")
+}
+
+model Friendship {
+  idFriendship  Int  @id @default(autoincrement())
+  idSender  Int  
+  idReceiver  Int
+  sender  User  @relation("Sender", fields: [idSender], references: [idUser])
+  receiver User @relation("Receiver", fields: [idReceiver], references: [idUser])  
+  status  FriendshipStatus  @default(PENDING)
+  @@unique([idSender, idReceiver])
 }
 
 model Lobby {
@@ -43,4 +55,10 @@ enum LobbyPrivacy {
 enum LobbyStatus {
   WAITING
   ONGOING
+}
+
+enum FriendshipStatus {
+  ACCEPTED
+  PENDING
+  DENIED
 }

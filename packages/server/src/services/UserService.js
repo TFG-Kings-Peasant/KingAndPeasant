@@ -102,11 +102,49 @@ const updateUserById = async (id, name, email, password) => {
     }
 }
 
+const getUsersbyName = async (name, id) => {
+
+    if (!name || name.trim() === "") {
+        console.error("Error: Invalid name received in getUsersbyName:", name);
+        return []; 
+    }
+
+    const friends = await prisma.friendship.findMany({
+        where: {
+            OR: [
+                { idSender: parseInt(id) },
+                { idReceiver: parseInt(id) }
+            ]
+        }
+    });
+
+    const friendIds = friends.map(friend => (friend.idSender === parseInt(id)) ? friend.idReceiver : friend.idSender);
+
+    const users = await prisma.user.findMany({
+        where: {
+            name: {
+                contains: String(name),
+            },
+            idUser: {
+                not: parseInt(id),
+                notIn: friendIds.length > 0 ? friendIds : undefined
+            }
+        },
+        select: {
+            idUser: true, 
+            name: true,
+            email: true,
+        }
+    });
+    return users;
+}
+
 export const userService = {
     getAllUsers,
     createUser,
     checkIfUserExists,
     getUserByEmail,
     getUserById,
-    updateUserById
+    updateUserById,
+    getUsersbyName
 };

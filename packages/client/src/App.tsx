@@ -9,6 +9,7 @@ import User from "./pages/user/User";
 import EditUser from "./pages/user/EditUser";
 import { useAuth } from "./hooks/useAuth"
 import { useEffect } from "react";
+import Dashboard from "./pages/friends/Dashboard";
 
 
 interface FriendRequestPayload {
@@ -46,6 +47,7 @@ function App() {
       <Route path="/game/:id" element={<Game />} />
       <Route path="/profile" element={<User/>}/>
       <Route path="/editProfile" element={<EditUser/>}/>
+      <Route path="/searchUsers" element={<Dashboard/>}/>
     </Routes>
   )
 }
