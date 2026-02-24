@@ -15,6 +15,11 @@ services:
       - "3306:3306"
     volumes:
       - ./mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   
   redis:
     image: redis:alpine
@@ -38,13 +43,15 @@ services:
       - "3000:3000"
     environment: 
       - PORT=3000
-      - DATABASE_URL=mysql://user:password@mariadb:3306/king_and_peasant_mariadb
+      - DATABASE_URL=mysql://user:password@mariadb:3306/king_and_peasant
     volumes:
       - ./packages/server:/app
       - /app/node_modules
     depends_on:
-      - redis
-      - mariadb
+      redis:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
 
   client:
     build: ./packages/client

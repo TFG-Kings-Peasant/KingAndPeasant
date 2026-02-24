@@ -88,7 +88,7 @@ const getAllPendigFriendship = async (userId) => {
             status: 'PENDING'
         },
         include: {
-            sender: { // Incluimos datos del remitente para mostrar su nombre
+            sender: { 
                 select: {
                     idUser: true,
                     name: true,

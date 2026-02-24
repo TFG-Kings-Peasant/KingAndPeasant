@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "start": "node index.js"
+    "db:setup": "npx prisma generate && npx prisma migrate deploy && npx prisma db seed",
+    "start": "npm run db:setup && node index.js"
   },
   "keywords": [],
   "author": "",
