@@ -74,6 +74,10 @@ const Login = () => {
                     Don't you have a crown yet? Register here
                 </Link>
 
+                <Link to="/" className="auth-link">
+                    Return to the kingdom
+                </Link>
+
             </div>
         </div>
     )

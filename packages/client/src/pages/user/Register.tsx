@@ -70,6 +70,10 @@ const Register = () => {
                     Do you already have a crown? Enter here
                 </Link>
 
+                <Link to="/" className="auth-link">
+                    Return to the kingdom
+                </Link>
+
             </div>
         </div>
     );      

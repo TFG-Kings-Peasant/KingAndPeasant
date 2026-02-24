@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Header from "../home/components/Header";
 import './LobbyList.css'
 import { createLobby, getAllLobbies, joinLobby, type LobbyBackend } from "./components/LobbyFetch";
 import { useNavigate } from "react-router";
@@ -105,7 +104,6 @@ function LobbyList() {
     };
 
     return <div>
-      <Header username = {user == null?"" : user.name}/>
         <div className="body-container">
             <div className="button-container">
                 <button onClick={openCreateModal}>Crear Sala</button>
