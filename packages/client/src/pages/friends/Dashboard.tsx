@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
-import SearchUsers from "./comonents/SearchUsers"; 
-import FriendRequestsList from "./comonents/FriendRequestsList";
-import FriendsList from "./comonents/FriendsList";
+import SearchUsers from "./components/SearchUsers"; 
+import FriendRequestsList from "./components/FriendRequestsList";
+import FriendsList from "./components/FriendsList";
 
 import "./Dashboard.css";
 

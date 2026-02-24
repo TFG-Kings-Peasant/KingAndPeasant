@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import "./User.css";
+import "./Profile.css";
 
-const User = () => {
+const Profile = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [games, setGames] = useState(0);
@@ -107,4 +107,4 @@ const User = () => {
     );
 } 
 
-export default User;
+export default Profile;

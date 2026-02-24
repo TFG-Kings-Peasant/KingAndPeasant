@@ -1,15 +1,15 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Home from "./pages/home/Home";
-import LobbyList from "./pages/lobbyList/LobbyList";
-import Login from "./pages/user/Login";
-import Register from "./pages/user/Register";
-import Lobby from "./pages/lobbyList/lobby/Lobby";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import LobbyList from "./pages/lobbies/LobbyList";
+import LobbyRoom from "./pages/lobbies/LobbyRoom";
 import Game from "./pages/game/Game";
-import User from "./pages/user/User";
-import EditUser from "./pages/user/EditUser";
+import Profile from "./pages/profile/Profile";
+import EditProfile from "./pages/profile/EditProfile";
+import Dashboard from "./pages/friends/Dashboard";
 import { useAuth } from "./hooks/useAuth"
 import { useEffect } from "react";
-import Dashboard from "./pages/friends/Dashboard";
 import { GlobalHeader } from "./components/GlobalHeader";
 
 
@@ -47,10 +47,10 @@ function App() {
             <Route path="/login" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
             <Route path="/lobbyList" element={<LobbyList />} />
-            <Route path="/lobby/:id" element={<Lobby />} />
+            <Route path="/lobby/:id" element={<LobbyRoom />} />
             <Route path="/game/:id" element={<Game />} />
-            <Route path="/profile" element={<User/>}/>
-            <Route path="/editProfile" element={<EditUser/>}/>
+            <Route path="/profile" element={<Profile/>}/>
+            <Route path="/editProfile" element={<EditProfile/>}/>
             <Route path="/searchUsers" element={<Dashboard/>}/>
           </Routes>
         </main>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import "./User.css";
+import "./Profile.css";
 
-const EditUser = () => {
+const EditProfile = () => {
     const { user, isLogin, login } = useUser();
     const navigate = useNavigate();
     const location = useLocation();
@@ -123,4 +123,4 @@ const EditUser = () => {
     );
 };
 
-export default EditUser;
+export default EditProfile;

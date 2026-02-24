@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import PlayerCard from "./components/PlayerCard";
-import "./Lobby.css";
-import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "../components/LobbyFetch";
-import { startGame } from "../../game/components/GameService";
+import "./LobbyRoom.css";
+import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "./components/LobbyFetch";
+import { startGame } from "../game/components/GameService";
 import { useNavigate, useParams } from "react-router";
-import { useUser } from "../../../hooks/useUser";
+import { useUser } from "../../hooks/useUser";
 
-function Lobby() {
+function LobbyRoom() {
   const { id } = useParams();
   const [lobby, setLobby] = useState<LobbyBackend | null>(null);
   const [loading, setLoading] = useState(true);
@@ -139,4 +139,4 @@ function Lobby() {
   );
 }
 
-export default Lobby;
+export default LobbyRoom;
