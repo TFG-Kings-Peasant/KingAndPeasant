@@ -4,17 +4,50 @@ import LobbyList from "./pages/lobbyList/LobbyList";
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
 import Lobby from "./pages/lobbyList/lobby/Lobby";
+import Game from "./pages/game/Game";
+import User from "./pages/user/User";
+import EditUser from "./pages/user/EditUser";
+import { useAuth } from "./hooks/useAuth"
+import { useEffect } from "react";
+import Dashboard from "./pages/friends/Dashboard";
+
+
+interface FriendRequestPayload {
+  senderId: string;
+  senderName: string;
+}
 
 function App() {
+
+  const {socket} = useAuth();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleFriendRequest = (data: FriendRequestPayload) =>{
+      console.log("Friend Request received: ", data);
+      alert(`¡${data.senderName || 'Alguien'} quiere ser tu amigo!`);
+    }
+
+    socket.on('friendRequest', handleFriendRequest);
+
+    return () => {
+      socket.off('friendRequest', handleFriendRequest);
+    };
+    
+  }, [socket]);
+
   return (
     <Routes>
-      {/* Ruta principal (El menú) */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login/>}/>
       <Route path="/register" element={<Register/>}/>
-      {/* Rutas conectadas a los nuevos archivos */}
       <Route path="/lobbyList" element={<LobbyList />} />
       <Route path="/lobby/:id" element={<Lobby />} />
+      <Route path="/game/:id" element={<Game />} />
+      <Route path="/profile" element={<User/>}/>
+      <Route path="/editProfile" element={<EditUser/>}/>
+      <Route path="/searchUsers" element={<Dashboard/>}/>
     </Routes>
   )
 }

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContext.ts";
 
 
 export const useUser = () => {
@@ -14,7 +14,8 @@ export const useUser = () => {
        user: context.user, 
        login: context.login,      // Alias para mantener compatibilidad con tu código
        logout: context.logout,  // Alias para mantener compatibilidad
-       isLogin: context.isLogin
+       isLogin: context.isLogin,
+       socket: context.socket
     }
 
 }

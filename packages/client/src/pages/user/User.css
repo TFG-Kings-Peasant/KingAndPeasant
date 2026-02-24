@@ -1,0 +1,81 @@
+/* --- Estilos para el Perfil (User.tsx) --- */
+
+.profile-info {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.profile-text {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    color: #444;
+}
+
+.profile-date {
+    margin: 10px 0;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.profile-divider {
+    border: 0; /* Quitamos borde por defecto */
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+.stats-title {
+    margin-bottom: 15px;
+    color: #222;
+    font-weight: bold;
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    text-align: center;
+    /* Opcional: Añadir un pequeño hover */
+    transition: transform 0.2s;
+}
+
+.stat-box:hover {
+    transform: scale(1.1);
+}
+
+.stat-icon {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.stat-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Modificadores de color para los números */
+.stat-number.win { color: #2e7d32; } /* Verde oscuro */
+.stat-number.loss { color: #c62828; } /* Rojo oscuro */
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #333;
+    margin-top: 2px;
+}
+
+/* Para convertir el Link en un bloque botón */
+.btn-block {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    margin-bottom: 10px;
+}
+
+.link-block {
+    display: block;
+    margin-top: 15px;
+}

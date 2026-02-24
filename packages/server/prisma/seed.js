@@ -1,97 +1,94 @@
 import { LobbyPrivacy, LobbyStatus } from "@prisma/client";
 import { prisma } from "../config/db.js";
-
+import bcrypt from 'bcryptjs';
 
 async function main() {
-  console.log('🌱 Empezando el seeding...');
+  console.log('🌱 Comprobando estado de la base de datos...');
 
-  // Borramos lobbies (que dependen de users) y luego users
-  await prisma.lobby.deleteMany();
-  await prisma.user.deleteMany();
-  console.log('🗑️  Datos antiguos eliminados.');
+  const password = "1234";
+  const hash = await bcrypt.hash(password, 10);
 
-  // 2. Crear Usuarios (Necesarios para ser dueños de los lobbies)
-  const user1 = await prisma.user.create({
-    data: {
-      name: 'ReyArturo',
-      email: 'arturo@camelot.com',
-      password: 'password123', // En producción deberías hashearla
-    },
+  // 1. Sincronizar Usuarios Base (Usamos upsert para no duplicar ni borrar)
+  const user1 = await prisma.user.upsert({
+    where: { email: 'arturo@camelot.com' },
+    update: {}, // Si ya existe, no hacemos nada
+    create: { name: 'ReyArturo', email: 'arturo@camelot.com', password: hash },
   });
 
-  const user2 = await prisma.user.create({
-    data: {
-      name: 'SirLancelot',
-      email: 'lancelot@camelot.com',
-      password: 'password123',
-    },
+  const user2 = await prisma.user.upsert({
+    where: { email: 'lancelot@camelot.com' },
+    update: {},
+    create: { name: 'SirLancelot', email: 'lancelot@camelot.com', password: hash },
   });
 
-  const user3 = await prisma.user.create({
-    data: {
-      name: 'Merlin',
-      email: 'merlin@wizard.com',
-      password: 'magic',
-    },
+  const user3 = await prisma.user.upsert({
+    where: { email: 'merlin@wizard.com' },
+    update: {},
+    create: { name: 'Merlin', email: 'merlin@wizard.com', password: hash },
   });
 
-
-  const user4 = await prisma.user.create({
-    data: {
-      name: 'Galahad',
-      email: 'galahad@camelot.com',
-      password: 'password123',
-    },
+  const user4 = await prisma.user.upsert({
+    where: { email: 'galahad@camelot.com' },
+    update: {},
+    create: { name: 'Galahad', email: 'galahad@camelot.com', password: hash },
   });
 
-    const user5 = await prisma.user.create({
-    data: {
-      name: 'Guille',
-      email: 'guille@klk.com',
-      password: 'password123', // En producción deberías hashearla
-    },
+  const user5 = await prisma.user.upsert({
+    where: { email: 'guille@klk.com' },
+    update: {},
+    create: { name: 'Guille', email: 'guille@klk.com', password: hash },
   });
 
-  console.log('👤 Usuarios creados:', [user1.name, user2.name, user3.name, user4.name, user5.name]);
-  // 3. Crear Lobbies
-  // Lobby 1: Creado por Arturo, esperando jugador
-  await prisma.lobby.create({
-    data: {
-      name: 'Mesa Redonda',
-      status: LobbyStatus.WAITING, // Esperando jugadores
-      privacy: LobbyPrivacy.PUBLIC,
-      player1Id: user1.idUser, // Arturo es el líder
-      player2Id: null,         // Hueco libre
-    },
-  });
+  console.log('👤 Usuarios base verificados/creados.');
 
-  // Lobby 2: Creado por Lancelot, partida llena (vs Merlin)
-  await prisma.lobby.create({
-    data: {
-      name: 'Torneo del Castillo',
-      status: LobbyStatus.ONGOING,     // Ya están jugando
-      privacy: LobbyPrivacy.PRIVATE,
-      player1Id: user2.idUser, // Lancelot líder
-      player2Id: user3.idUser, // Merlin invitado
-    },
-  });
+  // 2. Crear Lobbies SOLO si no hay ninguno en la base de datos
+  // Así evitamos crear 3 lobbies infinitamente en cada reinicio
+  const existingLobbies = await prisma.lobby.count();
+  
+  if (existingLobbies === 0) {
+    console.log('🏰 Base de datos vacía de partidas. Generando Lobbies de prueba...');
+    
+    await prisma.lobby.create({
+      data: {
+        name: 'Mesa Redonda',
+        status: LobbyStatus.WAITING,
+        privacy: LobbyPrivacy.PUBLIC,
+        player1Id: user1.idUser,
+        player2Id: null,
+      },
+    });
 
-  // Lobby 3: Creado por Galahad, esperando jugador
-  await prisma.lobby.create({
-    data: {
-      name: 'Cacería del Grial',
-      status: LobbyStatus.WAITING, // Esperando jugadores
-      privacy: LobbyPrivacy.PRIVATE,
-      player1Id: user4.idUser, // Galahad es el líder
-      player2Id: null,         // Hueco libre
-    },
-  });
-  console.log('🏰 Lobbies creados con éxito.');
+    await prisma.lobby.create({
+      data: {
+        name: 'Torneo del Castillo',
+        status: LobbyStatus.ONGOING,
+        privacy: LobbyPrivacy.PRIVATE,
+        player1Id: user2.idUser,
+        player2Id: user3.idUser,
+      },
+    });
+
+    await prisma.lobby.create({
+      data: {
+        name: 'Cacería del Grial',
+        status: LobbyStatus.WAITING,
+        privacy: LobbyPrivacy.PRIVATE,
+        player1Id: user4.idUser,
+        player2Id: null,
+      },
+    });
+    
+    console.log('🏰 Lobbies de prueba creados con éxito.');
+  } else {
+    console.log(`🏰 Se han detectado ${existingLobbies} lobbies existentes. Omitiendo creación para no duplicar.`);
+  }
+
+  console.log('✅ Seeding finalizado correctamente.');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Error durante el seeding:', e);
     process.exit(1);
   })
   .finally(async () => {

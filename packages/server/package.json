@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "start": "node index.js"
+    "db:setup": "npx prisma generate && npx prisma migrate deploy && npx prisma db seed",
+    "start": "npm run db:setup && node index.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "mariadb": "^3.4.5",
     "prisma": "5.10.2",
     "redis": "^5.10.0",
+    "socket.io": "^4.8.3",
     "supertest": "^7.2.2"
   }
 }
