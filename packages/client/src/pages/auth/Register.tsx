@@ -2,6 +2,11 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../components/ParchmentMenu.css";
 
+import { ParchmentCard } from "../../components/ParchmentCard";
+import { FormInput } from "../../components/FormInput";
+import { MenuButton } from "../../components/MenuButton";
+
+
 const Register = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -34,48 +39,41 @@ const Register = () => {
     };
 
     return (
-        <div className = "menu-container">
-            <div className = "menu-card">
-                <h2 className = "menu-title">New Lord</h2>
-                <form className="menu-form" onSubmit={handleSubmit}>
-                    <input
-                        className="menu-input"
-                        type="text"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                    <input
-                        className="menu-input"
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        className="menu-input"
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <button className="menu-button" type="submit">Register</button>
-                </form>
-                {error && <div className="menu-error">{error}</div>}
+        <ParchmentCard title="New Lord">
+            <form className="menu-form" onSubmit={handleSubmit}>
+                <FormInput
+                    type="text"
+                    placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+                <FormInput
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <FormInput
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <MenuButton type="submit">Register</MenuButton>
+            </form>
+            {error && <div className="menu-error">{error}</div>}
 
-                <Link to="/login" className="menu-link">
-                    Do you already have a crown? Enter here
-                </Link>
+            <Link to="/login" className="menu-link">
+                Do you already have a crown? Enter here
+            </Link>
 
-                <Link to="/" className="menu-link">
-                    Return to the kingdom
-                </Link>
-
-            </div>
-        </div>
+            <Link to="/" className="menu-link">
+                Return to the kingdom
+            </Link>
+        </ParchmentCard>
     );      
 }
 

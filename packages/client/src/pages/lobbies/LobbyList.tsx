@@ -4,6 +4,7 @@ import { createLobby, getAllLobbies, joinLobby, type LobbyBackend } from "./comp
 import { useNavigate } from "react-router";
 import { useUser } from "../../hooks/useUser";
 
+import { Modal } from "../../components/Modal";
 
 function LobbyList() {
     const [lobbies, setLobbies] = useState<LobbyBackend[]>([]);
@@ -142,45 +143,44 @@ function LobbyList() {
                 </div>
             </div>
         </div>
-        {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>Crear Nueva Sala</h3>
-                        <form onSubmit={handleConfirmCreate}>
-                            <div className="form-group">
-                                <label>Nombre de la sala:</label>
-                                <input 
-                                    type="text" 
-                                    value={newLobbyName}
-                                    onChange={(e) => setNewLobbyName(e.target.value)}
-                                    placeholder="Ej: Batalla Épica"
-                                    autoFocus
-                                />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>Privacidad:</label>
-                                <select 
-                                    value={newLobbyPrivacy} 
-                                    onChange={(e) => setNewLobbyPrivacy(e.target.value as 'PUBLIC' | 'PRIVATE')}
-                                >
-                                    <option value="PUBLIC">🌐 Pública</option>
-                                    <option value="PRIVATE">🔒 Privada</option>
-                                </select>
-                            </div>
-
-                            <div className="modal-actions">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="cancel-btn">
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="confirm-btn">
-                                    Crear Sala
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <Modal 
+            isOpen={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            title="Crear Nueva Sala"
+        >
+            <form onSubmit={handleConfirmCreate}>
+                <div className="form-group">
+                    <label>Nombre de la sala:</label>
+                    <input 
+                        type="text" 
+                        value={newLobbyName}
+                        onChange={(e) => setNewLobbyName(e.target.value)}
+                        placeholder="Ej: Batalla Épica"
+                        autoFocus
+                    />
                 </div>
-            )}
+                
+                <div className="form-group">
+                    <label>Privacidad:</label>
+                    <select 
+                        value={newLobbyPrivacy} 
+                        onChange={(e) => setNewLobbyPrivacy(e.target.value as 'PUBLIC' | 'PRIVATE')}
+                    >
+                        <option value="PUBLIC">🌐 Pública</option>
+                        <option value="PRIVATE">🔒 Privada</option>
+                    </select>
+                </div>
+
+                <div className="modal-actions">
+                    <button type="button" onClick={() => setIsModalOpen(false)} className="cancel-btn">
+                        Cancelar
+                    </button>
+                    <button type="submit" className="confirm-btn">
+                        Crear Sala
+                    </button>
+                </div>
+            </form>
+        </Modal>
     </div>;
 }
 

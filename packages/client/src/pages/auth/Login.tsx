@@ -4,6 +4,10 @@ import { useState } from "react";
 import type { User } from  "../../context/AuthContext";
 import "../../components/ParchmentMenu.css";
 
+import { ParchmentCard } from "../../components/ParchmentCard";
+import { FormInput } from "../../components/FormInput";
+import { MenuButton } from "../../components/MenuButton";
+
 const Login = () => {
     const { login } = useUser();
     const [email, setEmail] = useState("");
@@ -46,27 +50,23 @@ const Login = () => {
     };
     
     return (
-        <div className="menu-container">
-            <div className="menu-card">
-                <h2 className="menu-title">Welcome Lord</h2>
+        <ParchmentCard title="Login to the Kingdom">
                 <form className="menu-form" onSubmit = {handleSubmit}>
-                    <input
-                        className="menu-input"
+                    <FormInput
                         type="email"
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <input
-                        className="menu-input"
+                    <FormInput
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button className="menu-button" type="submit">Login</button>
+                    <MenuButton type="submit">Login</MenuButton>
                 </form>
                 {error && <div className="menu-error">{error}</div>}
 
@@ -77,9 +77,7 @@ const Login = () => {
                 <Link to="/" className="menu-link">
                     Return to the kingdom
                 </Link>
-
-            </div>
-        </div>
+        </ParchmentCard>
     )
 
 }
