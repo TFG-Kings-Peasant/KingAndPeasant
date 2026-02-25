@@ -41,3 +41,23 @@
   background-color: #333;
   border-color: #ffd700;
 }
+
+/* Contenedor derecho para mantener los botones alineados */
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Estilos específicos para el botón de cerrar sesión */
+.logout-btn {
+  background-color: #631212; /* Rojo oscurito */
+  color: #ffcccc;
+  border-color: #8a1919;
+}
+
+.logout-btn:hover {
+  background-color: #8a1919; 
+  border-color: #ff4d4d;
+  color: white;
+}

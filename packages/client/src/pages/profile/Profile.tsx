@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import "./Profile.css";
+import "../../components/ParchmentMenu.css";
 
 const Profile = () => {
     const [name, setName] = useState("");
@@ -46,19 +46,19 @@ const Profile = () => {
 
     if (error) {
         return (
-            <div className="auth-container">
-                <div className="auth-card">
-                    <div className="auth-error">{error}</div>
-                    <Link to="/" className="auth-link">Return to the Kingdom</Link>
+            <div className="menu-container">
+                <div className="menu-card">
+                    <div className="menu-error">{error}</div>
+                    <Link to="/" className="menu-link">Return to the Kingdom</Link>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Lord Profile {name}</h2>
+        <div className="menu-container">
+            <div className="menu-card">
+                <h2 className="menu-title">Lord Profile {name}</h2>
 
                 <div className="profile-info">
                     <p className="profile-text">
@@ -94,11 +94,11 @@ const Profile = () => {
                     </div>
                 </div>
 
-                <Link to="/editProfile" state={{name, email}} className="auth-button btn-block">
+                <Link to="/editProfile" state={{name, email}} className="menu-button btn-block">
                     Edit my profile.
                 </Link>
 
-                <Link to="/" className="auth-link link-block">
+                <Link to="/" className="menu-link link-block">
                     Return to the Kingdom.
                 </Link>
 

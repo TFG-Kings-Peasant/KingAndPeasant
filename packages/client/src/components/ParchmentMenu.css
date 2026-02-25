@@ -1,6 +1,6 @@
 /* packages/client/src/pages/auth/Auth.css */
 
-.auth-container {
+.menu-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -11,7 +11,7 @@
 }
 
 /* La tarjeta central (Pergamino/Papel) */
-.auth-card {
+.menu-card {
     background-color: #f5e6c8; /* Color pergamino */
     padding: 2.5rem;
     border-radius: 8px;
@@ -22,7 +22,7 @@
     border: 2px solid #8b5a2b; /* Borde madera */
 }
 
-.auth-title {
+.menu-title {
     color: #4a3b2a;
     font-size: 2rem;
     margin-bottom: 1.5rem;
@@ -30,13 +30,13 @@
     letter-spacing: 2px;
 }
 
-.auth-form {
+.menu-form {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-.auth-input {
+.menu-input {
     padding: 12px;
     border: 2px solid #c4a484;
     border-radius: 4px;
@@ -47,16 +47,16 @@
     color: #4a3b2a;
 }
 
-.auth-input:focus {
+.menu-input:focus {
     border-color: #8b5a2b;
 }
 
-.auth-input::placeholder {
+.menu-input::placeholder {
     color: #a1887f;
     font-style: italic;
 }
 
-.auth-button {
+.menu-button {
     margin-top: 10px;
     padding: 12px;
     background-color: #8b0000; 
@@ -70,13 +70,13 @@
     transition: all 0.2s;
 }
 
-.auth-button:hover {
+.menu-button:hover {
     background-color: #a50000;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-.auth-error {
+.menu-error {
     color: #d32f2f;
     background-color: #ffcdd2;
     padding: 10px;
@@ -85,7 +85,7 @@
     font-size: 0.9rem;
 }
 
-.auth-link {
+.menu-link {
     margin-top: 20px;
     display: block;
     color: #5d4037;
@@ -93,7 +93,7 @@
     font-size: 0.9rem;
 }
 
-.auth-link:hover {
+.menu-link:hover {
     text-decoration: underline;
     color: #8b0000;
 }

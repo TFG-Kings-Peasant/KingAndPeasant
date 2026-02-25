@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "./Auth.css";
+import "../../components/ParchmentMenu.css";
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -34,12 +34,12 @@ const Register = () => {
     };
 
     return (
-        <div className = "auth-container">
-            <div className = "auth-card">
-                <h2 className = "auth-title">New Lord</h2>
-                <form className="auth-form" onSubmit={handleSubmit}>
+        <div className = "menu-container">
+            <div className = "menu-card">
+                <h2 className = "menu-title">New Lord</h2>
+                <form className="menu-form" onSubmit={handleSubmit}>
                     <input
-                        className="auth-input"
+                        className="menu-input"
                         type="text"
                         placeholder="Name"
                         value={name}
@@ -47,7 +47,7 @@ const Register = () => {
                         required
                     />
                     <input
-                        className="auth-input"
+                        className="menu-input"
                         type="email"
                         placeholder="Email"
                         value={email}
@@ -55,22 +55,22 @@ const Register = () => {
                         required
                     />
                     <input
-                        className="auth-input"
+                        className="menu-input"
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button className="auth-button" type="submit">Register</button>
+                    <button className="menu-button" type="submit">Register</button>
                 </form>
-                {error && <div className="auth-error">{error}</div>}
+                {error && <div className="menu-error">{error}</div>}
 
-                <Link to="/login" className="auth-link">
+                <Link to="/login" className="menu-link">
                     Do you already have a crown? Enter here
                 </Link>
 
-                <Link to="/" className="auth-link">
+                <Link to="/" className="menu-link">
                     Return to the kingdom
                 </Link>
 

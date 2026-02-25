@@ -2,7 +2,7 @@ import { useUser } from "../../hooks/useUser";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import type { User } from  "../../context/AuthContext";
-import "./Auth.css";
+import "../../components/ParchmentMenu.css";
 
 const Login = () => {
     const { login } = useUser();
@@ -46,12 +46,12 @@ const Login = () => {
     };
     
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Welcome Lord</h2>
-                <form className="auth-form" onSubmit = {handleSubmit}>
+        <div className="menu-container">
+            <div className="menu-card">
+                <h2 className="menu-title">Welcome Lord</h2>
+                <form className="menu-form" onSubmit = {handleSubmit}>
                     <input
-                        className="auth-input"
+                        className="menu-input"
                         type="email"
                         placeholder="Email"
                         value={email}
@@ -59,22 +59,22 @@ const Login = () => {
                         required
                     />
                     <input
-                        className="auth-input"
+                        className="menu-input"
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button className="auth-button" type="submit">Login</button>
+                    <button className="menu-button" type="submit">Login</button>
                 </form>
-                {error && <div className="auth-error">{error}</div>}
+                {error && <div className="menu-error">{error}</div>}
 
-                <Link to="/register" className="auth-link">
+                <Link to="/register" className="menu-link">
                     Don't you have a crown yet? Register here
                 </Link>
 
-                <Link to="/" className="auth-link">
+                <Link to="/" className="menu-link">
                     Return to the kingdom
                 </Link>
 
