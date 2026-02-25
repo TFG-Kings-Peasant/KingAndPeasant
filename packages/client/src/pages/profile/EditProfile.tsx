@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import "./User.css";
+import "../../components/ParchmentMenu.css";
 
-const EditUser = () => {
+const EditProfile = () => {
     const { user, isLogin, login } = useUser();
     const navigate = useNavigate();
     const location = useLocation();
@@ -65,19 +65,19 @@ const EditUser = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Edit Profile</h2>
+        <div className="menu-container">
+            <div className="menu-card">
+                <h2 className="menu-title">Edit Profile</h2>
 
                 {success && <div style={{ color: 'green', marginBottom: '10px' }}>¡Changes saved!</div>}
-                {error && <div className="auth-error">{error}</div>}
+                {error && <div className="menu-error">{error}</div>}
 
-                <form className="auth-form" onSubmit={handleSubmit}>
+                <form className="menu-form" onSubmit={handleSubmit}>
                     
                     <div style={{ textAlign: "left", marginBottom: "10px" }}>
                         <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>Lord's Name</label>
                         <input
-                            className="auth-input"
+                            className="menu-input"
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -88,7 +88,7 @@ const EditUser = () => {
                     <div style={{ textAlign: "left", marginBottom: "10px" }}>
                         <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>Lord's Email</label>
                         <input
-                            className="auth-input"
+                            className="menu-input"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -99,7 +99,7 @@ const EditUser = () => {
                     <div style={{ textAlign: "left", marginBottom: "20px" }}>
                         <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>New Password</label>
                         <input
-                            className="auth-input"
+                            className="menu-input"
                             type="password"
                             placeholder="Leave empty to keep the current one"
                             value={password}
@@ -110,11 +110,11 @@ const EditUser = () => {
                         </small>
                     </div>
 
-                    <button className="auth-button" type="submit">
+                    <button className="menu-button" type="submit">
                         Save Changes
                     </button>
 
-                    <Link to="/profile" className="auth-link" style={{ display: 'block', marginTop: '15px' }}>
+                    <Link to="/profile" className="menu-link" style={{ display: 'block', marginTop: '15px' }}>
                         Cancel
                     </Link>
                 </form>
@@ -123,4 +123,4 @@ const EditUser = () => {
     );
 };
 
-export default EditUser;
+export default EditProfile;

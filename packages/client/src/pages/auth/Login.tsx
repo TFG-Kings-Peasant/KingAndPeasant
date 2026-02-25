@@ -2,7 +2,11 @@ import { useUser } from "../../hooks/useUser";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import type { User } from  "../../context/AuthContext";
-import "./Auth.css";
+import "../../components/ParchmentMenu.css";
+
+import { ParchmentCard } from "../../components/ParchmentCard";
+import { FormInput } from "../../components/FormInput";
+import { MenuButton } from "../../components/MenuButton";
 
 const Login = () => {
     const { login } = useUser();
@@ -46,36 +50,34 @@ const Login = () => {
     };
     
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Welcome Lord</h2>
-                <form className="auth-form" onSubmit = {handleSubmit}>
-                    <input
-                        className="auth-input"
+        <ParchmentCard title="Login to the Kingdom">
+                <form className="menu-form" onSubmit = {handleSubmit}>
+                    <FormInput
                         type="email"
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                    <input
-                        className="auth-input"
+                    <FormInput
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button className="auth-button" type="submit">Login</button>
+                    <MenuButton type="submit">Login</MenuButton>
                 </form>
-                {error && <div className="auth-error">{error}</div>}
+                {error && <div className="menu-error">{error}</div>}
 
-                <Link to="/register" className="auth-link">
+                <Link to="/register" className="menu-link">
                     Don't you have a crown yet? Register here
                 </Link>
 
-            </div>
-        </div>
+                <Link to="/" className="menu-link">
+                    Return to the kingdom
+                </Link>
+        </ParchmentCard>
     )
 
 }

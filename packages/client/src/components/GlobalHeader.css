@@ -1,0 +1,63 @@
+.global-header {
+  display: flex;
+  justify-content: space-between; /* Separa los 3 elementos */
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #1a1a1a;
+  border-bottom: 2px solid #333;
+  
+  /* Esto hace que la cabecera se quede pegada arriba al hacer scroll */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffd700; /* Un toque dorado */
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: color 0.2s;
+}
+
+.header-logo:hover {
+  color: #ffea70;
+}
+
+.header-btn {
+  background-color: transparent;
+  border: 1px solid #555;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.header-btn:hover {
+  background-color: #333;
+  border-color: #ffd700;
+}
+
+/* Contenedor derecho para mantener los botones alineados */
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Estilos específicos para el botón de cerrar sesión */
+.logout-btn {
+  background-color: #631212; /* Rojo oscurito */
+  color: #ffcccc;
+  border-color: #8a1919;
+}
+
+.logout-btn:hover {
+  background-color: #8a1919; 
+  border-color: #ff4d4d;
+  color: white;
+}

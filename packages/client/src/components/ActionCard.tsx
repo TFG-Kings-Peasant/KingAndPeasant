@@ -1,7 +1,7 @@
-import './HomeButton.css'
+import './ActionCard.css'
 import { useNavigate } from 'react-router-dom';
 
-interface HomeButtonProps {
+interface ActionCardProps {
     title: string;
     icon: string;
     description: string;
@@ -9,7 +9,7 @@ interface HomeButtonProps {
     url: string;
 }
 
-export default function HomeButton({ title, icon, description, buttonText, url }: HomeButtonProps) {
+export default function ActionCard({ title, icon, description, buttonText, url }: ActionCardProps) {
     const navigate = useNavigate();
     return (
         <div className="card">
