@@ -43,8 +43,8 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
             }
         }
     }
-    return await redisClient.set(`game:${lobbyId}`, JSON.stringify(initialState))
-
+    await redisClient.set(`game:${lobbyId}`, JSON.stringify(initialState))
+    return initialState;
 };
 
 const getGameStateById = async (id) => {

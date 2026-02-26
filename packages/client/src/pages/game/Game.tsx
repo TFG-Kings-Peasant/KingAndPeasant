@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getGameStateById, makeExampleAction, type GameState } from "./components/GameService";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import "./Game.css";
 
 function Game() {
   const { id } = useParams();
@@ -58,21 +59,91 @@ function Game() {
                 alert("Ocurrió un error desconocido");
             }
   }};
+
+  // Si no hay estado o usuario, mostramos la pantalla de carga
+  if (loading || !gameState || !user) return <div>Cargando el Tablero...</div>;
+
+  // Calculamos la perspectiva
+  const isKing = Number(user.id) === gameState.players.king.id;
+  const myPlayer = isKing ? gameState.players.king : gameState.players.peasant;
+  const rivalPlayer = isKing ? gameState.players.peasant : gameState.players.king;
+
+  const myRoleName = isKing ? "REY" : "CAMPESINO";
+  const rivalRoleName = isKing ? "CAMPESINO" : "REY";
   
   return (
-    <div>
-      <h1>{gameState?.turn || "Turno no disponible"}</h1>
-      <h2>Jugador Rey: {gameState?.players.king.id}</h2>
-      <p>Mano: {gameState?.players.king.hand.join(", ")}</p>
-      <p>Pueblo: {gameState?.players.king.town.join(", ")}</p>
+    <div className="game-board">
       
-      <h2>Jugador Campesino: {gameState?.players.peasant.id}</h2>
-      <p>Mano: {gameState?.players.peasant.hand.join(", ")}</p>
-      <p>Pueblo: {gameState?.players.peasant.town.join(", ")}</p>
-      
+      {/* ZONA RIVAL (Arriba) */}
+      <div className="opponent-area">
+        <h3>RIVAL ({rivalRoleName})</h3>
+        <div className="hand rival-hand">
+          {rivalPlayer.hand.map((card) => (
+            <div key={card.uid} className="card back">OCULTA</div>
+          ))}
+        </div>
+        <div className="town rival-town">
+          {rivalPlayer.town.map((card) => (
+            <div 
+              key={card.uid} 
+              className="card"
+              style={{ 
+                backgroundImage: `url('/cards/${card.templateId}.png')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                border: 'none', // Quitamos el borde por defecto para que luzca mejor
+                backgroundColor: 'transparent'
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
-      <button onClick={handleMakeAction}>Accion</button>
-      {error && <p style={{color: "red"}}>{error}</p>}
+      {/* ZONA CENTRAL */}
+      <div className="center-area">
+        <div className="deck-pile">MAZO<br/>({gameState.deck.length})</div>
+        <div className="discard-pile">DESCARTES<br/>({gameState.discardPile.length})</div>
+        
+        {/* Dejamos tu botón de prueba aquí en medio temporalmente */}
+        <button onClick={handleMakeAction}>Acción de Prueba</button>
+      </div>
+
+      {/* TU ZONA (Abajo) */}
+      <div className="player-area">
+        <div className="town my-town">
+          {myPlayer.town.map((card) => (
+             <div 
+               key={card.uid} 
+               className="card"
+               style={{ 
+                 backgroundImage: `url('/cards/${card.templateId}.png')`,
+                 backgroundSize: 'cover',
+                 backgroundPosition: 'center',
+                 border: 'none',
+                 backgroundColor: 'transparent'
+               }}
+             />
+          ))}
+        </div>
+        <div className="hand my-hand">
+          {myPlayer.hand.map((card) => (
+             <div 
+               key={card.uid} 
+               className="card"
+               style={{ 
+                 backgroundImage: `url('/cards/${card.templateId}.png')`,
+                 backgroundSize: 'cover',
+                 backgroundPosition: 'center',
+                 border: 'none',
+                 backgroundColor: 'transparent'
+               }}
+             />
+          ))}
+        </div>
+        <h3>TU MANO ({myRoleName}) - Turno actual: {gameState.turn.toUpperCase()}</h3>
+      </div>
+      
+      {error && <p style={{color: "red", textAlign: "center"}}>{error}</p>}
     </div>
   );
 }
