@@ -1,7 +1,18 @@
 import { redisClient } from '../../config/redis.js';
 
-const createGame = async ( lobbyId, player1Id, player2Id) => {
+function shuffleArray(array) {
+    for (let i = array.lengt -1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i +1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
 
+const createGame = async ( lobbyId, player1Id, player2Id) => {
+    const catalog = await prisma.card.findMany();
+    const deck = [];
+    catalog.forEach(card => {
+        
+    })
     const initialState = {
         era: 1, 
         turnNumber: 1,
