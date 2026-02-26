@@ -1,33 +1,44 @@
 import { redisClient } from '../../config/redis.js';
+import { prisma } from '../../config/db.js';
 
 function shuffleArray(array) {
-    for (let i = array.lengt -1; i > 0; i--) {
+    for (let i = array.length -1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i +1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+    return array;
 }
 
 const createGame = async ( lobbyId, player1Id, player2Id) => {
     const catalog = await prisma.card.findMany();
     const deck = [];
     catalog.forEach(card => {
-        
+        for(let i = 0; i < card.copies; i++) {
+            deck.push({
+                uid: `game_${lobbyId}_card_${card.id}_copy_${i}`,
+                templateId: card.id,
+                isRevealed: false
+            })
+        }
     })
+    shuffleArray(deck);
+    const handKing = deck.splice(0,5);
+    const handPeasant = deck.splice(0,5);
     const initialState = {
         era: 1, 
         turnNumber: 1,
         turn: "peasant",
-        deck: [1,2,3,4,5,6,7,8,9,10],
+        deck: deck,
         discardPile: [],
         players:{
             king: {
                 id: player1Id,
-                hand: [11,12,13],
+                hand: handKing,
                 town: []
             },
             peasant: {
                 id: player2Id,
-                hand:[14,15,16],
+                hand:handPeasant,
                 town: []
             }
         }
