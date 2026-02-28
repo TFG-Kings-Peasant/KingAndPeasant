@@ -1,0 +1,50 @@
+name: CI/CD Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - trunk
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm run test
+
+  deploy:
+    name: Deploy to Render
+    needs: test # Solo despliega si los tests pasan
+    runs-on: ubuntu-latest
+    steps:
+      # --- STAGING (TRUNK) ---
+      - name: Deploy Staging Backend
+        if: github.ref == 'refs/heads/trunk'
+        run: curl -X POST "${{ secrets.RENDER_HOOK_BACK_TRUNK }}"
+          
+      - name: Deploy Staging Frontend
+        if: github.ref == 'refs/heads/trunk'
+        run: curl -X POST "${{ secrets.RENDER_HOOK_FRONT_TRUNK }}"
+
+      # --- PRODUCCIÓN (MAIN) ---
+      - name: Deploy Production Backend
+        if: github.ref == 'refs/heads/main'
+        run: curl -X POST "${{ secrets.RENDER_HOOK_BACK_MAIN }}"
+          
+      - name: Deploy Production Frontend
+        if: github.ref == 'refs/heads/main'
+        run: curl -X POST "${{ secrets.RENDER_HOOK_FRONT_MAIN }}"
