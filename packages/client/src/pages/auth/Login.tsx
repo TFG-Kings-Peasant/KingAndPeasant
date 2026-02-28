@@ -19,7 +19,7 @@ const Login = () => {
         e.preventDefault();
         setError(null);
 
-        fetch("http://localhost:3000/api/auth/login", {
+        fetch(import.meta.env.VITE_API_URL+"/api/auth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
