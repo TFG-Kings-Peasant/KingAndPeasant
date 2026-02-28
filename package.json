@@ -8,7 +8,10 @@
     "packages/*"
   ],
   "scripts": {
-    
+    "build:client": "npm run build --workspace=client",
+    "start:prod:server": "npm run start:prod --workspace=server",
+    "db:deploy": "cd packages/server && npx prisma generate && npx prisma migrate deploy",
+
     "test": "npm run test:server && npm run test:client",
     "test:server": "npm run test --prefix packages/server",
     "test:client": "npm run test --prefix packages/client",
