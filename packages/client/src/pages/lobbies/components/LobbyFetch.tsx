@@ -10,7 +10,7 @@ export interface LobbyBackend {
     player2Id: number | null;
 }
 
-const API_URL = 'http://localhost:3000/api/lobby';
+const API_URL = import.meta.env.VITE_API_URL+'/api/lobby';
 
 export const getAllLobbies = async (): Promise<LobbyBackend[]> => {
     const response = await fetch(API_URL);

@@ -16,7 +16,7 @@ export default function FriendsList() {
 
         const fetchFriends = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/friendship/list", {
+                const res = await fetch(import.meta.env.VITE_API_URL+"/api/friendship/list", {
                     headers: { "Authorization": `Bearer ${user.authToken}` }
                 });
                 if (res.ok) {

@@ -25,7 +25,7 @@ export default function FriendRequestsList() {
 
         const fetchRequests = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/friendship/listFriendshipRequests", {
+                const res = await fetch(import.meta.env.VITE_API_URL+"/api/friendship/listFriendshipRequests", {
                     headers: { "Authorization": `Bearer ${user.authToken}` }
                 });
                 if (res.ok) {
@@ -65,7 +65,7 @@ export default function FriendRequestsList() {
     const handleResponse = async (friendshipId: number, action: "ACCEPTED" | "DENIED") => {
         setRequests((prev) => prev.filter(req => req.idFriendship !== friendshipId));
         try {
-            const res = await fetch("http://localhost:3000/api/friendship/update", {
+            const res = await fetch(import.meta.env.VITE_API_URL+"/api/friendship/update", {
                 method: "PUT",
                 headers: { 
                     "Authorization": `Bearer ${user?.authToken}`,

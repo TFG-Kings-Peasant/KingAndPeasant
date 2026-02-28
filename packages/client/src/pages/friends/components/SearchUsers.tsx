@@ -35,7 +35,7 @@ const SearchUsers = () => {
         }
 
         try {
-            const url = `http://localhost:3000/api/auth/search?query=${encodeURIComponent(searchQuery)}`;
+            const url = import.meta.env.VITE_API_URL+`/api/auth/search?query=${encodeURIComponent(searchQuery)}`;
 
             const response = await fetch(url, {
                 method: "GET",

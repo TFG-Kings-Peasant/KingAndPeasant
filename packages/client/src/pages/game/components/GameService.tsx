@@ -19,7 +19,7 @@ export interface GameState {
     }
 }
 
-const API_URL = "http://localhost:3000/api/game";
+const API_URL = import.meta.env.VITE_API_URL+"/api/game";
 
 export const startGame = async (lobbyId: number, player1Id: number, player2Id: number) => {
     const response = await fetch(API_URL + "/start", {

@@ -28,7 +28,7 @@ const EditProfile = () => {
         setSuccess(false);
 
         try {
-            const response = await fetch("http://localhost:3000/api/auth/edit-profile", {
+            const response = await fetch(import.meta.env.VITE_API_URL+"/api/auth/edit-profile", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
