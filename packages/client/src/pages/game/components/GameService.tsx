@@ -1,6 +1,6 @@
 export interface CardState {
     uid: string;
-    templateId: number;
+    templateId?: number;
     isRevealed: boolean;
 }
 
@@ -8,7 +8,7 @@ export interface GameState {
     id: number;
     turnNumber: number;
     turn: 'king' | 'peasant';
-    deck: CardState[];
+    deckCount: number;
     discardPile: CardState[];
     players: {
         king: {

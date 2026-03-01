@@ -53,7 +53,7 @@ const getGameStateById = async (id) => {
 }
 
 const exampleAction = async (id, playerId) => {
-    var gameState = await getGameStateById(id)
+    var gameState = await getGameStateById(id);
 
     if(gameState.turn == "peasant" && playerId==gameState.players.peasant.id){
         gameState.turn = "king"
@@ -68,8 +68,31 @@ const exampleAction = async (id, playerId) => {
     return await redisClient.set(`game:${id}`, JSON.stringify(gameState))
 }
 
+const getGameStateDTO = async (gameState, userId) => {
+    const dto = JSON.parse(JSON.stringify(gameState));
+
+    dto.deckCount = dto.deck.length;
+    delete dto.deck;
+
+    const isKing = userId === dto.players.king.id;
+    const isPeasant = userId === dto.players.peasant.id;
+
+    if (isKing) {
+        dto.players.peasant.hand = dto.players.peasant.hand.map(card => ({
+            uid: card.uid
+        }));
+    } else if (isPeasant) {
+        dto.players.king.hand = dto.players.king.hand.map(card => ({
+            uid: card.uid
+        }));
+    }
+
+    return dto;
+};
+
 export const gameService = {
     createGame,
     getGameStateById,
-    exampleAction
+    exampleAction,
+    getGameStateDTO
 };

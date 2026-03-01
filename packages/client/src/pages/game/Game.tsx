@@ -111,7 +111,7 @@ function Game() {
     <div className="game-sidebar">
       <div className="deck-pile">
         <span>MAZO</span>
-        <strong>{gameState.deck.length}</strong>
+        <strong>{gameState.deckCount}</strong>
       </div>
       
       <div className="discard-pile">
