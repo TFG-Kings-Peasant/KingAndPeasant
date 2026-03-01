@@ -81,10 +81,13 @@ const getGameStateDTO = async (gameState, userId) => {
         dto.players.peasant.hand = dto.players.peasant.hand.map(card => ({
             uid: card.uid
         }));
+        dto.players.peasant.town = dto.players.peasant.town.map(card => 
+            card.isRevealed ? card : {uid: card.uid}
+        );
     } else if (isPeasant) {
-        dto.players.king.hand = dto.players.king.hand.map(card => ({
-            uid: card.uid
-        }));
+        dto.players.king.hand = dto.players.king.hand.map(card => 
+            card.isRevealed ? card : {uid: card.uid}
+        );
     }
 
     return dto;

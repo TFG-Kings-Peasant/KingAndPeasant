@@ -43,7 +43,7 @@ const exampleAction = async (req, res) => {
 const getGameStatus = async (req, res) => {
     try {
         const { lobbyId } = req.params;
-        const userId = req.user.idUser;
+        const userId = Number(req.user.idUser);
 
         const gameState = getGameStateById(lobbyId); 
         const gameParsed = JSON.parse(gameState);

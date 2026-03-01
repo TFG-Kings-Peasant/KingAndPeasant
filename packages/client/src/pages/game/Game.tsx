@@ -95,7 +95,7 @@ function Game() {
       <div className="player-area">
         <div className="town">
           {myPlayer.town.map((card) => (
-            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
+            <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }}></div>
           ))}
         </div>
         <div className="hand">
