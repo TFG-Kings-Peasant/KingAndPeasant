@@ -72,80 +72,61 @@ function Game() {
   const rivalRoleName = isKing ? "CAMPESINO" : "REY";
   
   return (
-    <div className="game-board">
+  <div className="game-board">
+    {/* COLUMNA IZQUIERDA: JUEGO */}
+    <div className="game-main-area">
       
-      {/* ZONA RIVAL (Arriba) */}
+      {/* RIVAL */}
       <div className="opponent-area">
         <h3>RIVAL ({rivalRoleName})</h3>
-        <div className="hand rival-hand">
+        <div className="hand">
           {rivalPlayer.hand.map((card) => (
-            <div key={card.uid} className="card back">OCULTA</div>
+            <div key={card.uid} className="card ingame back"></div>
           ))}
         </div>
-        <div className="town rival-town">
+        <div className="town">
           {rivalPlayer.town.map((card) => (
-            <div 
-              key={card.uid} 
-              className="card"
-              style={{ 
-                backgroundImage: `url('/cards/${card.templateId}.png')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                border: 'none', // Quitamos el borde por defecto para que luzca mejor
-                backgroundColor: 'transparent'
-              }}
-            />
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
           ))}
         </div>
       </div>
 
-      {/* ZONA CENTRAL */}
-      <div className="center-area">
-        <div className="deck-pile">MAZO<br/>({gameState.deck.length})</div>
-        <div className="discard-pile">DESCARTES<br/>({gameState.discardPile.length})</div>
-        
-        {/* Dejamos tu botón de prueba aquí en medio temporalmente */}
-        <button onClick={handleMakeAction}>Acción de Prueba</button>
-      </div>
-
-      {/* TU ZONA (Abajo) */}
+      {/* TÚ */}
       <div className="player-area">
-        <div className="town my-town">
+        <div className="town">
           {myPlayer.town.map((card) => (
-             <div 
-               key={card.uid} 
-               className="card"
-               style={{ 
-                 backgroundImage: `url('/cards/${card.templateId}.png')`,
-                 backgroundSize: 'cover',
-                 backgroundPosition: 'center',
-                 border: 'none',
-                 backgroundColor: 'transparent'
-               }}
-             />
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
           ))}
         </div>
-        <div className="hand my-hand">
+        <div className="hand">
           {myPlayer.hand.map((card) => (
-             <div 
-               key={card.uid} 
-               className="card"
-               style={{ 
-                 backgroundImage: `url('/cards/${card.templateId}.png')`,
-                 backgroundSize: 'cover',
-                 backgroundPosition: 'center',
-                 border: 'none',
-                 backgroundColor: 'transparent'
-               }}
-             />
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
           ))}
         </div>
-        <h3>TU MANO ({myRoleName}) - Turno actual: {gameState.turn.toUpperCase()}</h3>
+        <h3>TU MANO ({myRoleName}) - Turno: {gameState.turn.toUpperCase()}</h3>
+      </div>
+    </div>
+
+    {/* COLUMNA DERECHA: MAZO Y ACCIONES */}
+    <div className="game-sidebar">
+      <div className="deck-pile">
+        <span>MAZO</span>
+        <strong>{gameState.deck.length}</strong>
       </div>
       
-      {error && <p style={{color: "red", textAlign: "center"}}>{error}</p>}
+      <div className="discard-pile">
+        <span>DESCARTES</span>
+        <strong>{gameState.discardPile.length}</strong>
+      </div>
+
+      <div className="action-container">
+        <button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>
+      </div>
     </div>
-  );
+
+    {error && <p className="error-msg">{error}</p>}
+  </div>
+);
 }
 
 export default Game;
