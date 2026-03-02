@@ -40,8 +40,28 @@ const exampleAction = async (req, res) => {
     }
 }
 
+const getGameStatus = async (req, res) => {
+    try {
+        const { lobbyId } = req.params;
+        const userId = Number(req.user.idUser);
+
+        const gameState = getGameStateById(lobbyId); 
+        const gameParsed = JSON.parse(gameState);
+
+        if (!gameParsed) return res.status(404).send("Juego no encontrado");
+
+        const safeState = gameService.getGameStateDTO(gameParsed, userId);
+
+        res.json(safeState);
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const gameController = {
     createGame,
     getGameStateById,
-    exampleAction
+    exampleAction,
+    getGameStatus
 }

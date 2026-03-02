@@ -47,6 +47,20 @@ model Lobby {
   player2     User?    @relation("Player2", fields: [player2Id], references: [idUser])
 }
 
+model Card {
+  id  Int  @id @default(autoincrement())
+  
+  nameKing  String 
+  typeKing  String
+  descKing  String  @db.Text
+
+  namePeasant  String
+  typePeasant  String 
+  descPeasant  String  @db.Text
+
+  copies  Int  @default(1)  
+}
+
 enum LobbyPrivacy {
   PUBLIC
   PRIVATE

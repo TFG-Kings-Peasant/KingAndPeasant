@@ -3,6 +3,7 @@ import { getGameStateById, makeExampleAction, type GameState } from "./component
 import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import "./Game.css";
 
 interface ChatMessage {
   sender: string;
@@ -81,6 +82,17 @@ function Game() {
                 alert("Ocurrió un error desconocido");
             }
   }};
+
+  // Si no hay estado o usuario, mostramos la pantalla de carga
+  if (loading || !gameState || !user) return <div>Cargando el Tablero...</div>;
+
+  // Calculamos la perspectiva
+  const isKing = Number(user.id) === gameState.players.king.id;
+  const myPlayer = isKing ? gameState.players.king : gameState.players.peasant;
+  const rivalPlayer = isKing ? gameState.players.peasant : gameState.players.king;
+
+  const myRoleName = isKing ? "REY" : "CAMPESINO";
+  const rivalRoleName = isKing ? "CAMPESINO" : "REY";
   
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault(); 
@@ -103,18 +115,55 @@ function Game() {
   };
   
   return (
-    <div>
-      <h1>{gameState?.turn || "Turno no disponible"}</h1>
-      <h2>Jugador Rey: {gameState?.players.king.id}</h2>
-      <p>Mano: {gameState?.players.king.hand.join(", ")}</p>
-      <p>Pueblo: {gameState?.players.king.town.join(", ")}</p>
+  <div className="game-board">
+    {/* COLUMNA IZQUIERDA: JUEGO */}
+    <div className="game-main-area">
       
-      <h2>Jugador Campesino: {gameState?.players.peasant.id}</h2>
-      <p>Mano: {gameState?.players.peasant.hand.join(", ")}</p>
-      <p>Pueblo: {gameState?.players.peasant.town.join(", ")}</p>
-      
+      {/* RIVAL */}
+      <div className="opponent-area">
+        <h3>RIVAL ({rivalRoleName})</h3>
+        <div className="hand">
+          {rivalPlayer.hand.map((card) => (
+            <div key={card.uid} className="card ingame back"></div>
+          ))}
+        </div>
+        <div className="town">
+          {rivalPlayer.town.map((card) => (
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
+          ))}
+        </div>
+      </div>
 
-      <button onClick={handleMakeAction}>Accion</button>
+      {/* TÚ */}
+      <div className="player-area">
+        <div className="town">
+          {myPlayer.town.map((card) => (
+            <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }}></div>
+          ))}
+        </div>
+        <div className="hand">
+          {myPlayer.hand.map((card) => (
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
+          ))}
+        </div>
+        <h3>TU MANO ({myRoleName}) - Turno: {gameState.turn.toUpperCase()}</h3>
+      </div>
+    </div>
+
+    {/* COLUMNA DERECHA: MAZO Y ACCIONES */}
+    <div className="game-sidebar">
+      <div className="deck-pile">
+        <span>MAZO</span>
+        <strong>{gameState.deckCount}</strong>
+      </div>
+      
+      <div className="discard-pile">
+        <span>DESCARTES</span>
+        <strong>{gameState.discardPile.length}</strong>
+      </div>
+
+      <div className="action-container">
+        <button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>
 
       <div className="chat-container">
         <h3 className="chat-header">
@@ -142,9 +191,12 @@ function Game() {
           </button>
         </form>
       </div>
-      {error && <p style={{color: "red"}}>{error}</p>}
+      </div>
     </div>
-  );
+
+    {error && <p className="error-msg">{error}</p>}
+  </div>
+);
 }
 
 export default Game;
