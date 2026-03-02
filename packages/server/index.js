@@ -50,6 +50,12 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
     });
 
+    socket.on('sendChatMessage', (data) => {
+        const { room, sender, text } = data;
+        
+        socket.to(room).emit('receiveChatMessage', { sender, text });
+    });
+
     socket.on('disconnect', () => {
         for (const [userId, socketId] of userSockets.entries()) {
             if (socketId === socket.id) {
