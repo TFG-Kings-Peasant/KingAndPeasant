@@ -97,5 +97,6 @@ export const gameService = {
     createGame,
     getGameStateById,
     exampleAction,
-    getGameStateDTO
+    getGameStateDTO,
+    shuffleArray
 };
