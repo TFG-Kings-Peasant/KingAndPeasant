@@ -1,7 +1,6 @@
 import { prisma } from '../../config/db.js';
 
 const getAllLobbies = async () => {
-    // Aquí usas Prisma para buscar en la BD
     return await prisma.lobby.findMany();
 };
 
@@ -12,8 +11,6 @@ const getLobbyById = async (id) => {
 };
 
 const createLobby = async (data) => {
-    // Aquí podrías añadir validaciones de negocio antes de guardar
-    // Por ejemplo: verificar si el rey ya existe
     return await prisma.lobby.create({
         data: {
             name: data.name,
@@ -34,6 +31,11 @@ const joinLobby = async ({ lobbyId, player2Id }) => {
     if (lobby.player2Id) {
         throw new Error('El lobby ya está lleno');
     }
+
+    if (lobby.player1Id === player2Id || lobby.player2Id === player2Id) {
+        throw new Error("Ya formas parte de esta sala.");
+    }
+
 
     return await prisma.lobby.update({
         where: { id: lobbyId },

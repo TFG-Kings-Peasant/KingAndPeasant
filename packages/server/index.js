@@ -5,10 +5,10 @@ import { connectRedis, redisClient } from './config/redis.js';
 import lobbyRoutes from './src/routes/LobbyRoutes.js';
 import userRoutes from './src/routes/UserRoutes.js';
 import friendshipRoutes from './src/routes/FriendshipRoutes.js';
-import { authenticateToken } from './middleware.js';
 import gameRoutes from './src/routes/GameRoutes.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
+import { registerLobbyHandlers } from './src/sockets/LobbySocket.js';
 
 const app = express();
 const server = createServer(app);
@@ -37,14 +37,17 @@ app.use('/api/friendship', friendshipRoutes);
 
 app.use('/api/game', gameRoutes);
 
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     socket.on('register', (userId) => {
         userSockets.set(userId, socket.id);
+        socket.userId = userId;
         console.log(`User ${userId} registered with socket ID: ${socket.id}`);
     });
-
+    registerLobbyHandlers(io, socket, userSockets);
+    
     socket.on('joinGame', (roomName) => {
         socket.join(roomName);
         console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
@@ -63,6 +66,7 @@ io.on('connection', (socket) => {
                 break;
             }
         }
+        
         console.log('A user disconnected:', socket.id);
     });
 });

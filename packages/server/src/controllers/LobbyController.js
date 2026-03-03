@@ -58,6 +58,18 @@ const joinLobby = async (req, res) => {
         }
 
         const updatedLobby = await lobbyService.joinLobby({ lobbyId, player2Id });
+
+        const io = req.app.get('io');
+        const userSockets = req.app.get('userSockets');
+        const socketId = userSockets.get(player2Id);
+
+        if (socketId) {
+            const socket = io.sockets.sockets.get(socketId);
+            if (socket) {
+                socket.join(`lobby${lobbyId}`);
+                io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
+            }
+        }
         res.status(200).json(updatedLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -75,6 +87,9 @@ const leaveLobby = async (req, res) => {
         }
 
         const updatedLobby = await lobbyService.leaveLobby({ lobbyId, playerId });
+
+        const io = req.app.get('io');
+        io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
         res.status(200).json(updatedLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -91,8 +106,10 @@ const setPlayerReady = async (req, res) => {
         if (!lobbyId || !playerId || isReady === undefined) {
             return res.status(400).json({ message: "Faltan datos requeridos" });
         }
-
         const updatedLobby = await lobbyService.setPlayerReady({ lobbyId, playerId, isReady });
+
+        const io = req.app.get('io');
+        io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
         res.status(200).json(updatedLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
