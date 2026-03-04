@@ -3,23 +3,25 @@ import { lobbyService } from '../services/LobbyService.js';
 
 const pendingLeaves = new Map();
 
-export const registerLobbyHandlers = (io, socket, userSockets) => {
+export const lobbySocket = (io, socket) => {
     
     socket.on('joinLobby', (roomName) => {
         const userId = socket.userId;
 
         if (userId && pendingLeaves.has(userId)) {
+
             clearTimeout(pendingLeaves.get(userId));
             pendingLeaves.delete(userId);
+
             console.log(`Salida cancelada para el usuario ${userId}`);
         }
 
         socket.join(roomName);
-        console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
+        io.to(roomName).emit('lobbyUpdated');
+
     });
 
     socket.on('leaveLobby', async (userId, lobbyId) => {
-        console.log(`El nootas sa salio de llobby enove`);
         AuxLeaveLobby(userId, lobbyId, socket, io);
     });
 
@@ -39,7 +41,6 @@ export const registerLobbyHandlers = (io, socket, userSockets) => {
 };
 
 const AuxLeaveLobby = async (userId, lobbyId, socket, io) => {
-    // Lo sacamos de la sala de socket para que no reciba más mensajes
         socket.leave(`lobby${lobbyId}`);
 
         const timeoutId = setTimeout(async () => {
@@ -50,10 +51,9 @@ const AuxLeaveLobby = async (userId, lobbyId, socket, io) => {
             } catch (error) {
                 console.error("Error al procesar salida del lobby:", error);
             } finally {
-                // Limpiamos el mapa
                 pendingLeaves.delete(userId);
             }
-        }, 3000); // 3 segundos de margen
+        }, 3000);
 
         pendingLeaves.set(userId, timeoutId);
 }

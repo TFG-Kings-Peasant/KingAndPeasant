@@ -38,7 +38,6 @@ function LobbyRoom() {
             socket.off('lobbyUpdated');
             socket.off('gameStarted');
             
-            // 3. Quitar el evento del navegador
             window.removeEventListener('beforeunload', handleUnload);
         };
     }, [socket, id, user?.id]);
@@ -98,7 +97,7 @@ function LobbyRoom() {
     }
   };
 
-    const handleStartGame = async () => {
+  const handleStartGame = async () => {
     if (!lobby) return;
     if (!user) return;
 

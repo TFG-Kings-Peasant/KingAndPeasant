@@ -6,19 +6,8 @@ const createGame = async (req, res) => {
         const { lobbyId, player1Id, player2Id } = req.body;
         const game = await gameService.createGame(lobbyId, player1Id, player2Id);
 
-        const io = req.app.get('io'); 
-        const userSockets = req.app.get('userSockets');
-        const socketId = userSockets.get(player2Id);
-
-        if (socketId) {
-            const socket = io.sockets.sockets.get(socketId);
-            if (socket) {
-                console.log(`Sa metio al jugador en la partida segurisimo vamos`);
-                
-                socket.join(`game${lobbyId}`);
-                io.to(`lobby${lobbyId}`).emit('gameStarted', { gameId: lobbyId });
-            }
-        }
+        const io = req.app.get('io');
+        io.to(`lobby${lobbyId}`).emit('gameStarted', { gameId: lobbyId }); 
         res.status(201).json(game);
     }catch (error) {
         res.status(500).json({ error: error.message });

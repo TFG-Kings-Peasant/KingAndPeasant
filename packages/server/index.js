@@ -8,7 +8,8 @@ import friendshipRoutes from './src/routes/FriendshipRoutes.js';
 import gameRoutes from './src/routes/GameRoutes.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-import { registerLobbyHandlers } from './src/sockets/LobbySocket.js';
+import { lobbySocket } from './src/sockets/LobbySocket.js';
+import { gameSocket } from './src/sockets/GameSocket.js';
 
 const app = express();
 const server = createServer(app);
@@ -46,18 +47,9 @@ io.on('connection', (socket) => {
         socket.userId = userId;
         console.log(`User ${userId} registered with socket ID: ${socket.id}`);
     });
-    registerLobbyHandlers(io, socket, userSockets);
-    
-    socket.on('joinGame', (roomName) => {
-        socket.join(roomName);
-        console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
-    });
 
-    socket.on('sendChatMessage', (data) => {
-        const { room, sender, text } = data;
-        
-        socket.to(room).emit('receiveChatMessage', { sender, text });
-    });
+    lobbySocket(io, socket);
+    gameSocket(io, socket);
 
     socket.on('disconnect', () => {
         for (const [userId, socketId] of userSockets.entries()) {
