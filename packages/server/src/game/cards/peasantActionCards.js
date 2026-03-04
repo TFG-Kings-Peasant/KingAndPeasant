@@ -56,7 +56,6 @@ export const peasantActionCards = {
         return gameState;
     },
     14: (gameState, targetData) => {
-        const { rebel1Uid, rebel2Uid } = targetData;
         for (let i = 0; i < 2; i++) {
             if (gameState.deck.length > 0){
                 const card = gameState.deck.shift();
@@ -70,7 +69,6 @@ export const peasantActionCards = {
         return gameState;
     },
     15: (gameState, targetData) => {
-        const { rebel1Uid, rebel2Uid } = targetData;
         for (let i = 0; i < 2; i++) {
             if (gameState.deck.length > 0){
                 const card = gameState.deck.shift();

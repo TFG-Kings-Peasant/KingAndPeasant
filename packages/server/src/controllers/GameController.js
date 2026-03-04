@@ -23,7 +23,7 @@ const getGameStatus = async (req, res) => {
 
         const gameState = userId === dtoKing.players.king.id ? dtoKing : userId === dtoPeasant.players.peasant.id ? dtoPeasant : null;
 
-        res.status(201).json(gameState);
+        res.status(200).json(gameState);
         
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -59,7 +59,7 @@ function sendGameStateUpdate (dtoKing, dtoPeasant) {
 const resolveAction = async (req, res) => {
     try {
         const lobbyId = req.params.id;
-        const { cardUid, targetData } = req.body;
+        const { targetData } = req.body;
         const userId  = Number(req.user.idUser);
         const {dtoKing, dtoPeasant} = await gameService.resolvePendingAction(lobbyId, userId, targetData);
     

@@ -2,14 +2,7 @@ import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { pendingActionResolvers } from '../game/cards/peasantPendingActions.js';
-
-function shuffleArray(array) {
-    for (let i = array.length -1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i +1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+import { shuffleArray } from '../utils/helpers.js';
 
 const createGame = async ( lobbyId, player1Id, player2Id) => {
     const catalog = await prisma.card.findMany();
