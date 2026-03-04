@@ -141,3 +141,59 @@ h3 {
   letter-spacing: 1.5px;
   opacity: 0.8;
 }
+
+/* --- ESTILOS PARA EL MODAL DE LA CARTA AMPLIADA --- */
+
+.card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.card.clickable:hover {
+  transform: scale(1.05); /* Pequeño efecto al pasar el ratón antes de clicar */
+}
+
+/* El fondo oscuro que bloquea la pantalla */
+.card-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75); /* Oscurece la partida */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Se asegura de estar por encima de todo */
+  cursor: pointer; /* Indica que clicar fuera cierra el modal */
+}
+
+/* El contenedor de la carta ampliada */
+.card-modal-content {
+  background: transparent;
+  padding: 10px;
+  cursor: default; /* Quita el cursor pointer al pasar sobre la carta en sí */
+  animation: popIn 0.2s ease-out forwards;
+}
+
+/* La imagen de la carta en grande */
+.card.zoomed {
+  width: 300px; /* Ajusta estos tamaños según la proporción de tus cartas */
+  height: 420px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px; /* Dependiendo de si tus png ya tienen el borde o no */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Pequeña animación para que no aparezca de golpe */
+@keyframes popIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
