@@ -1,4 +1,4 @@
-import {gameService} from "../../services/GameService.js";
+import { shuffleArray } from "../../utils/helpers.js";
 
 export const peasantActionCards = {
     3: (gameState, targetData) => {
@@ -45,30 +45,41 @@ export const peasantActionCards = {
         });
         return gameState;
     },
-    12: (gameState, targetData) => {
+    12: (gameState) => {
         const cardsTown = gameState.players.peasant.town.splice(0, gameState.players.peasant.town.length); 
         cardsTown.forEach(card => card.isRevealed = false);
         gameState.players.peasant.hand.push(...cardsTown);
         const cardsDiscard = gameState.discardPile.splice(0, gameState.discardPile.length);
         cardsDiscard.forEach(card => card.isRevealed = false);
         gameState.deck.push(...cardsDiscard);
-        gameService.shuffleArray(gameState.deck);
+        shuffleArray(gameState.deck);
         return gameState;
     },
     14: (gameState, targetData) => {
-        for (let i = 0; i < 2; i++) {
-            if (gameState.deck.length > 0){
-                const card = gameState.deck.shift();
-                gameState.players.peasant.hand.push(card);
-            }
+        const discardUids = targetData?.discardUids || [];
+        
+        if (discardUids.length > 2) {
+            throw new Error('Solo puedes recuperar hasta 2 cartas del descarte');
         }
+        discardUids.forEach(uid => {
+            const index = gameState.discardPile.findIndex(c => c.uid === uid);
+            if (index === -1) {
+                throw new Error(`La carta con UID ${uid} no está en el descarte`);
+            }
+            
+            const [recoveredCard] = gameState.discardPile.splice(index, 1);
+            
+            recoveredCard.isRevealed = false; 
+            
+            gameState.players.peasant.hand.push(recoveredCard);
+        });
         gameState.pendingAction = {
             player: 'peasant',
-            type: 'RALLY',
+            type: 'REASSEMBLE' 
         };
         return gameState;
     },
-    15: (gameState, targetData) => {
+    15: (gameState) => {
         for (let i = 0; i < 2; i++) {
             if (gameState.deck.length > 0){
                 const card = gameState.deck.shift();

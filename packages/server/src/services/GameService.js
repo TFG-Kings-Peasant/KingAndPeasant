@@ -1,8 +1,10 @@
 import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
-import { pendingActionResolvers } from '../game/cards/peasantPendingActions.js';
+import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
 import { shuffleArray } from '../utils/helpers.js';
+import { kingActionCards } from '../game/cards/kingActionCards.js';
+import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 
 const createGame = async ( lobbyId, player1Id, player2Id) => {
     const catalog = await prisma.card.findMany();
@@ -118,13 +120,16 @@ const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState
     if (userRol === "peasant") {
         const action = peasantActionCards[playedCard.templateId];
         if (!action) {
-        throw new Error('Carta de acción no existe');
+            throw new Error('Carta de acción no existe');
         }
         //Actualizar estado del juego
         gameState = action(gameState, targetData);
     } else {
-        //Aquí se implementarían las cartas de acción del rey
-        throw new Error('Las cartas de acción del rey aún no están implementadas');
+        const action = kingActionCards[playedCard.templateId];
+        if (!action) {
+            throw new Error('Carta de acción no existe');
+        }
+        gameState = action(gameState, targetData)
     }   
     //Guardar estado actualizado
     return await saveAndFormatGameState(lobbyId, gameState);
@@ -143,13 +148,17 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
         if (userRol === 'peasant') {
-            const resolver = pendingActionResolvers[pendingAction.type];
+            const resolver = peasantPendingActions[pendingAction.type];
             if (!resolver) {
                 throw new Error(`Resolutor no encontrado para la acción: ${pendingAction.type}`);
             }
             gameState = resolver(gameState, targetData);
         } else {
-            throw new Error('Acciones pendientes del rey aún no implementadas');
+            const resolver = kingPendingActions[pendingAction.type];
+            if (!resolver) {
+                throw new Error(`Resolutor no encontrado para la acción: ${pendingAction.type}`)
+            }
+            gameState = resolver(gameState, targetData); 
         }    
     } else {
         throw new Error('No hay acciones pendientes para este jugador');
