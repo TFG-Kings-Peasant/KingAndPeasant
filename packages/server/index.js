@@ -5,10 +5,11 @@ import { connectRedis, redisClient } from './config/redis.js';
 import lobbyRoutes from './src/routes/LobbyRoutes.js';
 import userRoutes from './src/routes/UserRoutes.js';
 import friendshipRoutes from './src/routes/FriendshipRoutes.js';
-import { authenticateToken } from './middleware.js';
 import gameRoutes from './src/routes/GameRoutes.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
+import { lobbySocket } from './src/sockets/LobbySocket.js';
+import { gameSocket } from './src/sockets/GameSocket.js';
 
 const app = express();
 const server = createServer(app);
@@ -37,24 +38,18 @@ app.use('/api/friendship', friendshipRoutes);
 
 app.use('/api/game', gameRoutes);
 
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     socket.on('register', (userId) => {
         userSockets.set(userId, socket.id);
+        socket.userId = userId;
         console.log(`User ${userId} registered with socket ID: ${socket.id}`);
     });
 
-    socket.on('joinGame', (roomName) => {
-        socket.join(roomName);
-        console.log(`Socket ${socket.id} se unió a la sala: ${roomName}`);
-    });
-
-    socket.on('sendChatMessage', (data) => {
-        const { room, sender, text } = data;
-        
-        socket.to(room).emit('receiveChatMessage', { sender, text });
-    });
+    lobbySocket(io, socket);
+    gameSocket(io, socket);
 
     socket.on('disconnect', () => {
         for (const [userId, socketId] of userSockets.entries()) {
@@ -63,6 +58,7 @@ io.on('connection', (socket) => {
                 break;
             }
         }
+        
         console.log('A user disconnected:', socket.id);
     });
 });

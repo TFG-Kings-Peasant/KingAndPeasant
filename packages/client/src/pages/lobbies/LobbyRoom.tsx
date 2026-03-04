@@ -5,6 +5,7 @@ import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "./c
 import { startGame } from "../game/components/GameService";
 import { useNavigate, useParams } from "react-router";
 import { useUser } from "../../hooks/useUser";
+import { useAuth } from "../../hooks/useAuth";
 
 function LobbyRoom() {
   const { id } = useParams();
@@ -13,22 +14,33 @@ function LobbyRoom() {
   const [error, setError] = useState("");
 
   const { user, isLogin} = useUser();
+  const { socket } = useAuth();
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-      // 1. Carga inicial inmediata (con pantalla de carga)
-      fetchLobby(true);
+    useEffect(() => {
+        fetchLobby(true);
+    }, [id, user]);
 
-      // 2. Configurar el intervalo (Polling) cada 2 segundos
-      // Esto pedirá los datos al servidor constantemente
-      const intervalId = setInterval(() => {
-          fetchLobby(false); // false = carga silenciosa (sin spinner)
-      }, 2000);
+    useEffect(() => {
+        if (!socket || !id || !user) return;
 
-      // 3. Limpieza: Si te vas de la página, dejamos de pedir datos
-      return () => clearInterval(intervalId);
-  }, [id, user]); // Refresca también si cambia el usuario (por ejemplo, al hacer login)
+        socket.emit('joinLobby', `lobby${id}`);
+
+        socket.on('lobbyUpdated', () => fetchLobby(false));
+        socket.on('gameStarted', () => {navigate(`/game/${id}`)});
+
+        const handleUnload = () => socket.emit('leaveLobby', user.id, id);
+        window.addEventListener('beforeunload', handleUnload);
+
+        return () => {
+            socket.emit('leaveLobby', user.id, id);
+            socket.off('lobbyUpdated');
+            socket.off('gameStarted');
+            
+            window.removeEventListener('beforeunload', handleUnload);
+        };
+    }, [socket, id, user?.id]);
 
   const fetchLobby = async (showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -40,6 +52,10 @@ function LobbyRoom() {
         if (!data) {
             setError("La sala ya no existe");
         }
+
+        if (data.status === 'ONGOING') {
+            navigate(`/game/${id}`);
+        }
     } catch (err) {
         console.error(err);
         if (showLoading) setError("Error al cargar el lobby");
@@ -49,26 +65,31 @@ function LobbyRoom() {
   };
 
   const handleToggleReady = async () => {
-      if (!lobby) return;
-      if (!isLogin) return;
-      try {
+    if (!lobby) return;
+    if (!isLogin) return;
+    if (!socket) {
+        console.log("Socket no disponible aún...");
+        return;
+    }
+    try {
         const isPlayer1 = lobby.player1Id === Number(user?.id);
         const currentReadyStatus = isPlayer1 ? lobby.player1Ready : lobby.player2Ready;
-          await setPlayerReady(lobby.id, user?.id || null,!currentReadyStatus); // Cambiamos el estado del jugador actual
-          fetchLobby(); // Refrescamos manual para ver el cambio al instante
-      } catch (err) {
-          setError("Error al cambiar estado");
-          console.error(err);
-      }
+        await setPlayerReady(lobby.id, user?.id || null,!currentReadyStatus);
+        fetchLobby();
+    } catch (err) {
+        setError("Error al cambiar estado");
+        console.error(err);
+    }
   };
 
 
   const handleLeave = async () => {
     if (!lobby) return;
+    if (!user) return;
+
     if (window.confirm("¿Seguro que quieres salir?")) {
         try {
-            await leaveLobby(lobby.id, user?.id || ""); // Pasamos el ID del usuario actual
-            navigate("/lobbyList"); // Volver al inicio
+            navigate("/lobbyList");
         } catch (err) {
             setError("No se pudo salir del lobby");
             console.error(err);
@@ -76,13 +97,13 @@ function LobbyRoom() {
     }
   };
 
-    const handleStartGame = async () => {
+  const handleStartGame = async () => {
     if (!lobby) return;
+    if (!user) return;
+
     if (window.confirm("¿Seguro que quieres comenzar la partida?")) {
         try {
-            await startGame(lobby.id, lobby.player1Id, lobby.player2Id!); // Iniciar la partida con ambos jugadores
-            await leaveLobby(lobby.id, user?.id || ""); // Pasamos el ID del usuario actual
-            navigate("/game/" + lobby.id); // Ir a la pantalla de juego
+            await startGame(lobby.id, lobby.player1Id, lobby.player2Id!);
         } catch (err) {
             setError("No se pudo comenzar la partida");
             console.error(err);
