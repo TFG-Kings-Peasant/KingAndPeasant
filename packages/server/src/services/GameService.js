@@ -1,5 +1,7 @@
 import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
+import { peasantActionCards } from './cards/peasantActionCards.js';
+import { pendingActionResolvers } from '../game/cards/peasantPendingActions.js';
 
 function shuffleArray(array) {
     for (let i = array.length -1; i > 0; i--) {
@@ -31,6 +33,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         deck: deck,
         discardPile: [],
         players:{
+            //Si queremos asignar los roles random, habria que cambiar esto
             king: {
                 id: player1Id,
                 hand: handKing,
@@ -41,62 +44,122 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
                 hand:handPeasant,
                 town: []
             }
-        }
+        },
+        pendingAction: null
     }
-    await redisClient.set(`game:${lobbyId}`, JSON.stringify(initialState))
-    return initialState;
+    return await saveAndFormatGameState(lobbyId, initialState);
 };
 
 const getGameStateById = async (id) => {
     const gameState = await redisClient.get(`game:${id}`);
+    if (!gameState) {
+        throw new Error('La partida no existe o ha expirado');
+    }
     return JSON.parse(gameState);
 }
 
-const exampleAction = async (id, playerId) => {
-    var gameState = await getGameStateById(id);
-
-    if(gameState.turn == "peasant" && playerId==gameState.players.peasant.id){
-        gameState.turn = "king"
-        console.log("Cambio a king: "+ gameState.turn)
-    }else if(gameState.turn == "king" && playerId==gameState.players.king.id){
-        gameState.turn = "peasant"
-        console.log("Cambio a peasant: " + gameState.turn)
-    }else{
-        throw new Error('No es el turno del jugador');
+const saveAndFormatGameState = async (lobbyId, gameState) => {
+    const result = await redisClient.set(`game:${lobbyId}`, JSON.stringify(gameState));
+    if (result !== 'OK') {
+        throw new Error('Error al guardar el estado del juego');
     }
-
-    return await redisClient.set(`game:${id}`, JSON.stringify(gameState))
+    return getGameStateDTO(gameState);
 }
 
-const getGameStateDTO = async (gameState, userId) => {
-    const dto = JSON.parse(JSON.stringify(gameState));
+//Obtiene el GameState y devuelve los DTOs
+const getGameStateDTO = (gameState) => {
+    const dtoKing = JSON.parse(JSON.stringify(gameState));
+    dtoKing.deckCount = dtoKing.deck.length;
+    delete dtoKing.deck;
+    const dtoPeasant = JSON.parse(JSON.stringify(gameState));
+    dtoPeasant.deckCount = dtoPeasant.deck.length;
+    delete dtoPeasant.deck;
 
-    dto.deckCount = dto.deck.length;
-    delete dto.deck;
+    dtoKing.players.peasant.hand = dtoKing.players.peasant.hand.map(card => ({
+        uid: card.uid
+    }));
+    dtoKing.players.peasant.town = dtoKing.players.peasant.town.map(card => 
+        card.isRevealed ? card : {uid: card.uid}
+    );
 
-    const isKing = userId === dto.players.king.id;
-    const isPeasant = userId === dto.players.peasant.id;
-
-    if (isKing) {
-        dto.players.peasant.hand = dto.players.peasant.hand.map(card => ({
-            uid: card.uid
-        }));
-        dto.players.peasant.town = dto.players.peasant.town.map(card => 
-            card.isRevealed ? card : {uid: card.uid}
-        );
-    } else if (isPeasant) {
-        dto.players.king.hand = dto.players.king.hand.map(card => 
-            card.isRevealed ? card : {uid: card.uid}
-        );
-    }
-
-    return dto;
+    dtoPeasant.players.king.hand = dtoPeasant.players.king.hand.map(card => ({
+        uid: card.uid
+    }));
+    dtoPeasant.players.king.town = dtoPeasant.players.king.town.map(card => 
+        card.isRevealed ? card : {uid: card.uid}
+    );
+    
+    return {dtoKing, dtoPeasant};
 };
+
+
+
+const playActionCard = async (lobbyId, userId, cardUid, targetData) => {
+    //Estado del juego y rol del usuario
+    let gameState = await getGameStateById(lobbyId);
+    const userRol = gameState.players.king.id === userId ? "king" : "peasant";
+    //Comprobacion de turno
+    if (gameState.turn !== userRol) {
+        throw new Error('No es el turno del jugador');
+    }
+    //Comprobacion de carta en mano
+    const cardIndex = gameState.players[userRol].hand.findIndex(card => card.uid === cardUid);
+    if (cardIndex === -1) {
+        throw new Error('Carta no encontrada en la mano del jugador');
+    }
+    //Mover carta a pila de descarte
+    const [playedCard] = gameState.players[userRol].hand.splice(cardIndex, 1);
+    playedCard.isRevealed = true;
+    gameState.discardPile.push(playedCard);
+    //Ejecutar efecto de carta
+    if (userRol === "peasant") {
+        const action = peasantActionCards[playedCard.templateId];
+        if (!action) {
+        throw new Error('Carta de acción no existe');
+        }
+        //Actualizar estado del juego
+        gameState = action(gameState, targetData);
+    } else {
+        //Aquí se implementarían las cartas de acción del rey
+        throw new Error('Las cartas de acción del rey aún no están implementadas');
+    }   
+    //Guardar estado actualizado
+    return await saveAndFormatGameState(lobbyId, gameState);
+}
+
+const resolvePendingAction = async (lobbyId, userId, targetData) => {
+    let gameState = await getGameStateById(lobbyId);
+    /* Formato del pendingAction
+    gameState.pendingAction = {
+        player: 'peasant',
+        type: 'RALLY',
+    };
+    */
+    const userRol = gameState.players.king.id === userId ? "king" : "peasant";
+    const pendingAction = gameState.pendingAction;
+    //Comprobacion de acción pendiente para el jugador
+    if (pendingAction && pendingAction.player === userRol) {
+        if (userRol === 'peasant') {
+            const resolver = pendingActionResolvers[pendingAction.type];
+            if (!resolver) {
+                throw new Error(`Resolutor no encontrado para la acción: ${pendingAction.type}`);
+            }
+            gameState = resolver(gameState, targetData);
+        } else {
+            throw new Error('Acciones pendientes del rey aún no implementadas');
+        }    
+    } else {
+        throw new Error('No hay acciones pendientes para este jugador');
+    }
+    gameState.pendingAction = null;
+    return await saveAndFormatGameState(lobbyId, gameState);
+}
 
 export const gameService = {
     createGame,
     getGameStateById,
-    exampleAction,
+    playActionCard,
     getGameStateDTO,
-    shuffleArray
+    shuffleArray,
+    resolvePendingAction
 };

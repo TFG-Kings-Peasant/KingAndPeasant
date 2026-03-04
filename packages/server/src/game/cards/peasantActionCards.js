@@ -45,7 +45,7 @@ export const peasantActionCards = {
         });
         return gameState;
     },
-    12: (gameState) => {
+    12: (gameState, targetData) => {
         const cardsTown = gameState.players.peasant.town.splice(0, gameState.players.peasant.town.length); 
         cardsTown.forEach(card => card.isRevealed = false);
         gameState.players.peasant.hand.push(...cardsTown);
@@ -56,6 +56,20 @@ export const peasantActionCards = {
         return gameState;
     },
     14: (gameState, targetData) => {
+        const { rebel1Uid, rebel2Uid } = targetData;
+        for (let i = 0; i < 2; i++) {
+            if (gameState.deck.length > 0){
+                const card = gameState.deck.shift();
+                gameState.players.peasant.hand.push(card);
+            }
+        }
+        gameState.pendingAction = {
+            player: 'peasant',
+            type: 'RALLY',
+        };
+        return gameState;
+    },
+    15: (gameState, targetData) => {
         const { rebel1Uid, rebel2Uid } = targetData;
         for (let i = 0; i < 2; i++) {
             if (gameState.deck.length > 0){
