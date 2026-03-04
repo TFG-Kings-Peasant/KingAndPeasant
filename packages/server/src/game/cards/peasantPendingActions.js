@@ -1,6 +1,6 @@
 export const peasantPendingActions = {
     'RALLY': (gameState, targetData) => {
-        const { selectedCardsUid = [] } = targetData;
+        const { selectedCardsUid = [] } = targetData || {};
         if (selectedCardsUid.length > 2) {
             throw new Error('No se pueden seleccionar más de 2 cartas');
         }
