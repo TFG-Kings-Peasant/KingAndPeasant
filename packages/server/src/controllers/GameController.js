@@ -3,65 +3,55 @@ import { io, userSockets } from '../../index.js';
 
 const createGame = async (req, res) => {
     try {
-        const { lobbyId, player1Id, player2Id } = req.body;
-        const game = await gameService.createGame(lobbyId, player1Id, player2Id);
-        res.status(201).json(game);
+        const lobbyId = req.params.id;
+        const { player1Id, player2Id } = req.body;
+        const {dtoKing, dtoPeasant} = await gameService.createGame(lobbyId, player1Id, player2Id);
+        res.status(201).json(dtoKing, dtoPeasant);
     }catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
 
-const getGameStateById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const gameState = await gameService.getGameStateById(id);
-        res.status(200).json(gameState);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-
-const exampleAction = async (req, res) => {
-    try{
-        const { id } = req.params;
-        const { playerId } = req.body;
-
-        if (!id || !playerId) {
-            return res.status(400).json({ message: "Faltan datos requeridos" });
-        }
-
-        const gameState = await gameService.exampleAction(id, playerId)
-
-        io.to(`game_${id}`).emit('action')
-
-        res.status(201).json(gameState);
-    }catch(error){
-        res.status(500).json({ error: error.message});
-    }
-}
-
 const getGameStatus = async (req, res) => {
     try {
-        const { lobbyId } = req.params;
+        const lobbyId = req.params.id;
         const userId = Number(req.user.idUser);
 
-        const gameState = getGameStateById(lobbyId); 
-        const gameParsed = JSON.parse(gameState);
+        const {dtoKing, dtoPeasant} = await gameService.getGameStateDTO(lobbyId);
 
-        if (!gameParsed) return res.status(404).send("Juego no encontrado");
+        if (!dtoKing || !dtoPeasant) return res.status(404).send("Juego no encontrado");
 
-        const safeState = gameService.getGameStateDTO(gameParsed, userId);
+        const gameState= userId === dtoKing.players.king.id ? dtoKing : userId === dtoPeasant.players.peasant.id ? dtoPeasant : null;
 
-        res.json(safeState);
+        res.status(201).json(gameState);
         
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+const playCard = async (req, res) => {
+    try {
+        const lobbyId = req.params.id;
+        const { cardUid, targetData } = req.body;
+        const userId  = Number(req.user.idUser);
+
+        const {dtoKing, dtoPeasant} = await gameService.playCard(lobbyId, cardUid, targetData, userId);
+    
+        if (userSockets[dtoKing.players.king.id]) {
+            io.to(userSockets[dtoKing.players.king.id]).emit('gameState', dtoKing);
+        }
+        if (userSockets[dtoPeasant.players.peasant.id]) {
+            io.to(userSockets[dtoPeasant.players.peasant.id]).emit('gameState', dtoPeasant);
+        }
+        res.status(200).json({ message: "Carta jugada correctamente" });
+    } catch (error) {
+        console.error("Error al jugar la carta:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const gameController = {
     createGame,
-    getGameStateById,
-    exampleAction,
     getGameStatus
 }

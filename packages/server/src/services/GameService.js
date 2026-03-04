@@ -1,6 +1,6 @@
 import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
-import { peasantActionCards } from './cards/peasantActionCards.js';
+import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { pendingActionResolvers } from '../game/cards/peasantPendingActions.js';
 
 function shuffleArray(array) {
@@ -19,6 +19,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
             deck.push({
                 uid: `game_${lobbyId}_card_${card.id}_copy_${i}`,
                 templateId: card.id,
+                type: card.type,
                 isRevealed: false
             })
         }
@@ -63,11 +64,16 @@ const saveAndFormatGameState = async (lobbyId, gameState) => {
     if (result !== 'OK') {
         throw new Error('Error al guardar el estado del juego');
     }
-    return getGameStateDTO(gameState);
+    return transformGameStateDTO(gameState);
+}
+
+const getGameStateDTO = async (lobbyId) => {
+    const gameState = await getGameStateById(lobbyId);
+    return transformGameStateDTO(gameState);
 }
 
 //Obtiene el GameState y devuelve los DTOs
-const getGameStateDTO = (gameState) => {
+const transformGameStateDTO = (gameState) => {
     const dtoKing = JSON.parse(JSON.stringify(gameState));
     dtoKing.deckCount = dtoKing.deck.length;
     delete dtoKing.deck;
@@ -92,23 +98,27 @@ const getGameStateDTO = (gameState) => {
     return {dtoKing, dtoPeasant};
 };
 
-
-
-const playActionCard = async (lobbyId, userId, cardUid, targetData) => {
-    //Estado del juego y rol del usuario
+const playCard = async (lobbyId, cardUid, targetData, userId) => {
     let gameState = await getGameStateById(lobbyId);
     const userRol = gameState.players.king.id === userId ? "king" : "peasant";
-    //Comprobacion de turno
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
-    //Comprobacion de carta en mano
     const cardIndex = gameState.players[userRol].hand.findIndex(card => card.uid === cardUid);
     if (cardIndex === -1) {
         throw new Error('Carta no encontrada en la mano del jugador');
     }
-    //Mover carta a pila de descarte
     const [playedCard] = gameState.players[userRol].hand.splice(cardIndex, 1);
+    if (playedCard.type === 'Action') {
+        return await playActionCard(lobbyId, targetData, playedCard, userRol, gameState);
+    }
+    else {
+        throw new Error('Solo se pueden jugar cartas de acción por ahora');
+    }
+}
+
+
+const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState) => {
     playedCard.isRevealed = true;
     gameState.discardPile.push(playedCard);
     //Ejecutar efecto de carta
@@ -161,5 +171,6 @@ export const gameService = {
     playActionCard,
     getGameStateDTO,
     shuffleArray,
-    resolvePendingAction
+    resolvePendingAction,
+    playCard
 };

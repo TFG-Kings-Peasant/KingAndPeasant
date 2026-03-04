@@ -1,4 +1,4 @@
-import {gameService} from "../../services/GameService";
+import {gameService} from "../../services/GameService.js";
 
 export const peasantActionCards = {
     3: (gameState, targetData) => {
