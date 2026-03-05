@@ -15,7 +15,7 @@ const createGame = async (req, res) => {
 const getGameStatus = async (req, res) => {
     try {
         const lobbyId = req.params.id;
-        const userId = Number(req.user.idUser);
+        const userId = Number(req.user.id);
 
         const {dtoKing, dtoPeasant} = await gameService.getGameStateDTO(lobbyId);
 
@@ -34,7 +34,7 @@ const playCard = async (req, res) => {
     try {
         const lobbyId = req.params.id;
         const { cardUid, targetData } = req.body;
-        const userId  = Number(req.user.idUser);
+        const userId  = Number(req.user.id);
 
         const {dtoKing, dtoPeasant} = await gameService.playCard(lobbyId, cardUid, targetData, userId);
     
@@ -60,7 +60,7 @@ const resolveAction = async (req, res) => {
     try {
         const lobbyId = req.params.id;
         const { targetData } = req.body;
-        const userId  = Number(req.user.idUser);
+        const userId  = Number(req.user.id);
         const {dtoKing, dtoPeasant} = await gameService.resolvePendingAction(lobbyId, userId, targetData);
     
         sendGameStateUpdate(dtoKing, dtoPeasant);
