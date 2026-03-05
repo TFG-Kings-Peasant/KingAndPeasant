@@ -3,9 +3,11 @@ import { io, userSockets } from '../../index.js';
 
 const createGame = async (req, res) => {
     try {
-        const lobbyId = req.params.id;
-        const { player1Id, player2Id } = req.body;
+        const { lobbyId, player1Id, player2Id } = req.body;
         const {dtoKing, dtoPeasant} = await gameService.createGame(lobbyId, player1Id, player2Id);
+
+        const io = req.app.get('io');
+        io.to(`lobby${lobbyId}`).emit('gameStarted'); 
         res.status(201).json({dtoKing, dtoPeasant});
     }catch (error) {
         res.status(500).json({ error: error.message });
@@ -14,15 +16,15 @@ const createGame = async (req, res) => {
 
 const getGameStatus = async (req, res) => {
     try {
-        const lobbyId = req.params.id;
-        const userId = Number(req.user.id);
+        const gameId = req.params.id;
+        const userId =req.user.id;
 
-        const {dtoKing, dtoPeasant} = await gameService.getGameStateDTO(lobbyId);
+        const {dtoKing, dtoPeasant} = await gameService.getGameStateDTO(gameId);
 
         if (!dtoKing || !dtoPeasant) return res.status(404).send("Juego no encontrado");
 
         const gameState = userId === dtoKing.players.king.id ? dtoKing : userId === dtoPeasant.players.peasant.id ? dtoPeasant : null;
-
+        console.log("📊 Enviando estado del juego a usuario", userId, ":", gameState);
         res.status(200).json(gameState);
         
     } catch (error) {
