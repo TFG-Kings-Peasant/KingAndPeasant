@@ -1,11 +1,12 @@
 import Router from "express";
 const router = Router();
 import { gameController } from '../controllers/GameController.js';
+import { authenticateToken } from "../../middleware.js";
 
-router.post('/start', gameController.createGame);
-router.get('/:id', gameController.getGameStatus);
-router.post('/:id/playCard', gameController.playCard);
-router.post('/:id/resolveAction', gameController.resolveAction);
+router.post('/start',authenticateToken, gameController.createGame);
+router.get('/:id', authenticateToken, gameController.getGameStatus);
+router.post('/:id/playCard', authenticateToken, gameController.playCard);
+router.post('/:id/resolveAction', authenticateToken, gameController.resolveAction);
 
 
 export default router;

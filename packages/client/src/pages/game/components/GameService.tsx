@@ -1,3 +1,5 @@
+import { useAuth } from "../../../hooks/useAuth";
+
 export interface CardState {
     uid: string;
     templateId?: number;
@@ -26,10 +28,13 @@ export interface GameState {
 
 const API_URL = import.meta.env.VITE_API_URL+"/api/game";
 
-export const startGame = async (lobbyId: number, player1Id: number, player2Id: number) => {
+export const startGame = async (lobbyId: number, player1Id: number, player2Id: number, token: string) => {
     const response = await fetch(API_URL + "/start", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({ 
             lobbyId,
             player1Id, 
@@ -43,8 +48,14 @@ export const startGame = async (lobbyId: number, player1Id: number, player2Id: n
     return await response.json();
 };
 
-export const getGameStateById = async (gameId: number) => {
-    const response = await fetch(API_URL + `/${gameId}`);
+export const getGameStateById = async (gameId: number, token: string) => {
+    const response = await fetch(API_URL + `/${gameId}`, {
+        method: 'GET',
+        headers: { 
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        },
+    });
     if (!response.ok) { 
         const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);

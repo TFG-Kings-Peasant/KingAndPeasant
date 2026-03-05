@@ -4,6 +4,7 @@ import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Game.css";
+import { useUser } from "../../hooks/useUser";
 
 interface ChatMessage {
   sender: string;
@@ -26,7 +27,8 @@ function Game() {
 
   const fetchGameState = async () => {
     try {
-      const data = await getGameStateById(Number(id));
+      if(!id || !user || !user.authToken) return;
+      const data = await getGameStateById(Number(id), user?.authToken);
       setGameState(data);
     } catch (err) {
       console.error(err);
@@ -51,12 +53,12 @@ function Game() {
     };
 
     socket.emit('joinGame', `game_${id}`);
-    socket.on('action', fetchGameState);
+    socket.on('gameState', fetchGameState);
 
     socket.on('receiveChatMessage', handleReceiveMessage);
 
     return () => {
-      socket.off('action', fetchGameState);
+      socket.off('gameState', fetchGameState);
       socket.off('receiveChatMessage', handleReceiveMessage);
     };
 

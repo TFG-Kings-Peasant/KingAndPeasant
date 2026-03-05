@@ -99,11 +99,11 @@ function LobbyRoom() {
 
   const handleStartGame = async () => {
     if (!lobby) return;
-    if (!user) return;
+    if (!user || !user.authToken) return;
 
     if (window.confirm("¿Seguro que quieres comenzar la partida?")) {
         try {
-            await startGame(lobby.id, lobby.player1Id, lobby.player2Id!);
+            await startGame(lobby.id, lobby.player1Id, lobby.player2Id!, user.authToken);
         } catch (err) {
             setError("No se pudo comenzar la partida");
             console.error(err);
