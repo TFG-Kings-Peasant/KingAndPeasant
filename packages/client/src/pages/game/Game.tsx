@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { getGameStateById, getPosibleActions, makeExampleAction, type CardState, type GameState } from "./components/GameService";
+import { getGameStateById, getPosibleActions, playCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Game.css";
-import { useUser } from "../../hooks/useUser";
 
 interface ChatMessage {
   sender: string;
@@ -18,7 +17,7 @@ function Game() {
   const [error, setError] = useState("");
   
   const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
-
+  
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -68,22 +67,7 @@ function Game() {
     fetchGameState();
   }, [id]);
 
-  const handleMakeAction = async () => {
-    try{
-       if(!id || !user || !gameState) return;
-       if((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
-           || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
-       {
-        await makeExampleAction(Number(id), Number(user.id))
-        fetchGameState();
-       }
-    }catch (err) {
-      if (err instanceof Error) {
-                alert(err.message);
-            } else {
-                alert("Ocurrió un error desconocido");
-            }
-  }};
+  
 
   if (loading || !gameState || !user) return <div>Cargando el Tablero...</div>;
 
@@ -91,8 +75,9 @@ function Game() {
   const myPlayer = isKing ? gameState.players.king : gameState.players.peasant;
   const rivalPlayer = isKing ? gameState.players.peasant : gameState.players.king;
 
-  const myRoleName = isKing ? "REY" : "CAMPESINO";
-  const rivalRoleName = isKing ? "CAMPESINO" : "REY";
+  const myRoleName = isKing ? "king" : "peasant";
+  const rivalRoleName = isKing ? "peasant" : "king";
+  const pendingAction = gameState.pendingAction && gameState.pendingAction.player == myRoleName? true: false;
   
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault(); 
@@ -119,6 +104,45 @@ function Game() {
       card.position = position;
     }
     setSelectedCard(card);
+  }
+
+  const handlePlayCard = async () => {
+    if(!id || !user || !user.authToken || !gameState || !selectedCard) return;
+    if(gameState.turn !== myRoleName) {
+      alert("No es tu turno");
+      return;
+    }
+    try {
+      const newState = await playCard(Number(id), selectedCard.uid, {}, user.authToken)
+      setSelectedCard(null);
+      setGameState(newState); //Esto no debería de estar así todavía porque habria que recibir el DTO
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Ocurrió un error desconocido");
+      }
+      setError("Error jugando una carta")
+    }
+  }
+
+  const handleResolvePending = async (targetData: Record<string, unknown>) => {
+    if(!id || !user || !user.authToken || !gameState || !selectedCard) return;
+    if(gameState.turn !== myRoleName) {
+      alert("No es tu turno");
+      return;
+    }
+    try {
+      await resolvePendingAction(Number(id), targetData, user.authToken)
+      
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Ocurrió un error desconocido");
+      }
+      setError("Error jugando una carta")
+    }
   }
 
   return (
@@ -169,7 +193,7 @@ function Game() {
       </div>
 
       <div className="action-container">
-        <button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>
+        {/*<button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>*/}
 
       <div className="chat-container">
         <h3 className="chat-header">
@@ -200,25 +224,45 @@ function Game() {
       </div>
     </div>
     
-    {/* --- NUEVO: MODAL DE CARTA AMPLIADA --- */}
-      {selectedCard && (
-        <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
-          {/* Al hacer click en el contenido evitamos que se cierre (propagation) */}
-          <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
-
-            <div 
-              className="card zoomed" 
-              style={{ backgroundImage: `url('/cards/${selectedCard.templateId}.png')` }}
-            ></div>
-            <p>Tipo de la carta: {selectedCard.type}</p>
-            <p>Posible accion: {getPosibleActions(selectedCard, isKing)}</p>
-          </div>
+    {pendingAction && (
+      <div className="pending-action-overlay">
+        <div className="pending-action-content">
+          <h2>¡Acción Requerida!</h2>
+          <p>Debes resolver: {gameState.pendingAction?.type}</p>
+          
+          {/* Botones temporales para probar */}
+          <button onClick={() => handleResolvePending({ action: 'SKIP' })}>Saltar</button>
+          <button onClick={() => handleResolvePending({ test: 'data' })}>Probar Acción</button>
         </div>
-      )}
+      </div>
+    )}
+
+    {/* --- NUEVO: MODAL DE CARTA AMPLIADA --- */}
+    {selectedCard && (
+      <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
+        {/* Al hacer click en el contenido evitamos que se cierre (propagation) */}
+        <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div 
+            className="card zoomed" 
+            style={{ backgroundImage: `url('/cards/${selectedCard.templateId}.png')` }}
+          ></div>
+          <p>Tipo de la carta: {selectedCard.type}</p>
+          <p>Posible accion: {getPosibleActions(selectedCard, isKing)}</p>
+          {gameState.turn === myRoleName && selectedCard.position === "hand" && (
+          <button
+            onClick={handlePlayCard}
+            className="button ingame"
+          >
+            Jugar carta
+          </button>
+          )}
+        </div>
+      </div>
+    )}
 
     {error && <p className="error-msg">{error}</p>}
   </div>
-);
+  );
 }
 
 export default Game;

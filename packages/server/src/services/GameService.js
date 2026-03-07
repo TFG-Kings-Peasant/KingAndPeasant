@@ -14,7 +14,8 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
             deck.push({
                 uid: `game_${lobbyId}_card_${card.id}_copy_${i}`,
                 templateId: card.id,
-                type: card.type,
+                typeKing: card.typeKing,
+                typePeasant: card.typePeasant,
                 isRevealed: false
             })
         }
@@ -103,8 +104,9 @@ const playCard = async (lobbyId, cardUid, targetData, userId) => {
     if (cardIndex === -1) {
         throw new Error('Carta no encontrada en la mano del jugador');
     }
+    const cardType = userRol==="king"? playedCard.typeKing : playedCard.typePeasant;
     const [playedCard] = gameState.players[userRol].hand.splice(cardIndex, 1);
-    if (playedCard.type === 'Action') {
+    if (cardType === 'Action') {
         return await playActionCard(lobbyId, targetData, playedCard, userRol, gameState);
     }
     else {

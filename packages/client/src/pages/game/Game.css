@@ -186,6 +186,63 @@ h3 {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
+/* --- OVERLAY DE ACCIÓN PENDIENTE --- */
+.pending-action-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro casi opaco */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Por encima de TODO (cartas, chat, etc.) */
+  backdrop-filter: blur(4px); /* Un toque moderno: difumina el tablero de fondo */
+}
+
+/* --- CONTENIDO DEL MODAL DE ACCIÓN --- */
+.pending-action-content {
+  background: linear-gradient(135deg, #2c1e16 0%, #1a110c 100%); /* Tonos madera/oscuros medievales */
+  border: 2px solid #c9a358; /* Borde dorado oscuro */
+  border-radius: 12px;
+  padding: 30px 40px;
+  text-align: center;
+  color: #fffde7;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.7), 0px 0px 15px rgba(201, 163, 88, 0.3);
+  max-width: 400px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.pending-action-content h2 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  color: #e6c27a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(230, 194, 122, 0.3);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.pending-action-content p {
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+}
+
+/* Opcional: Para que el contenedor de los botones quede ordenado */
+.pending-action-content .button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Animación para que aparezca con un pequeño "rebote" */
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 /* Pequeña animación para que no aparezca de golpe */
 @keyframes popIn {
   from {

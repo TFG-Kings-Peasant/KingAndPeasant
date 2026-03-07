@@ -1,5 +1,3 @@
-import { useAuth } from "../../../hooks/useAuth";
-
 export interface CardState {
     uid: string;
     templateId?: number;
@@ -25,7 +23,12 @@ export interface GameState {
             hand: CardState[];
             town: CardState[];
         }
+    };
+    pendingAction: {
+        player: 'king' | 'peasant';
+        type: string;
     }
+
 }
 
 const API_URL = import.meta.env.VITE_API_URL+"/api/game";
@@ -66,19 +69,41 @@ export const getGameStateById = async (gameId: number, token: string) => {
     return await response.json();
 }
 
-export const makeExampleAction = async (gameId: number, playerId: number) => {
-    const response = await fetch(API_URL + `/${gameId}`+ `/example-action`, {
+export const playCard = async (lobbyId: number, cardUid: string, targetData: Record<string, unknown> = {}, token: string) => {
+    const response = await fetch(`${API_URL}/game/${lobbyId}/playCard`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            playerId
-        })
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+            cardUid,
+            targetData
+        }),
     });
-    if(!response.ok){
+    if (!response.ok) { 
         const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
         throw new Error(`Error ${response.status}: ${errorText}`);
     }
+    return await response.json();
+}
+
+export const resolvePendingAction = async (lobbyId: number, targetData: Record<string, unknown> = {}, token: string) => {
+    const response = await fetch(`${API_URL}/game/${lobbyId}/resolveAction`, {
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({targetData})
+    });
+    if (!response.ok) { 
+        const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
+        console.error("❌ ERROR DEL SERVER:", response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+    return await response.json();
 }
 
 export const getPosibleActions = (card: CardState, isKing: boolean) => {
