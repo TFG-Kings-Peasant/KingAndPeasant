@@ -104,8 +104,8 @@ const playCard = async (lobbyId, cardUid, targetData, userId) => {
     if (cardIndex === -1) {
         throw new Error('Carta no encontrada en la mano del jugador');
     }
-    const cardType = userRol==="king"? playedCard.typeKing : playedCard.typePeasant;
     const [playedCard] = gameState.players[userRol].hand.splice(cardIndex, 1);
+    const cardType = userRol==="king"? playedCard.typeKing : playedCard.typePeasant;
     if (cardType === 'Action') {
         return await playActionCard(lobbyId, targetData, playedCard, userRol, gameState);
     }

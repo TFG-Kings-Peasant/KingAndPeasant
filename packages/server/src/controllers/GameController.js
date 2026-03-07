@@ -40,7 +40,7 @@ const playCard = async (req, res) => {
 
         const {dtoKing, dtoPeasant} = await gameService.playCard(lobbyId, cardUid, targetData, userId);
     
-        sendGameStateUpdate(dtoKing, dtoPeasant);
+        sendGameStateUpdate(req, dtoKing, dtoPeasant);
 
         res.status(200).json({ message: "Carta jugada correctamente" });
     } catch (error) {
@@ -49,7 +49,9 @@ const playCard = async (req, res) => {
     }
 }
 
-function sendGameStateUpdate (dtoKing, dtoPeasant) {
+function sendGameStateUpdate (req, dtoKing, dtoPeasant) {
+    const io = req.app.get('io');
+    const userSockets = req.app.get('userSockets');
     if (userSockets[dtoKing.players.king.id]) {
         io.to(userSockets[dtoKing.players.king.id]).emit('gameState', dtoKing);
     }
@@ -65,7 +67,7 @@ const resolveAction = async (req, res) => {
         const userId  = Number(req.user.id);
         const {dtoKing, dtoPeasant} = await gameService.resolvePendingAction(lobbyId, userId, targetData);
     
-        sendGameStateUpdate(dtoKing, dtoPeasant);
+        sendGameStateUpdate(req, dtoKing, dtoPeasant);
 
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {

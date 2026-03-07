@@ -70,7 +70,7 @@ export const getGameStateById = async (gameId: number, token: string) => {
 }
 
 export const playCard = async (lobbyId: number, cardUid: string, targetData: Record<string, unknown> = {}, token: string) => {
-    const response = await fetch(`${API_URL}/game/${lobbyId}/playCard`, {
+    const response = await fetch(`${API_URL}/${lobbyId}/playCard`, {
         method: 'POST',
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -90,7 +90,7 @@ export const playCard = async (lobbyId: number, cardUid: string, targetData: Rec
 }
 
 export const resolvePendingAction = async (lobbyId: number, targetData: Record<string, unknown> = {}, token: string) => {
-    const response = await fetch(`${API_URL}/game/${lobbyId}/resolveAction`, {
+    const response = await fetch(`${API_URL}/${lobbyId}/resolveAction`, {
         method: 'POST',
         headers: {
             "Authorization": `Bearer ${token}`,

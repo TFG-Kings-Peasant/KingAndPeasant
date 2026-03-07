@@ -127,7 +127,7 @@ function Game() {
   }
 
   const handleResolvePending = async (targetData: Record<string, unknown>) => {
-    if(!id || !user || !user.authToken || !gameState || !selectedCard) return;
+    if(!id || !user || !user.authToken || !gameState) return;
     if(gameState.turn !== myRoleName) {
       alert("No es tu turno");
       return;
