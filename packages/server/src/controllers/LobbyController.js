@@ -35,7 +35,6 @@ const createLobby = async (req, res) => {
         
         console.log("📥 Datos recibidos para crear lobby:", req.body);
 
-        // Validación básica de entrada
         if (!name || !player1Id) {
             return res.status(400).json({ message: "Faltan datos requeridos" });
         }
@@ -75,6 +74,9 @@ const leaveLobby = async (req, res) => {
         }
 
         const updatedLobby = await lobbyService.leaveLobby({ lobbyId, playerId });
+
+        const io = req.app.get('io');
+        io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
         res.status(200).json(updatedLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -91,8 +93,10 @@ const setPlayerReady = async (req, res) => {
         if (!lobbyId || !playerId || isReady === undefined) {
             return res.status(400).json({ message: "Faltan datos requeridos" });
         }
-
         const updatedLobby = await lobbyService.setPlayerReady({ lobbyId, playerId, isReady });
+
+        const io = req.app.get('io');
+        io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
         res.status(200).json(updatedLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -3,6 +3,8 @@ import { useAuth } from "../../../hooks/useAuth";
 export interface CardState {
     uid: string;
     templateId?: number;
+    type: string;
+    position?: 'hand' | 'town' | 'deck' | 'discard';
     isRevealed: boolean;
 }
 
@@ -76,5 +78,47 @@ export const makeExampleAction = async (gameId: number, playerId: number) => {
         const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
         throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+}
+
+export const getPosibleActions = (card: CardState, isKing: boolean) => {
+    if(isKing){
+        switch(card.type){
+            case "Action":
+                return "Jugar acción";
+            case "Guard":
+                if(card.position === "hand"){
+                    return "Preparar un guardia";
+                }else if(card.position === "town"){
+                    return "Movilizar un guardia";
+                }else{
+                    return "";
+                }
+            default:
+                if(!card.isRevealed){
+                    return "Condenar rebelde";
+                }else{
+                    return "";
+                }
+        }
+    }else{
+        switch(card.type){
+            case "Action":
+                return "Jugar acción";
+            case "Rebel":
+                if(card.position === "hand"){
+                    return "Esconder rebelde"
+                }else if(card.position === "town"){
+                    if(card.isRevealed){
+                        return "Devolver a la mano";
+                    }else{
+                        return "Activar rebelde o infiltrar en el mazo";
+                    }
+                }else{
+                    return "";
+                }
+            default:
+                return "";
+        }
     }
 }

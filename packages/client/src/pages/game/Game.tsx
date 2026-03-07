@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getGameStateById, makeExampleAction, type GameState } from "./components/GameService";
+import { getGameStateById, getPosibleActions, makeExampleAction, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -17,6 +17,8 @@ function Game() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
+  const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,8 +71,6 @@ function Game() {
   const handleMakeAction = async () => {
     try{
        if(!id || !user || !gameState) return;
-       console.log((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
-           || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
        if((gameState.turn == 'peasant' && Number(user.id) == gameState.players.peasant.id) 
            || (gameState.turn == 'king' && Number(user.id) == gameState.players.king.id))
        {
@@ -85,10 +85,8 @@ function Game() {
             }
   }};
 
-  // Si no hay estado o usuario, mostramos la pantalla de carga
   if (loading || !gameState || !user) return <div>Cargando el Tablero...</div>;
 
-  // Calculamos la perspectiva
   const isKing = Number(user.id) === gameState.players.king.id;
   const myPlayer = isKing ? gameState.players.king : gameState.players.peasant;
   const rivalPlayer = isKing ? gameState.players.peasant : gameState.players.king;
@@ -116,12 +114,17 @@ function Game() {
     setCurrentMessage("");
   };
   
+  const handleSelectCard = (card: CardState, position: 'hand' | 'town' | 'deck' | 'discard'| null) => {
+    if(position){
+      card.position = position;
+    }
+    setSelectedCard(card);
+  }
+
   return (
   <div className="game-board">
-    {/* COLUMNA IZQUIERDA: JUEGO */}
     <div className="game-main-area">
       
-      {/* RIVAL */}
       <div className="opponent-area">
         <h3>RIVAL ({rivalRoleName})</h3>
         <div className="hand">
@@ -131,28 +134,29 @@ function Game() {
         </div>
         <div className="town">
           {rivalPlayer.town.map((card) => (
-            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+            onClick={() => handleSelectCard(card, null)}></div>
           ))}
         </div>
       </div>
 
-      {/* TÚ */}
       <div className="player-area">
         <div className="town">
           {myPlayer.town.map((card) => (
-            <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }}></div>
+            <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
+            onClick={() => handleSelectCard(card, "town")}></div>
           ))}
         </div>
         <div className="hand">
           {myPlayer.hand.map((card) => (
-            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}></div>
+            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+            onClick={() => handleSelectCard(card, "hand")}></div>
           ))}
         </div>
         <h3>TU MANO ({myRoleName}) - Turno: {gameState.turn.toUpperCase()}</h3>
       </div>
     </div>
 
-    {/* COLUMNA DERECHA: MAZO Y ACCIONES */}
     <div className="game-sidebar">
       <div className="deck-pile">
         <span>MAZO</span>
@@ -195,6 +199,22 @@ function Game() {
       </div>
       </div>
     </div>
+    
+    {/* --- NUEVO: MODAL DE CARTA AMPLIADA --- */}
+      {selectedCard && (
+        <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
+          {/* Al hacer click en el contenido evitamos que se cierre (propagation) */}
+          <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
+
+            <div 
+              className="card zoomed" 
+              style={{ backgroundImage: `url('/cards/${selectedCard.templateId}.png')` }}
+            ></div>
+            <p>Tipo de la carta: {selectedCard.type}</p>
+            <p>Posible accion: {getPosibleActions(selectedCard, isKing)}</p>
+          </div>
+        </div>
+      )}
 
     {error && <p className="error-msg">{error}</p>}
   </div>

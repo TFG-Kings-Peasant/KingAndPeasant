@@ -1,5 +1,5 @@
 import { gameService } from '../services/GameService.js';
-import { io, userSockets } from '../../index.js';
+
 
 const createGame = async (req, res) => {
     try {
