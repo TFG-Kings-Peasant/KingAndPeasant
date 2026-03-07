@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getGameStateById, makeExampleAction, type GameState } from "./components/GameService";
+import { getGameStateById, getPosibleActions, makeExampleAction, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -17,7 +17,7 @@ function Game() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  const [selectedCard, setSelectedCard] = useState<any | null>(null);
+  const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
@@ -114,6 +114,13 @@ function Game() {
     setCurrentMessage("");
   };
   
+  const handleSelectCard = (card: CardState, position: 'hand' | 'town' | 'deck' | 'discard'| null) => {
+    if(position){
+      card.position = position;
+    }
+    setSelectedCard(card);
+  }
+
   return (
   <div className="game-board">
     <div className="game-main-area">
@@ -128,7 +135,7 @@ function Game() {
         <div className="town">
           {rivalPlayer.town.map((card) => (
             <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-            onClick={() => setSelectedCard(card)}></div>
+            onClick={() => handleSelectCard(card, null)}></div>
           ))}
         </div>
       </div>
@@ -137,13 +144,13 @@ function Game() {
         <div className="town">
           {myPlayer.town.map((card) => (
             <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
-            onClick={() => setSelectedCard(card)}></div>
+            onClick={() => handleSelectCard(card, "town")}></div>
           ))}
         </div>
         <div className="hand">
           {myPlayer.hand.map((card) => (
             <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-            onClick={() => setSelectedCard(card)}></div>
+            onClick={() => handleSelectCard(card, "hand")}></div>
           ))}
         </div>
         <h3>TU MANO ({myRoleName}) - Turno: {gameState.turn.toUpperCase()}</h3>
@@ -198,12 +205,13 @@ function Game() {
         <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
           {/* Al hacer click en el contenido evitamos que se cierre (propagation) */}
           <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
-            
-            {/* OPCIÓN A: Mostrar la imagen de la carta en grande (Basado en tu código actual) */}
+
             <div 
               className="card zoomed" 
               style={{ backgroundImage: `url('/cards/${selectedCard.templateId}.png')` }}
             ></div>
+            <p>Tipo de la carta: {selectedCard.type}</p>
+            <p>Posible accion: {getPosibleActions(selectedCard, isKing)}</p>
           </div>
         </div>
       )}
