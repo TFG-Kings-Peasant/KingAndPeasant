@@ -63,7 +63,7 @@ function sendGameStateUpdate (req, dtoKing, dtoPeasant) {
     const peasantId = dtoPeasant.players.peasant.id;
     const socketPeasant = userSockets.get(String(peasantId)) || userSockets.get(Number(peasantId));
     if (peasantId) {
-        io.to(peasantId).emit('gameState', dtoPeasant);
+        io.to(socketPeasant).emit('gameState', dtoPeasant);
     } else {
         console.log(`No se encontró socket activo para el CAMPESINO (${peasantId})`); 
     }
