@@ -5,3 +5,8 @@ export function shuffleArray(array) {
     }
     return array;
 }
+
+export function changeTurn(gameState) {
+    gameState.turn = gameState.turn === "king" ? "peasant" : "king";
+    return gameState;
+}

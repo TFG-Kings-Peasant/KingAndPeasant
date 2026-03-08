@@ -246,14 +246,12 @@ function Game() {
             className="card zoomed" 
             style={{ backgroundImage: `url('/cards/${selectedCard.templateId}.png')` }}
           ></div>
-          <p>Tipo de la carta: {selectedCard.type}</p>
-          <p>Posible accion: {getPosibleActions(selectedCard, isKing)}</p>
           {gameState.turn === myRoleName && selectedCard.position === "hand" && (
           <button
             onClick={handlePlayCard}
             className="button ingame"
           >
-            Jugar carta
+            {getPosibleActions(selectedCard, isKing)}
           </button>
           )}
         </div>

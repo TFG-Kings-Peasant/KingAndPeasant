@@ -1,7 +1,8 @@
 export interface CardState {
     uid: string;
     templateId?: number;
-    type: string;
+    typeKing: string;
+    typePeasant: string;
     position?: 'hand' | 'town' | 'deck' | 'discard';
     isRevealed: boolean;
 }
@@ -108,7 +109,7 @@ export const resolvePendingAction = async (lobbyId: number, targetData: Record<s
 
 export const getPosibleActions = (card: CardState, isKing: boolean) => {
     if(isKing){
-        switch(card.type){
+        switch(card.typeKing){
             case "Action":
                 return "Jugar acción";
             case "Guard":
@@ -127,7 +128,7 @@ export const getPosibleActions = (card: CardState, isKing: boolean) => {
                 }
         }
     }else{
-        switch(card.type){
+        switch(card.typePeasant){
             case "Action":
                 return "Jugar acción";
             case "Rebel":
