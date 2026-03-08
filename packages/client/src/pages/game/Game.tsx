@@ -51,8 +51,13 @@ function Game() {
       setMessages((prev) => [...prev, msg]);
     };
 
+    const handleGameStateUpdate = (newGameState: GameState) => {
+        console.log("=== TABLERO ACTUALIZADO VÍA SOCKET ===", newGameState);
+        setGameState(newGameState); 
+    };
+
     socket.emit('joinGame', `game_${id}`);
-    socket.on('gameState', fetchGameState);
+    socket.on('gameState', handleGameStateUpdate);
 
     socket.on('receiveChatMessage', handleReceiveMessage);
 
@@ -112,10 +117,11 @@ function Game() {
       alert("No es tu turno");
       return;
     }
+    const cardToPlayUid = selectedCard.uid;
+    setSelectedCard(null);
     try {
-      const newState = await playCard(Number(id), selectedCard.uid, {}, user.authToken)
+      await playCard(Number(id), cardToPlayUid, {}, user.authToken)
       setSelectedCard(null);
-      setGameState(newState); //Esto no debería de estar así todavía porque habria que recibir el DTO
     } catch (err) {
       if (err instanceof Error) {
         alert(err.message);

@@ -52,11 +52,20 @@ const playCard = async (req, res) => {
 function sendGameStateUpdate (req, dtoKing, dtoPeasant) {
     const io = req.app.get('io');
     const userSockets = req.app.get('userSockets');
-    if (userSockets[dtoKing.players.king.id]) {
-        io.to(userSockets[dtoKing.players.king.id]).emit('gameState', dtoKing);
+    const kingId = dtoKing.players.king.id;
+    const socketKing = userSockets.get(String(kingId)) || userSockets.get(Number(kingId));
+    if (socketKing) {
+        io.to(socketKing).emit('gameState', dtoKing);
+    } else {
+        console.log(`No se encontró socket activo para el REY (${kingId})`);
     }
-    if (userSockets[dtoPeasant.players.peasant.id]) {
-        io.to(userSockets[dtoPeasant.players.peasant.id]).emit('gameState', dtoPeasant);
+
+    const peasantId = dtoPeasant.players.peasant.id;
+    const socketPeasant = userSockets.get(String(peasantId)) || userSockets.get(Number(peasantId));
+    if (peasantId) {
+        io.to(socketPeasant).emit('gameState', dtoPeasant);
+    } else {
+        console.log(`No se encontró socket activo para el CAMPESINO (${peasantId})`); 
     }
 }
 

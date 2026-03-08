@@ -23,6 +23,17 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     shuffleArray(deck);
     const handKing = deck.splice(0,5);
     const handPeasant = deck.splice(0,5);
+
+    //Forzar la carta de acción
+    const targetCardId = 15; 
+    
+    const cardIndex = deck.findIndex(card => card.templateId === targetCardId);
+    
+    if (cardIndex !== -1) {
+        const [testCard] = deck.splice(cardIndex, 1);
+        handPeasant[0] = testCard; 
+    }
+
     const initialState = {
         era: 1, 
         turnNumber: 1,
@@ -96,7 +107,7 @@ const transformGameStateDTO = (gameState) => {
 
 const playCard = async (lobbyId, cardUid, targetData, userId) => {
     let gameState = await getGameStateById(lobbyId);
-    const userRol = gameState.players.king.id === userId ? "king" : "peasant";
+    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
@@ -118,6 +129,11 @@ const playCard = async (lobbyId, cardUid, targetData, userId) => {
 const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState) => {
     playedCard.isRevealed = true;
     gameState.discardPile.push(playedCard);
+
+    console.log("=== ESTADO DEL PUEBLO ANTES DE LA ACCIÓN ===");
+    console.log(JSON.stringify(gameState.players[userRol].town, null, 2));
+    console.log("TARGET DATA RECIBIDO:", targetData);
+
     //Ejecutar efecto de carta
     if (userRol === "peasant") {
         const action = peasantActionCards[playedCard.templateId];
@@ -145,7 +161,7 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
         type: 'RALLY',
     };
     */
-    const userRol = gameState.players.king.id === userId ? "king" : "peasant";
+    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
     const pendingAction = gameState.pendingAction;
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
