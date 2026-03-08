@@ -24,7 +24,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     const handKing = deck.splice(0,5);
     const handPeasant = deck.splice(0,5);
 
-    //Forzar la carta de acción
+    /*Forzar la carta de acción
     const targetCardId = 15; 
     
     const cardIndex = deck.findIndex(card => card.templateId === targetCardId);
@@ -33,7 +33,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         const [testCard] = deck.splice(cardIndex, 1);
         handPeasant[0] = testCard; 
     }
-
+    */
     const initialState = {
         era: 1, 
         turnNumber: 1,
@@ -129,11 +129,6 @@ const playCard = async (lobbyId, cardUid, targetData, userId) => {
 const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState) => {
     playedCard.isRevealed = true;
     gameState.discardPile.push(playedCard);
-
-    console.log("=== ESTADO DEL PUEBLO ANTES DE LA ACCIÓN ===");
-    console.log(JSON.stringify(gameState.players[userRol].town, null, 2));
-    console.log("TARGET DATA RECIBIDO:", targetData);
-
     //Ejecutar efecto de carta
     if (userRol === "peasant") {
         const action = peasantActionCards[playedCard.templateId];
