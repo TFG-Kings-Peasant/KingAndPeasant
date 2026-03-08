@@ -117,8 +117,10 @@ function Game() {
       alert("No es tu turno");
       return;
     }
+    const cardToPlayUid = selectedCard.uid;
+    setSelectedCard(null);
     try {
-      await playCard(Number(id), selectedCard.uid, {}, user.authToken)
+      await playCard(Number(id), cardToPlayUid, {}, user.authToken)
       setSelectedCard(null);
     } catch (err) {
       if (err instanceof Error) {

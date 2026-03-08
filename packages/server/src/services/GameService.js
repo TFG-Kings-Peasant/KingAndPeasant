@@ -107,7 +107,7 @@ const transformGameStateDTO = (gameState) => {
 
 const playCard = async (lobbyId, cardUid, targetData, userId) => {
     let gameState = await getGameStateById(lobbyId);
-    const userRol = gameState.players.king.id === userId ? "king" : "peasant";
+    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
@@ -161,7 +161,7 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
         type: 'RALLY',
     };
     */
-    const userRol = gameState.players.king.id === userId ? "king" : "peasant";
+    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
     const pendingAction = gameState.pendingAction;
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
