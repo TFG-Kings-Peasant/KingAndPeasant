@@ -52,7 +52,7 @@ export const startGame = async (lobbyId: number, player1Id: number, player2Id: n
         throw new Error(error.error || "Failed to start game");
     }
     return await response.json();
-};
+};// Leemos qué nos ha respondido el servidor
 
 export const getGameStateById = async (gameId: number, token: string) => {
     const response = await fetch(API_URL + `/${gameId}`, {
@@ -63,7 +63,7 @@ export const getGameStateById = async (gameId: number, token: string) => {
         },
     });
     if (!response.ok) { 
-        const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
+        const errorText = await response.text();
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
         throw new Error(`Error ${response.status}: ${errorText}`);
     }
@@ -83,7 +83,7 @@ export const playHandCard = async (gameId: number, cardUid: string, targetData: 
         }),
     });
     if (!response.ok) { 
-        const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
+        const errorText = await response.text();
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
         throw new Error(`Error ${response.status}: ${errorText}`);
     }
@@ -100,7 +100,39 @@ export const resolvePendingAction = async (gameId: number, targetData: Record<st
         body: JSON.stringify({targetData})
     });
     if (!response.ok) { 
-        const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
+        const errorText = await response.text(); 
+        console.error("❌ ERROR DEL SERVER:", response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+    return await response.json();
+}
+
+export const passTurn = async (gameId: number, token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/passTurn`, {
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        }
+    });
+    if (!response.ok) { 
+        const errorText = await response.text(); 
+        console.error("❌ ERROR DEL SERVER:", response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+    return await response.json();
+}
+
+export const drawACard = async (gameId: number, token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/drawACard`, {
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        }
+    });
+    if (!response.ok) { 
+        const errorText = await response.text(); 
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
         throw new Error(`Error ${response.status}: ${errorText}`);
     }

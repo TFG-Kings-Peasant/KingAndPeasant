@@ -2,7 +2,7 @@ import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
-import { changeTurn, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
+import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 
@@ -105,6 +105,42 @@ const transformGameStateDTO = (gameState) => {
     return {dtoKing, dtoPeasant};
 };
 
+const playTownCard = async (ameId, cardUid, targetData, userId) => {
+    let gameState = await getGameStateById(gameId);
+    const userRol = getUserRol(gameState, userId);
+        if (gameState.turn !== userRol) {
+        throw new Error('No es el turno del jugador');
+    }
+    const card = gameState.players[userRol].town.find(card => card.uid === cardUid);
+    if (!card) {
+        throw new Error('Carta no encontrada en el pueblo del jugador');
+    }
+    if(userRol==='king'){
+        //TODO: Activar acción
+    }else{
+        if(card.isRevealed){
+            //TODO: Devolver a la mano
+        }else{
+            if(canInfiltrate(card)){
+                //TODO: Infiltrar
+            }else{
+                //TODO: Activar acción
+            }
+        }
+    }
+
+}
+
+const passTurn = async (gameId, userId) => {
+    let gameState = await getGameStateById(gameId);
+    const userRol = getUserRol(gameState, userId);
+    if (gameState.turn !== userRol) {
+        throw new Error('No es el turno del jugador');
+    }
+    gameState = changeTurn(gameState);
+    return await saveAndFormatGameState(gameId, gameState);
+}
+
 const playHandCard = async (gameId, cardUid, targetData, userId) => {
     let gameState = await getGameStateById(gameId);
     const userRol = getUserRol(gameState, userId);
@@ -193,13 +229,46 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
         return await saveAndFormatGameState(gameId, gameState);
 }
 
-const condemnARebel = async (gameId, userId) => {
+const condemnARebel = async (gameId, cardUid, userId, isDeck) => {
+    let gameState = await getGameStateById(gameId);
+    const userRol = getUserRol(gameState, userId);
+    if (gameState.turn !== userRol) {
+        throw new Error('No es el turno del jugador');
+    }
+    let card = null;
+    if(isDeck){
+        card = gameState.players.deck[gameState.deck.length - 1];
+    }else{
+        card = gameState.players.peasant.town.find(card => card.uid === cardUid);
+    }
+    if (!card) {
+        throw new Error('Carta no encontrada en la mano del jugador');
+    }
+    if(card.isRevealed){
+        throw new Error('No se puede condenar a un rebelde revelado');
+
+    }
+    card.isRevealed = true;
+    //TODO: CONDICIÓN DE VICTORIA: Si la carta condenada es el Asesino, el rey gana, en caso contrario, el rey pierde.
+    return await saveAndFormatGameState(gameId, gameState);
+
+}
+
+const peasantDrawACard = async (gameId, userId) => {
     let gameState = await getGameStateById(gameId);
     const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
+    if(userRol !== "peasant"){
+        throw new Error('Solo el campesino puede realizar la acción de robar carta');
+    }
+    gameState = drawCardFromDeck(gameState, userRol)
+    changeTurn(gameState);
+    return await saveAndFormatGameState(gameId, gameState);
 }
+
+
 
 export const gameService = {
     createGame,
@@ -208,5 +277,7 @@ export const gameService = {
     getGameStateDTO,
     shuffleArray,
     resolvePendingAction,
-    playHandCard
+    playHandCard,
+    peasantDrawACard,
+    passTurn
 };

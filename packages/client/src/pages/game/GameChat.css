@@ -1,6 +1,10 @@
 .chat-container {
-  width: 300px;
-  height: 300px;
+  /* Quitamos width: 300px y height: 300px; */
+  width: 90%;         /* Ocupa el 90% del ancho del sidebar para dejar un margencito */
+  flex: 0.5; 
+  max-height: calc(100% - 100px); /* Evita que choque con el borde inferior */
+  margin-bottom: 10px;
+  /* El resto de tus estilos se quedan igual: */
   border: 1px solid #ccc;
   border-radius: 8px;
   display: flex;

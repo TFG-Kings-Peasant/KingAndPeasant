@@ -108,30 +108,36 @@
   opacity: 0.8;
 }
 
-/* CONTROLES */
+/* --- BOTONES DE ACCIÓN A LA IZQUIERDA --- */
 .action-container {
-  width: 100%;
+  position: absolute;
+  left: 30px;           /* Distancia desde el borde izquierdo de la pantalla */
+  top: 50%;             /* Lo bajamos hasta la mitad */
+  transform: translateY(-50%); /* Lo centramos perfectamente en vertical */
+  width: 160px;         /* Ancho para los botones */
+  z-index: 100;         /* Para que no se quede por debajo de nada */
+}
+
+/* El div interno que envuelve los botones cuando es tu turno */
+.action-container > div {
   display: flex;
-  justify-content: center;
-  margin-top: 20px;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
 }
 
 button.ingame {
-  padding: 15px 25px;
+  /* Mantén los estilos que ya tenías para el botón, pero asegúrate de que el ancho sea 100% */
+  width: 100%; 
+  padding: 15px 10px;
   background: #e67e22;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  width: 80%;
   box-shadow: 0 4px 0 #d35400;
-}
-
-button.ingame:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #d35400;
 }
 
 h3 {

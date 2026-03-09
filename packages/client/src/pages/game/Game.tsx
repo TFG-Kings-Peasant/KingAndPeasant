@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getGameStateById, getPosibleActions, playHandCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
+import { drawACard, getGameStateById, getPosibleActions, passTurn, playHandCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -111,6 +111,44 @@ function Game() {
     setSelectedCard(card);
   }
 
+  const handlePassTurn = async () => {
+    if(!id || !user || !user.authToken || !gameState) return;
+    if(gameState.turn !== myRoleName) {
+      alert("No es tu turno");
+      return;
+    }
+    try{
+      await passTurn(Number(id), user.authToken)
+
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(err.message);
+        setError(err.message);
+      } else {
+        alert("Ocurrió un error desconocido");
+      }
+    }
+  } 
+
+  const handleDrawCard = async () => {
+    if(!id || !user || !user.authToken || !gameState) return;
+    if(gameState.turn !== myRoleName) {
+      alert("No es tu turno");
+      return;
+    }
+    try{
+      await drawACard(Number(id), user.authToken)
+
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(err.message);
+        setError(err.message);
+      } else {
+        alert("Ocurrió un error desconocido");
+      }
+    }
+  } 
+
   const handleplayHandCard = async () => {
     if(!id || !user || !user.authToken || !gameState || !selectedCard) return;
     if(gameState.turn !== myRoleName) {
@@ -199,7 +237,13 @@ function Game() {
       </div>
 
       <div className="action-container">
-        {/*<button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>*/}
+        {gameState.turn === myRoleName ? <div>
+          <button className = "button ingame" onClick={handlePassTurn}>PASAR TURNO</button> 
+          {myRoleName === 'peasant' ? <button className = "button ingame" onClick={handleDrawCard}>ROBAR CARTA</button> : <div></div> }
+          </div>
+        : <div></div>}
+
+      </div>
 
       <div className="chat-container">
         <h3 className="chat-header">
@@ -226,7 +270,6 @@ function Game() {
             Enviar
           </button>
         </form>
-      </div>
       </div>
     </div>
     

@@ -23,3 +23,17 @@ export function getCardType(playedCard, userRol){
 export function canInfiltrate(card){
     return card.descPeasant.includes("Infiltrate:")
 }
+
+
+export function drawCardFromDeck(gameState, userRol){
+    const card = gameState.deck.pop();
+    if(!card){
+        //TODO: CONDICION DE VICTORIA: No quedan cartas en la deck, condicion de victoria
+    }
+    if(userRol==='king'){
+        gameState.players.king.hand.push(card);
+    }else{
+        gameState.players.peasant.hand.push(card);
+    }
+    return gameState;
+}

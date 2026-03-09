@@ -85,9 +85,41 @@ const resolveAction = async (req, res) => {
     }
 }
 
+const peasantDrawACard = async (req, res) => {
+    try {
+        const gameId = req.params.id;
+        const userId  = Number(req.user.id);
+        const {dtoKing, dtoPeasant} = await gameService.peasantDrawACard(gameId, userId);
+    
+        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+
+        res.status(200).json({ message: "Acción resuelta correctamente" });
+    } catch (error) {
+        console.error("Error al resolver la acción:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const passTurn = async (req, res) => {
+    try {
+        const gameId = req.params.id;
+        const userId  = Number(req.user.id);
+        const {dtoKing, dtoPeasant} = await gameService.passTurn(gameId, userId);
+    
+        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+
+        res.status(200).json({ message: "Acción resuelta correctamente" });
+    } catch (error) {
+        console.error("Error al resolver la acción:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const gameController = {
     createGame,
     getGameStatus,
     playHandCard,
-    resolveAction
+    resolveAction,
+    peasantDrawACard,
+    passTurn
 }
