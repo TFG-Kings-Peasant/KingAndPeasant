@@ -3,7 +3,7 @@ export interface CardState {
     templateId?: number;
     typeKing: string;
     typePeasant: string;
-    position?: 'hand' | 'town' | 'deck' | 'discard';
+    position?: 'hand' | 'town' | 'enemyTown' | 'deck' | 'discard';
     isRevealed: boolean;
 }
 
@@ -70,8 +70,8 @@ export const getGameStateById = async (gameId: number, token: string) => {
     return await response.json();
 }
 
-export const playCard = async (lobbyId: number, cardUid: string, targetData: Record<string, unknown> = {}, token: string) => {
-    const response = await fetch(`${API_URL}/${lobbyId}/playCard`, {
+export const playHandCard = async (gameId: number, cardUid: string, targetData: Record<string, unknown> = {}, token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/playHandCard`, {
         method: 'POST',
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -90,8 +90,8 @@ export const playCard = async (lobbyId: number, cardUid: string, targetData: Rec
     return await response.json();
 }
 
-export const resolvePendingAction = async (lobbyId: number, targetData: Record<string, unknown> = {}, token: string) => {
-    const response = await fetch(`${API_URL}/${lobbyId}/resolveAction`, {
+export const resolvePendingAction = async (gameId: number, targetData: Record<string, unknown> = {}, token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/resolveAction`, {
         method: 'POST',
         headers: {
             "Authorization": `Bearer ${token}`,

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getGameStateById, getPosibleActions, playCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
+import { getGameStateById, getPosibleActions, playHandCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -104,14 +104,14 @@ function Game() {
     setCurrentMessage("");
   };
   
-  const handleSelectCard = (card: CardState, position: 'hand' | 'town' | 'deck' | 'discard'| null) => {
+  const handleSelectCard = (card: CardState, position: 'hand' | 'town' | 'enemyTown' | 'deck' | 'discard'| null) => {
     if(position){
       card.position = position;
     }
     setSelectedCard(card);
   }
 
-  const handlePlayCard = async () => {
+  const handleplayHandCard = async () => {
     if(!id || !user || !user.authToken || !gameState || !selectedCard) return;
     if(gameState.turn !== myRoleName) {
       alert("No es tu turno");
@@ -120,7 +120,7 @@ function Game() {
     const cardToPlayUid = selectedCard.uid;
     setSelectedCard(null);
     try {
-      await playCard(Number(id), cardToPlayUid, {}, user.authToken)
+      await playHandCard(Number(id), cardToPlayUid, {}, user.authToken)
       setSelectedCard(null);
     } catch (err) {
       if (err instanceof Error) {
@@ -164,8 +164,8 @@ function Game() {
         </div>
         <div className="town">
           {rivalPlayer.town.map((card) => (
-            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-            onClick={() => handleSelectCard(card, null)}></div>
+            card.isRevealed ? <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+            onClick={() => handleSelectCard(card, 'enemyTown')}></div> : <div key={card.uid} className="card ingame back"></div>
           ))}
         </div>
       </div>
@@ -246,7 +246,6 @@ function Game() {
     {/* --- NUEVO: MODAL DE CARTA AMPLIADA --- */}
     {selectedCard && (
       <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
-        {/* Al hacer click en el contenido evitamos que se cierre (propagation) */}
         <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
           <div 
             className="card zoomed" 
@@ -254,7 +253,7 @@ function Game() {
           ></div>
           {gameState.turn === myRoleName && selectedCard.position === "hand" && (
           <button
-            onClick={handlePlayCard}
+            onClick={handleplayHandCard}
             className="button ingame"
           >
             {getPosibleActions(selectedCard, isKing)}

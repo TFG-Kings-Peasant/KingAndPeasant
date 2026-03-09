@@ -5,7 +5,7 @@ import { authenticateToken } from "../../middleware.js";
 
 router.post('/start', authenticateToken, gameController.createGame);
 router.get('/:id', authenticateToken, gameController.getGameStatus);
-router.post('/:id/playCard', authenticateToken, gameController.playCard);
+router.post('/:id/playHandCard', authenticateToken, gameController.playHandCard);
 router.post('/:id/resolveAction', authenticateToken, gameController.resolveAction);
 
 

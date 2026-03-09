@@ -2,17 +2,17 @@ import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
-import { shuffleArray } from '../utils/helpers.js';
+import { changeTurn, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 
-const createGame = async ( lobbyId, player1Id, player2Id) => {
+const createGame = async ( gameId, player1Id, player2Id) => {
     const catalog = await prisma.card.findMany();
     const deck = [];
     catalog.forEach(card => {
         for(let i = 0; i < card.copies; i++) {
             deck.push({
-                uid: `game_${lobbyId}_card_${card.id}_copy_${i}`,
+                uid: `game_${gameId}_card_${card.id}_copy_${i}`,
                 templateId: card.id,
                 typeKing: card.typeKing,
                 typePeasant: card.typePeasant,
@@ -55,7 +55,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         },
         pendingAction: null
     }
-    return await saveAndFormatGameState(lobbyId, initialState);
+    return await saveAndFormatGameState(gameId, initialState);
 };
 
 const getGameStateById = async (id) => {
@@ -66,16 +66,16 @@ const getGameStateById = async (id) => {
     return JSON.parse(gameState);
 }
 
-const saveAndFormatGameState = async (lobbyId, gameState) => {
-    const result = await redisClient.set(`game:${lobbyId}`, JSON.stringify(gameState));
+const saveAndFormatGameState = async (gameId, gameState) => {
+    const result = await redisClient.set(`game:${gameId}`, JSON.stringify(gameState));
     if (result !== 'OK') {
         throw new Error('Error al guardar el estado del juego');
     }
     return transformGameStateDTO(gameState);
 }
 
-const getGameStateDTO = async (lobbyId) => {
-    const gameState = await getGameStateById(lobbyId);
+const getGameStateDTO = async (gameId) => {
+    const gameState = await getGameStateById(gameId);
     return transformGameStateDTO(gameState);
 }
 
@@ -105,9 +105,9 @@ const transformGameStateDTO = (gameState) => {
     return {dtoKing, dtoPeasant};
 };
 
-const playCard = async (lobbyId, cardUid, targetData, userId) => {
-    let gameState = await getGameStateById(lobbyId);
-    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
+const playHandCard = async (gameId, cardUid, targetData, userId) => {
+    let gameState = await getGameStateById(gameId);
+    const userRol = getUserRol(gameState, userId);
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
@@ -116,17 +116,15 @@ const playCard = async (lobbyId, cardUid, targetData, userId) => {
         throw new Error('Carta no encontrada en la mano del jugador');
     }
     const [playedCard] = gameState.players[userRol].hand.splice(cardIndex, 1);
-    const cardType = userRol==="king"? playedCard.typeKing : playedCard.typePeasant;
+    const cardType = getCardType(playedCard, userRol);
     if (cardType === 'Action') {
-        return await playActionCard(lobbyId, targetData, playedCard, userRol, gameState);
-    }
-    else {
-        throw new Error('Solo se pueden jugar cartas de acción por ahora');
+        return await playActionCard(gameId, targetData, playedCard, userRol, gameState);
+    }else {
+        return await placeCardInTown(gameId, playedCard, userRol, gameState)
     }
 }
 
-
-const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState) => {
+const playActionCard = async (gameId,targetData, playedCard, userRol, gameState) => {
     playedCard.isRevealed = true;
     gameState.discardPile.push(playedCard);
     //Ejecutar efecto de carta
@@ -145,11 +143,11 @@ const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState
         gameState = action(gameState, targetData)
     }   
     //Guardar estado actualizado
-    return await saveAndFormatGameState(lobbyId, gameState);
+    return await saveAndFormatGameState(gameId, gameState);
 }
 
-const resolvePendingAction = async (lobbyId, userId, targetData) => {
-    let gameState = await getGameStateById(lobbyId);
+const resolvePendingAction = async (gameId, userId, targetData) => {
+    let gameState = await getGameStateById(gameId);
     /* Formato del pendingAction
     gameState.pendingAction = {
         player: 'peasant',
@@ -177,7 +175,30 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
         throw new Error('No hay acciones pendientes para este jugador');
     }
     gameState.pendingAction = null;
-    return await saveAndFormatGameState(lobbyId, gameState);
+    changeTurn(gameState);
+    return await saveAndFormatGameState(gameId, gameState);
+}
+
+const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
+        if(userRol=== 'peasant'){
+            playedCard.isRevealed = false
+            gameState.players.peasant.town.push(playedCard);
+        }else{
+            playedCard.isRevealed = true
+            gameState.players.king.town.push(playedCard);
+        }
+        gameState.pendingAction = null;
+        changeTurn(gameState);
+
+        return await saveAndFormatGameState(gameId, gameState);
+}
+
+const condemnARebel = async (gameId, userId) => {
+    let gameState = await getGameStateById(gameId);
+    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
+    if (gameState.turn !== userRol) {
+        throw new Error('No es el turno del jugador');
+    }
 }
 
 export const gameService = {
@@ -187,5 +208,5 @@ export const gameService = {
     getGameStateDTO,
     shuffleArray,
     resolvePendingAction,
-    playCard
+    playHandCard
 };
