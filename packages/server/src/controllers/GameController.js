@@ -37,7 +37,7 @@ const playCard = async (req, res) => {
         const lobbyId = req.params.id;
         const { cardUid, targetData } = req.body;
         const userId  = Number(req.user.id);
-
+        const io = req.app.get('io');
         const result = await gameService.playCard(lobbyId, cardUid, targetData, userId);
     
         if (result.isGameOver) {
@@ -66,7 +66,7 @@ function sendGameStateUpdate (req, dtoKing, dtoPeasant) {
 
     const peasantId = dtoPeasant.players.peasant.id;
     const socketPeasant = userSockets.get(String(peasantId)) || userSockets.get(Number(peasantId));
-    if (peasantId) {
+    if (socketPeasant) {
         io.to(socketPeasant).emit('gameState', dtoPeasant);
     } else {
         console.log(`No se encontró socket activo para el CAMPESINO (${peasantId})`); 
