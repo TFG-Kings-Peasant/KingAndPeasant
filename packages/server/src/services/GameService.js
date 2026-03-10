@@ -180,6 +180,21 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
     return await saveAndFormatGameState(lobbyId, gameState);
 }
 
+const checkWinCondition = async (gameState) => {
+    const deckCount = gameState.deck.length;
+    const discardPile = gameState.discardPile;
+    const kingHand = gameState.players.king.hand;
+    const kingTown = gameState.players.king.town;
+    const peasantTown = gameState.players.peasant.town;
+    if (discardPile.some(card => Number(card.templateId) === 16) || deckCount === 0) {
+        return true; 
+    } else if (kingHand.some(card => Number(card.templateId) === 16) || 
+        peasantTown.some(card => Number(card.templateId) === 16 && card.isRevealed && kingTown.length === 0)) {
+        return true;
+    }
+    return false;
+}
+
 export const gameService = {
     createGame,
     getGameStateById,
