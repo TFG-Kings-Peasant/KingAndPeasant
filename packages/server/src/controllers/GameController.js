@@ -38,9 +38,13 @@ const playCard = async (req, res) => {
         const { cardUid, targetData } = req.body;
         const userId  = Number(req.user.id);
 
-        const {dtoKing, dtoPeasant} = await gameService.playCard(lobbyId, cardUid, targetData, userId);
+        const result = await gameService.playCard(lobbyId, cardUid, targetData, userId);
     
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+        if (result.isGameOver) {
+            io.to(`game_${lobbyId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
 
         res.status(200).json({ message: "Carta jugada correctamente" });
     } catch (error) {
@@ -74,10 +78,13 @@ const resolveAction = async (req, res) => {
         const lobbyId = req.params.id;
         const { targetData } = req.body;
         const userId  = Number(req.user.id);
-        const {dtoKing, dtoPeasant} = await gameService.resolvePendingAction(lobbyId, userId, targetData);
-    
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
-
+        const result = await gameService.resolvePendingAction(lobbyId, userId, targetData);
+        const io = req.app.get('io');
+        if (result.isGameOver) {
+            io.to(`game_${lobbyId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
         console.error("Error al resolver la acción:", error.message);

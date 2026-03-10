@@ -35,6 +35,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     }
     */
     const initialState = {
+        startedAt: new Date(),
         era: 1, 
         turnNumber: 1,
         turn: "peasant",
@@ -53,7 +54,8 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
                 town: []
             }
         },
-        pendingAction: null
+        pendingAction: null,
+        lastEvent: null
     }
     return await saveAndFormatGameState(lobbyId, initialState);
 };
@@ -67,6 +69,37 @@ const getGameStateById = async (id) => {
 }
 
 const saveAndFormatGameState = async (lobbyId, gameState) => {
+    const winStatus = await checkWinCondition(gameState); 
+
+    if (winStatus && winStatus.isGameOver) {
+        const kingId = gameState.players.king.id;
+        const peasantId = gameState.players.peasant.id;
+        const winnerId = winStatus.winnerId;
+        const loserId = winnerId === kingId? peasantId : kingId;
+
+        await prisma.game.create({
+            data: {
+                player1Id: kingId,
+                player2Id: peasantId,
+                winnerId: winnerId,
+                reason: winStatus.reason,
+                startedAt: gameState.startedAt
+            }
+        });
+
+        await prisma.user.update({
+            where: { idUser: winnerId },
+            data: { games: {increment: 1}, wins: {increment: 1} }
+        });
+
+        await prisma.user.update({
+            where: {idUser: loserId},
+            data: { games: {increment: 1}, losses: {increment: 1}}
+        });
+        await redisClient.del(`game:${lobbyId}`);
+        return winStatus;
+    }
+    
     const result = await redisClient.set(`game:${lobbyId}`, JSON.stringify(gameState));
     if (result !== 'OK') {
         throw new Error('Error al guardar el estado del juego');
@@ -180,19 +213,26 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
     return await saveAndFormatGameState(lobbyId, gameState);
 }
 
-const checkWinCondition = async (gameState) => {
+const checkWinCondition = async (gameState, actionContext = null) => {
     const deckCount = gameState.deck.length;
     const discardPile = gameState.discardPile;
     const kingHand = gameState.players.king.hand;
     const kingTown = gameState.players.king.town;
     const peasantTown = gameState.players.peasant.town;
-    if (discardPile.some(card => Number(card.templateId) === 16) || deckCount === 0) {
-        return true; 
-    } else if (kingHand.some(card => Number(card.templateId) === 16) || 
-        peasantTown.some(card => Number(card.templateId) === 16 && card.isRevealed && kingTown.length === 0)) {
-        return true;
+    if (discardPile.some(card => Number(card.templateId) === 16)) {
+        return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
+    } 
+    if (deckCount === 0) {
+        return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'PEASANT_DECK_EMPTY' };
     }
-    return false;
+    if (kingHand.some(card => Number(card.templateId) === 16) || 
+        peasantTown.some(card => Number(card.templateId) === 16 && card.isRevealed && kingTown.length === 0)) {
+        return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
+    }
+    if (gameState.lastEvent === 'CONDEMN_FAIL') {
+        return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
+    }
+    return { isGameOver: false};
 }
 
 export const gameService = {
