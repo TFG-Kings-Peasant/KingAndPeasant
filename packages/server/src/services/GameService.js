@@ -99,6 +99,8 @@ const saveAndFormatGameState = async (lobbyId, gameState) => {
         await redisClient.del(`game:${lobbyId}`);
         return winStatus;
     }
+
+    delete gameState.lastEvent;
     
     const result = await redisClient.set(`game:${lobbyId}`, JSON.stringify(gameState));
     if (result !== 'OK') {
@@ -213,7 +215,7 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
     return await saveAndFormatGameState(lobbyId, gameState);
 }
 
-const checkWinCondition = async (gameState, actionContext = null) => {
+const checkWinCondition = async (gameState) => {
     const deckCount = gameState.deck.length;
     const discardPile = gameState.discardPile;
     const kingHand = gameState.players.king.hand;
