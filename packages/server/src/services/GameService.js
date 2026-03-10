@@ -105,30 +105,43 @@ const transformGameStateDTO = (gameState) => {
     return {dtoKing, dtoPeasant};
 };
 
-const playTownCard = async (ameId, cardUid, targetData, userId) => {
+const playTownCard = async (gameId, cardUid, userId) => {
     let gameState = await getGameStateById(gameId);
     const userRol = getUserRol(gameState, userId);
-        if (gameState.turn !== userRol) {
+    if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
-    const card = gameState.players[userRol].town.find(card => card.uid === cardUid);
-    if (!card) {
+    const cardIndex = gameState.players[userRol].town.findIndex(card => card.uid === cardUid);
+    if (cardIndex === -1) {
         throw new Error('Carta no encontrada en el pueblo del jugador');
     }
+    const [playedCard] = gameState.players[userRol].town.splice(cardIndex, 1);
     if(userRol==='king'){
-        //TODO: Activar acción
+        //TODO: Activar acción guardia
+            changeTurn(gameState);
+            return await saveAndFormatGameState(gameId, gameState);
     }else{
-        if(card.isRevealed){
-            //TODO: Devolver a la mano
+        if(playedCard.isRevealed){
+            return await returnRebeldToHand(gameId, gameState, playedCard)
         }else{
-            if(canInfiltrate(card)){
+            if(canInfiltrate(playedCard)){
                 //TODO: Infiltrar
+                changeTurn(gameState);
+                return await saveAndFormatGameState(gameId, gameState);
             }else{
-                //TODO: Activar acción
+                //TODO: Activar acción rebeld
+                changeTurn(gameState);
+                return await saveAndFormatGameState(gameId, gameState);
             }
         }
     }
+}
 
+const returnRebeldToHand = async (gameId, gameState, playedCard) => {
+    gameState.players.peasant.hand.push(playedCard)
+    changeTurn(gameState);
+
+    return await saveAndFormatGameState(gameId, gameState);
 }
 
 const passTurn = async (gameId, userId) => {
@@ -229,27 +242,33 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
         return await saveAndFormatGameState(gameId, gameState);
 }
 
-const condemnARebel = async (gameId, cardUid, userId, isDeck) => {
+const condemnARebel = async (gameId, cardUid, userId) => {
     let gameState = await getGameStateById(gameId);
     const userRol = getUserRol(gameState, userId);
+    if(userRol==='peasant'){
+        throw new Error('El campesino no puede condenar rebeldes');
+    }
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
-    let card = null;
-    if(isDeck){
-        card = gameState.players.deck[gameState.deck.length - 1];
-    }else{
+    let card = gameState.deck.find(card => card.uid === cardUid);
+    if(!card){
         card = gameState.players.peasant.town.find(card => card.uid === cardUid);
-    }
-    if (!card) {
+        if (!card) {
         throw new Error('Carta no encontrada en la mano del jugador');
+        }
+    }else if( card.uid != gameState.players.deck[gameState.deck.length - 1].uid)
+    {
+        throw new Error('Si la carta condenada estaba en el mazo, esta debe ser la primera del mazop');
     }
     if(card.isRevealed){
         throw new Error('No se puede condenar a un rebelde revelado');
 
     }
+
     card.isRevealed = true;
     //TODO: CONDICIÓN DE VICTORIA: Si la carta condenada es el Asesino, el rey gana, en caso contrario, el rey pierde.
+    console.log("Un rebelde a sido condenado, esta era ha acabado. TODO: Evaluar de quien es la victoria")
     return await saveAndFormatGameState(gameId, gameState);
 
 }
@@ -278,6 +297,8 @@ export const gameService = {
     shuffleArray,
     resolvePendingAction,
     playHandCard,
+    playTownCard,
     peasantDrawACard,
-    passTurn
+    passTurn,
+    condemnARebel
 };

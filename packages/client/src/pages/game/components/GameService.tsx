@@ -70,8 +70,8 @@ export const getGameStateById = async (gameId: number, token: string) => {
     return await response.json();
 }
 
-export const playHandCard = async (gameId: number, cardUid: string, targetData: Record<string, unknown> = {}, token: string) => {
-    const response = await fetch(`${API_URL}/${gameId}/playHandCard`, {
+export const playCard = async (gameId: number, cardUid: string, targetData: Record<string, unknown> = {}, isHand: boolean,token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/playCard`, {
         method: 'POST',
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -79,7 +79,8 @@ export const playHandCard = async (gameId: number, cardUid: string, targetData: 
         },
         body: JSON.stringify({ 
             cardUid,
-            targetData
+            targetData,
+            isHand
         }),
     });
     if (!response.ok) { 
@@ -101,6 +102,25 @@ export const resolvePendingAction = async (gameId: number, targetData: Record<st
     });
     if (!response.ok) { 
         const errorText = await response.text(); 
+        console.error("❌ ERROR DEL SERVER:", response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+    return await response.json();
+}
+
+export const condemnRebel = async (gameId: number, cardUid: string, token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/condemnRebel`, {
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+            cardUid
+        }),
+    });
+    if (!response.ok) { 
+        const errorText = await response.text();
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
         throw new Error(`Error ${response.status}: ${errorText}`);
     }
