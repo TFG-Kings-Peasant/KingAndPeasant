@@ -24,6 +24,14 @@ const setupNewEra = async (lobbyId, nextKingId, nextPeasantId, currentEra, curre
     const handKing = deck.splice(0,5);
     const handPeasant = deck.splice(0,5);
 
+    handKing.push({
+        uid: `cheat_card_assassin`,
+        templateId: 16,
+        typeKing: "Rebel",
+        typePeasant: "Rebel",
+        isRevealed: true
+    });
+
     return {
         startedAt: startedAt,
         era: currentEra + 1,

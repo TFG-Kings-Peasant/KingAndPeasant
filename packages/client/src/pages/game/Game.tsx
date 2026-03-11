@@ -31,17 +31,6 @@ function Game() {
     reason: string;  
   } | null>(null);
 
-  const previousEra = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (gameState) {
-      if (previousEra.current !== null && gameState.era > previousEra.current) {
-        alert(`🚩 ¡FIN DE LA ERA!\nAlguien ha ganado la Era ${previousEra.current}.\n\n¡Comienza la Era ${gameState.era} y se han intercambiado los roles!`);
-      }
-      previousEra.current = gameState.era;
-    }
-  }, [gameState?.era]);
-
   const fetchGameState = async () => {
     try {
       if(!id || !user || !user.authToken) return;
@@ -71,7 +60,14 @@ function Game() {
 
     const handleGameStateUpdate = (newGameState: GameState) => {
         console.log("=== TABLERO ACTUALIZADO VÍA SOCKET ===", newGameState);
-        setGameState(newGameState); 
+        setGameState((prevState) => {
+            // Si YA teníamos una partida en pantalla y la nueva Era es mayor...
+            if (prevState && newGameState.era > prevState.era) {
+                alert(`🚩 ¡FIN DE LA ERA!\nAlguien ha ganado la Era ${prevState.era}.\n\n¡Comienza la Era ${newGameState.era} y se han intercambiado los roles!`);
+            }
+            // Devolvemos el nuevo estado para que React actualice la pantalla
+            return newGameState; 
+        });
     };
 
     socket.emit('joinGame', `game_${id}`);
@@ -321,7 +317,7 @@ function Game() {
             </p>
             
             <button 
-                onClick={() => navigate('/home')} // Te lleva al inicio
+                onClick={() => navigate('/')} // Te lleva al inicio
                 className="button ingame"
                 style={{ padding: '10px 20px', fontSize: '1.1rem', cursor: 'pointer' }}
             >
