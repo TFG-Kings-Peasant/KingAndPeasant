@@ -89,9 +89,9 @@ const condemnARebel = async (req, res) => {
     try {
         const gameId = req.params.id;
         const userId  = Number(req.user.id);
-        const { cardUid } = req.body;
+        const { isDeck, cardUid } = req.body;
 
-        const {dtoKing, dtoPeasant} = await gameService.condemnARebel(gameId, cardUid, userId);
+        const {dtoKing, dtoPeasant} = await gameService.condemnARebel(gameId, isDeck, cardUid, userId);
     
         sendGameStateUpdate(req, dtoKing, dtoPeasant);
 

@@ -108,14 +108,15 @@ export const resolvePendingAction = async (gameId: number, targetData: Record<st
     return await response.json();
 }
 
-export const condemnRebel = async (gameId: number, cardUid: string, token: string) => {
+export const condemnRebel = async (gameId: number, isDeck: boolean, cardUid: string, token: string) => {
     const response = await fetch(`${API_URL}/${gameId}/condemnRebel`, {
         method: 'POST',
         headers: {
             "Authorization": `Bearer ${token}`,
             'Content-Type': 'application/json' 
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
+            isDeck,
             cardUid
         }),
     });

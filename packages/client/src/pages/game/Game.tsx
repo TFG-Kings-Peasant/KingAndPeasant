@@ -158,7 +158,7 @@ function Game() {
     const cardToPlayUid = selectedCard.uid;
     try {
       if(selectedCard.position === 'enemyTown' && isKing){
-        await condemnRebel(Number(id), cardToPlayUid, user.authToken)
+        await condemnRebel(Number(id), false,cardToPlayUid, user.authToken)
       }else if(selectedCard.position === 'hand'){
         await playCard(Number(id), cardToPlayUid, {}, true, user.authToken)
       }else if(selectedCard.position === 'town'){
@@ -173,6 +173,25 @@ function Game() {
         alert("Ocurrió un error desconocido");
       }
       setError("Error jugando una carta")
+    }
+  }
+
+  const handleCondemnDeckCard = async () => {
+    if(!id || !user || !user.authToken || !gameState) return;
+    if(gameState.turn !== myRoleName) {
+      alert("No es tu turno");
+      return;
+    }
+    try {
+      await condemnRebel(Number(id), true, '', user.authToken)
+      setSelectedCard(null);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Ocurrió un error desconocido");
+      }
+      setError("Error al condenar carta de la deck")
     }
   }
 
@@ -246,7 +265,8 @@ function Game() {
       <div className="action-container">
         {gameState.turn === myRoleName ? <div>
           <button className = "button ingame" onClick={handlePassTurn}>PASAR TURNO</button> 
-          {myRoleName === 'peasant' ? <button className = "button ingame" onClick={handleDrawCard}>ROBAR CARTA</button> : <div></div> }
+          {myRoleName === 'peasant' ? <button className = "button ingame" onClick={handleDrawCard}>ROBAR CARTA</button> : 
+          <button className = "button ingame" onClick={handleCondemnDeckCard}>CONDENAR CARTA DEL MAZO</button>  }
           </div>
         : <div></div>}
 

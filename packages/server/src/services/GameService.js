@@ -242,7 +242,7 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
         return await saveAndFormatGameState(gameId, gameState);
 }
 
-const condemnARebel = async (gameId, cardUid, userId) => {
+const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
     let gameState = await getGameStateById(gameId);
     const userRol = getUserRol(gameState, userId);
     if(userRol==='peasant'){
@@ -251,21 +251,21 @@ const condemnARebel = async (gameId, cardUid, userId) => {
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
-    let card = gameState.deck.find(card => card.uid === cardUid);
-    if(!card){
-        card = gameState.players.peasant.town.find(card => card.uid === cardUid);
-        if (!card) {
-        throw new Error('Carta no encontrada en la mano del jugador');
-        }
-    }else if( card.uid != gameState.players.deck[gameState.deck.length - 1].uid)
+    let cardIndex = null
+    let card = null
+    if(isDeck){
+        card = gameState.deck.splice(gameState.deck.length - 1, 1)[0];
+    }else{  
+        cardIndex = gameState.players.peasant.town.findIndex(card => card.uid === cardUid);
+        card = gameState.players.peasant.town.splice(cardIndex, 1)[0];
+    }
+    if(!card)
     {
-        throw new Error('Si la carta condenada estaba en el mazo, esta debe ser la primera del mazop');
-    }
-    if(card.isRevealed){
+        throw new Error('Carta no encontrada');
+    }else if(card.isRevealed)
+    {
         throw new Error('No se puede condenar a un rebelde revelado');
-
     }
-
     card.isRevealed = true;
     //TODO: CONDICIÓN DE VICTORIA: Si la carta condenada es el Asesino, el rey gana, en caso contrario, el rey pierde.
     console.log("Un rebelde a sido condenado, esta era ha acabado. TODO: Evaluar de quien es la victoria")
