@@ -31,6 +31,17 @@ function Game() {
     reason: string;  
   } | null>(null);
 
+  const previousEra = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (gameState) {
+      if (previousEra.current !== null && gameState.era > previousEra.current) {
+        alert(`🚩 ¡FIN DE LA ERA!\nAlguien ha ganado la Era ${previousEra.current}.\n\n¡Comienza la Era ${gameState.era} y se han intercambiado los roles!`);
+      }
+      previousEra.current = gameState.era;
+    }
+  }, [gameState?.era]);
+
   const fetchGameState = async () => {
     try {
       if(!id || !user || !user.authToken) return;
@@ -97,6 +108,9 @@ function Game() {
   const rivalRoleName = isKing ? "peasant" : "king";
   const pendingAction = gameState.pendingAction && gameState.pendingAction.player == myRoleName? true: false;
   
+  const myScore = gameState.scores[String(user.id)] || 0;
+  const rivalScore = gameState.scores[String(rivalPlayer.id)] || 0;
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault(); 
     
@@ -201,6 +215,20 @@ function Game() {
     </div>
 
     <div className="game-sidebar">
+      <div className="score-board" style={{ backgroundColor: '#2c2c2c', padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center', border: '2px solid #d4af37' }}>
+          <h2 style={{ margin: '0 0 10px 0', color: '#d4af37', fontSize: '1.5rem' }}>ERA {gameState.era}</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem' }}>
+              <div>
+                  <span style={{ display: 'block', color: '#aaa', fontSize: '0.8rem' }}>Tus Victorias</span>
+                  <strong style={{ fontSize: '1.2rem'}}>{myScore} / 2</strong>
+              </div>
+              <div>
+                  <span style={{ display: 'block', color: '#aaa', fontSize: '0.8rem' }}>Rival</span>
+                  <strong style={{ fontSize: '1.2rem'}}>{rivalScore} / 2</strong>
+              </div>
+          </div>
+      </div>
+
       <div className="deck-pile">
         <span>MAZO</span>
         <strong>{gameState.deckCount}</strong>

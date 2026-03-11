@@ -9,6 +9,9 @@ export interface CardState {
 
 export interface GameState {
     id: number;
+    startedAt: string;
+    era: number;
+    scores: Record<string, number>;
     turnNumber: number;
     turn: 'king' | 'peasant';
     deckCount: number;
