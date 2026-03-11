@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getGameStateById, getPosibleActions, playCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Game.css";
 
@@ -12,6 +12,7 @@ interface ChatMessage {
 
 function Game() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -23,6 +24,12 @@ function Game() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {socket, user} = useAuth()
+
+  const [gameOverData, setGameOverData] = useState<{
+    isGameOver: boolean;
+    winnerId: number;
+    reason: string;  
+  } | null>(null);
 
   const fetchGameState = async () => {
     try {
@@ -61,9 +68,15 @@ function Game() {
 
     socket.on('receiveChatMessage', handleReceiveMessage);
 
+    socket.on('game:finished', (data) => {
+        console.log("=== PARTIDA TERMINADA ===", data);
+        setGameOverData(data); 
+    });
+
     return () => {
       socket.off('gameState', fetchGameState);
       socket.off('receiveChatMessage', handleReceiveMessage);
+      socket.off('game:finished');
     };
 
   }, [socket, id]);
@@ -265,6 +278,31 @@ function Game() {
     )}
 
     {error && <p className="error-msg">{error}</p>}
+
+    {gameOverData && (
+      <div className="card-modal-overlay" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="card-modal-content" style={{ padding: '40px', textAlign: 'center', backgroundColor: '#fff', borderRadius: '10px', color: '#000' }}>
+            <h1 style={{ fontSize: '2rem', marginBottom: '20px' }}>
+                {gameOverData.winnerId === Number(user?.id) 
+                    ? '👑 ¡HAS GANADO!' 
+                    : '💀 HAS PERDIDO'}
+            </h1>
+            
+            <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>
+                Motivo: <strong>{gameOverData.reason}</strong>
+            </p>
+            
+            <button 
+                onClick={() => navigate('/home')} // Te lleva al inicio
+                className="button ingame"
+                style={{ padding: '10px 20px', fontSize: '1.1rem', cursor: 'pointer' }}
+            >
+                Volver al Menú Principal
+            </button>
+        </div>
+      </div>
+    )}
+
   </div>
   );
 }

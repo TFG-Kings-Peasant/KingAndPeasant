@@ -6,7 +6,7 @@ import { shuffleArray } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 
-const createGame = async ( lobbyId, player1Id, player2Id) => {
+const setupNewEra = async (lobbyId, nextKingId, nextPeasantId, currentEra, currentScores, startedAt) => {
     const catalog = await prisma.card.findMany();
     const deck = [];
     catalog.forEach(card => {
@@ -17,13 +17,31 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
                 typeKing: card.typeKing,
                 typePeasant: card.typePeasant,
                 isRevealed: false
-            })
+            });
         }
-    })
+    });
     shuffleArray(deck);
     const handKing = deck.splice(0,5);
     const handPeasant = deck.splice(0,5);
 
+    return {
+        startedAt: startedAt,
+        era: currentEra + 1,
+        scores: currentScores, // Novedad: Llevamos el conteo de victorias
+        turnNumber: 1,
+        turn: "peasant", // Las reglas dicen que empieza el campesino
+        deck: deck,
+        discardPile: [],
+        players: {
+            king: { id: nextKingId, hand: handKing, town: [] },
+            peasant: { id: nextPeasantId, hand: handPeasant, town: [] }
+        },
+        pendingAction: null,
+        lastEvent: null
+    };
+}
+
+const createGame = async ( lobbyId, player1Id, player2Id) => {
     /*Forzar la carta de acción
     const targetCardId = 15; 
     
@@ -34,29 +52,13 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         handPeasant[0] = testCard; 
     }
     */
-    const initialState = {
-        startedAt: new Date(),
-        era: 1, 
-        turnNumber: 1,
-        turn: "peasant",
-        deck: deck,
-        discardPile: [],
-        players:{
-            //Si queremos asignar los roles random, habria que cambiar esto
-            king: {
-                id: player1Id,
-                hand: handKing,
-                town: []
-            },
-            peasant: {
-                id: player2Id,
-                hand:handPeasant,
-                town: []
-            }
-        },
-        pendingAction: null,
-        lastEvent: null
-    }
+    const initialScores = {
+        [player1Id]: 0,
+        [player2Id]: 0
+    };
+
+    const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
+    
     return await saveAndFormatGameState(lobbyId, initialState);
 };
 
@@ -77,27 +79,41 @@ const saveAndFormatGameState = async (lobbyId, gameState) => {
         const winnerId = winStatus.winnerId;
         const loserId = winnerId === kingId? peasantId : kingId;
 
-        await prisma.game.create({
-            data: {
-                player1Id: kingId,
-                player2Id: peasantId,
-                winnerId: winnerId,
-                reason: winStatus.reason,
-                startedAt: gameState.startedAt
-            }
-        });
+        gameState.scores[winnerId] += 1;
+        
 
-        await prisma.user.update({
-            where: { idUser: winnerId },
-            data: { games: {increment: 1}, wins: {increment: 1} }
-        });
+        if(gameState.scores[winnerId] >= 2) {
+            await prisma.game.create({
+                data: {
+                    player1Id: kingId,
+                    player2Id: peasantId,
+                    winnerId: winnerId,
+                    reason: winStatus.reason,
+                    startedAt: new Date(gameState.startedAt)
+                }
+            });
 
-        await prisma.user.update({
-            where: {idUser: loserId},
-            data: { games: {increment: 1}, losses: {increment: 1}}
-        });
-        await redisClient.del(`game:${lobbyId}`);
-        return winStatus;
+            await prisma.user.update({
+                where: { idUser: winnerId },
+                data: { games: {increment: 1}, wins: {increment: 1} }
+            });
+
+            await prisma.user.update({
+                where: {idUser: loserId},
+                data: { games: {increment: 1}, losses: {increment: 1}}
+            });
+            await redisClient.del(`game:${lobbyId}`);
+            return winStatus;
+        } else {
+            gameState = await setupNewEra(
+                lobbyId, 
+                winnerId, 
+                loserId, 
+                gameState.era, 
+                gameState.scores, 
+                gameState.startedAt
+            );
+        }
     }
 
     delete gameState.lastEvent;
