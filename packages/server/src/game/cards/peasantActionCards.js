@@ -4,14 +4,14 @@ export const peasantActionCards = {
     3: (gameState) => {
         const peasantTown = gameState.players.peasant.town;
         const kingTown = gameState.players.king.town;
-        const rebelInTown = false;
-        const guardInTown = false;
-        for (let card in peasantTown) {
+        let rebelInTown = false;
+        let guardInTown = false;
+        for (let card of peasantTown) {
             if (card.typePeasant == "Rebel") {
                 rebelInTown = true;
                 break;
             }
-        } for (let card in kingTown) {
+        } for (let card of kingTown) {
             if (card.typeKing == "Guard") {
                 guardInTown = true;
                 break;
@@ -27,7 +27,7 @@ export const peasantActionCards = {
         return gameState;
     },
     11: (gameState) => {
-        if (!gameState.players.peasant.town) {
+        if (gameState.players.peasant.town.length === 0) {
             throw new Error('No existen las cartas suficientes en el pueblo para realizar esta acción');
         }
         gameState.pendingAction = {
@@ -37,7 +37,7 @@ export const peasantActionCards = {
         return gameState;
     },
     12: (gameState) => {
-        if (gameState.players.peasant.town === 0) {
+        if (gameState.players.peasant.town.length === 0) {
             throw new Error('No existen las cartas suficientes en el pueblo para realizar esta acción');
         }
         const cardsTown = gameState.players.peasant.town.splice(0, gameState.players.peasant.town.length); 

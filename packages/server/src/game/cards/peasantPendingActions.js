@@ -74,15 +74,21 @@ export const peasantPendingActions = {
             throw new Error('La cantidad de cartas rebeldes y posiciones en el mazo debe ser la misma');
         }
         if (rebelUids.length !== 0) {
-            for (const uid of rebelUids) {
-                const index = gameState.players.peasant.town.findIndex(card => card.uid === uid);
-                if (index === -1) {
-                    throw new Error('Carta no encontrada en el pueblo');
+            const insertions = rebelUids.map((uid, index) => ({
+                uid: uid,
+                position: deckPositions[index]
+            }));
+            insertions.sort((a, b) => b.position - a.position);
+            for (const item of insertions) {
+                const townIndex = gameState.players.peasant.town.findIndex(card => card.uid === item.uid);
+                
+                if (townIndex === -1) {
+                    throw new Error(`Carta ${item.uid} no encontrada en el pueblo`);
                 }
-                const [card] = gameState.players.peasant.town.splice(index, 1);
-                const indexDeck = deckPositions.shift();
-                if (indexDeck === undefined) { throw new Error('Faltan posiciones en el mazo para infiltrar estas cartas'); }
-                gameState.deck.splice(indexDeck, 0, card);
+                
+                const [card] = gameState.players.peasant.town.splice(townIndex, 1);
+                
+                gameState.deck.splice(item.position, 0, card);
             }
         }
         gameState.players.peasant.town.forEach(card => {

@@ -1,9 +1,9 @@
 export const kingActionCards = {
-    10: (gameState, targetData) => {
+    10: (gameState) => {
         const kingHand = gameState.players.king.hand;
-        const guardsInHand = false; 
-        const countGuards = 0;
-        for (let card in kingHand) {
+        let guardsInHand = false; 
+        let countGuards = 0;
+        for (let card of kingHand) {
             if (card.typeKing == "Guard") {
                 countGuards = countGuards + 1;
                 if(countGuards >= 2) {
@@ -21,7 +21,7 @@ export const kingActionCards = {
         };
         return gameState;
     },
-    11: (gameState, targetData) => {
+    11: (gameState) => {
         gameState.pendingAction = {
             player: 'king',
             type: 'ARREST' 
