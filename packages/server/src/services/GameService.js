@@ -186,8 +186,6 @@ const playCard = async (lobbyId, cardUid, targetData, userId) => {
 
 
 const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState) => {
-    playedCard.isRevealed = true;
-    gameState.discardPile.push(playedCard);
     //Ejecutar efecto de carta
     if (userRol === "peasant") {
         const action = peasantActionCards[playedCard.templateId];
@@ -202,7 +200,9 @@ const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState
             throw new Error('Carta de acción no existe');
         }
         gameState = action(gameState, targetData)
-    }   
+    }
+    playedCard.isRevealed = true;
+    gameState.discardPile.push(playedCard); 
     //Guardar estado actualizado
     return await saveAndFormatGameState(lobbyId, gameState);
 }
