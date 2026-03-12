@@ -1,8 +1,9 @@
-import { drawCardFromDeck } from "../../utils/helpers";
+import {drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
 
 export const rebelCards = {
-    1: (gameState) => {
+    1: (gameState, targetData) => {
         //Take all Rebels from the discard pile, then Hide them
+        console.log("Take all Rebels from the discard pile, then Hide them")
        for (let i = gameState.discardPile.length - 1; i >= 0; i--) {
             const card = gameState.discardPile[i];
 
@@ -16,16 +17,16 @@ export const rebelCards = {
         }
         return gameState;
     },
-    2: (gameState, targetData) => {
+    2: (gameState, playedCard) => {
         //"Shuffle all other Rebels in Town and cards in hand into the deck, then draw 3 cards"
-        const { playedCardUid } = targetData 
+        console.log("Shuffle all other Rebels in Town and cards in hand into the deck, then draw 3 cards")
 
         // 1. Mover los "otros" Rebeldes del Town al mazo
         for (let i = gameState.players.peasant.town.length - 1; i >= 0; i--) {
             const card = gameState.players.peasant.town[i];
             
             // Verificamos que sea Rebelde y que NO sea la carta que estamos jugando
-            if (card.typePeasant === "Rebel" && card.uid !== playedCardUid) {
+            if (card.typePeasant === "Rebel" && card.uid !== playedCard.uid) {
                 gameState.deck.push(card); // La metemos al mazo
                 gameState.players.peasant.town.splice(i, 1); // La sacamos del town
             }
@@ -47,7 +48,6 @@ export const rebelCards = {
                 gameState.players.peasant.hand.push(drawnCard);
             }
         }
-
         return gameState;
     },
     4: (gameState, targetData) => {
@@ -78,7 +78,7 @@ export const rebelCards = {
     },
     6: (gameState) => {
         //"Remove all Rebels and Guards"
-
+        console.log("Remove all Rebels and Guards")
         // 1. Recorrer el town del King buscando Guardias
         for (let i = gameState.players.king.town.length - 1; i >= 0; i--) {
             const card = gameState.players.king.town[i];
@@ -104,7 +104,6 @@ export const rebelCards = {
 
             }
         }
-
         return gameState;
     },
     7: (gameState) => {

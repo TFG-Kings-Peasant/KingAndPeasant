@@ -1,4 +1,4 @@
-import { drawCardFromDeck } from "../../utils/helpers";
+import { changeTurn, drawCardFromDeck } from "../../utils/helpers.js";
 
 export const guardCards = {
     1: (gameState, targetData) => {
@@ -16,6 +16,7 @@ export const guardCards = {
     },
     2: (gameState) => {
         //"Discard the top 2 cards of the deck"
+        console.log("Discard the top 2 cards of the deck")
         if(gameState.deck.lenght > 0){
             const card = gameState.deck.pop()
             card.isRevealed = true
@@ -26,7 +27,7 @@ export const guardCards = {
             card.isRevealed = true
             gameState.discardPile.push(card)
         }
-
+        changeTurn(gameState)
         return gameState;
     },
     3: (gameState) => {
@@ -59,12 +60,13 @@ export const guardCards = {
     },
     6: (gameState) => {
         //"Reveal all Rebels"
+        console.log("Reveal all Rebels")
 
         for (let i = gameState.players.peasant.town.length - 1; i >= 0; i--) {
             const card = gameState.players.peasant.town[i];
             card.isRevealed = true
         }
-
+        changeTurn(gameState)
         return gameState;
     },
     7: (gameState) => {

@@ -5,6 +5,9 @@ import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
 import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
+import {rebelCards} from '../game/cards/rebelCards.js'
+import {guardCards} from '../game/cards/guardCards.js'
+
 
 const createGame = async ( gameId, player1Id, player2Id) => {
     const catalog = await prisma.card.findMany();
@@ -105,40 +108,53 @@ const transformGameStateDTO = (gameState) => {
     return {dtoKing, dtoPeasant};
 };
 
-const playTownCard = async (gameId, cardUid, userId) => {
+const playTownCard = async (gameId, cardUid, targetData, userId) => {
     let gameState = await getGameStateById(gameId);
     const userRol = getUserRol(gameState, userId);
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
     const cardIndex = gameState.players[userRol].town.findIndex(card => card.uid === cardUid);
+
     if (cardIndex === -1) {
         throw new Error('Carta no encontrada en el pueblo del jugador');
     }
-    const [playedCard] = gameState.players[userRol].town.splice(cardIndex, 1);
+    const playedCard = gameState.players[userRol].town[cardIndex];
+
     if(userRol==='king'){
-        //TODO: Activar acción guardia
-            changeTurn(gameState);
-            return await saveAndFormatGameState(gameId, gameState);
+        return await activateCard(gameId, targetData, playedCard, userRol, gameState);
     }else{
         if(playedCard.isRevealed){
-            return await returnRebeldToHand(gameId, gameState, playedCard)
+            return await returnRebeldToHand(gameId, gameState, cardIndex)
         }else{
-            if(canInfiltrate(playedCard)){
-                //TODO: Infiltrar
-                changeTurn(gameState);
-                return await saveAndFormatGameState(gameId, gameState);
-            }else{
-                //TODO: Activar acción rebeld
-                changeTurn(gameState);
-                return await saveAndFormatGameState(gameId, gameState);
-            }
+            return await activateCard(gameId, targetData, playedCard, userRol, gameState);
         }
     }
 }
 
-const returnRebeldToHand = async (gameId, gameState, playedCard) => {
-    gameState.players.peasant.hand.push(playedCard)
+const activateCard = async (gameId, targetData, playedCard, userRol, gameState) => {
+    playedCard.isRevealed = true;
+    if (userRol === "peasant") {
+        const action = rebelCards[playedCard.templateId];
+        if (!action) {
+            throw new Error('Carta de Rebel no existe');
+        }
+        gameState = action(gameState, playedCard);
+    } else {
+        const action = guardCards[playedCard.templateId];
+        if (!action) {
+            throw new Error('Carta de Guard no existe');
+        }
+        gameState = action(gameState, playedCard)
+    }   
+    changeTurn(gameState); // Esto no va aqui, deberia depender de si se ha acabado la pending action.
+
+    return await saveAndFormatGameState(gameId, gameState);
+}
+
+const returnRebeldToHand = async (gameId, gameState, cardIndex) => {
+    const [card] = gameState.players.peasant.town.splice(cardIndex, 1);
+    gameState.players.peasant.hand.push(card)
     changeTurn(gameState);
 
     return await saveAndFormatGameState(gameId, gameState);

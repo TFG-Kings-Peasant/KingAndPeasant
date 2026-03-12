@@ -38,7 +38,7 @@ const playCard = async (req, res) => {
         const userId  = Number(req.user.id);
         const {dtoKing, dtoPeasant} = isHand 
         ? await gameService.playHandCard(gameId, cardUid, targetData, userId) 
-        : await gameService.playTownCard(gameId, cardUid, userId);
+        : await gameService.playTownCard(gameId, cardUid, targetData, userId);
     
         sendGameStateUpdate(req, dtoKing, dtoPeasant);
 
