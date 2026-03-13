@@ -1,16 +1,13 @@
 import { changeTurn, drawCardFromDeck } from "../../utils/helpers.js";
 
 export const guardCards = {
-    1: (gameState, targetData) => {
+    1: (gameState) => {
         //"Draw 1 card, then Ready up to 1 Guard"
 
         drawCardFromDeck(gameState, 'king')
-
-        // 2. Ocultar hasta 2 Rebeldes (de la mano al Town)
         gameState.pendingAction = {
-                type: "READY_GUARDS",
                 player: "king",
-                maxAmount: 1
+                type: "CRIER",
         };
         return gameState;
     },
@@ -33,28 +30,36 @@ export const guardCards = {
     3: (gameState) => {
         //"Ready a Guard, then Mobilize it"
         gameState.pendingAction = {
-            type: "READY_A_GUARD",
+            type: "INQUISITOR",
             player: "king"
         };
         return gameState;
     },
     4: (gameState) => {
         //"Reveal a Rebel"
+        const peasantTown = gameState.players.peasant.town;
+        let rebelInTown = false;
+        for (let card of peasantTown) {
+            if (card.typePeasant == "Rebel") {
+                rebelInTown = true;
+                break;
+            }
+        }
+        if (!rebelInTown) {
+            throw new Error('No hay rebeldes en el pueblo para revelar');
+        }
         gameState.pendingAction = {
-            type: "REVEAL_A_REBEL",
-            player: "king"
+            player: "king",
+            type: "SPY",
         };
         return gameState;
     },
     5: (gameState) => {
         //"Shuffle the deck and look at the top card, you may put it on the bottom of the deck"
         shuffleArray(gameState.deck);
-        const topCard = gameState.deck[gameState.deck.length - 1]
-        //TODO: Mostrar la carta al jugador
         gameState.pendingAction = {
-            type: "SHOW_CARD",
             player: "king",
-            card: topCard.uid
+            type: "ADVISOR"
         };
         return gameState;
     },
@@ -62,6 +67,17 @@ export const guardCards = {
         //"Reveal all Rebels"
         console.log("Reveal all Rebels")
 
+        const peasantTown = gameState.players.peasant.town;
+        let rebelInTown = false;
+        for (let card of peasantTown) {
+            if (card.typePeasant == "Rebel") {
+                rebelInTown = true;
+                break;
+            }
+        }
+        if (!rebelInTown) {
+            throw new Error('No hay rebeldes en el pueblo para revelar');
+        }
         for (let i = gameState.players.peasant.town.length - 1; i >= 0; i--) {
             const card = gameState.players.peasant.town[i];
             card.isRevealed = true
@@ -71,33 +87,25 @@ export const guardCards = {
     },
     7: (gameState) => {
         //"Look at any 1 card in the deck, if it is the ASSASSIN discard it, otherwise put it back in order",
-
         gameState.pendingAction = {
-            type: "SELECT_DECK_CARD",
-            player: "king"
+            player: "king",
+            type: "GUARDIAN",
         };
-        //TODO: Mostrar la carta seleccionada
         return gameState;
     },
     8: (gameState) => {
         //"Peasant Removes 1 hidden Rebel"
-
         gameState.pendingAction = {
-            type: "REMOVE_HIDDEN_REBEL",
-            player: "peasant"
+            player: "peasant",
+            type: "EXECUTOR"
         };
-
         return gameState;
     },
     9: (gameState) => {
         //"Look at the top 3 cards of the deck, then put them back in any order"
-        const amountToTake = Math.min(3, gameState.deck.length);
-        const topThreeCards = gameState.deck.splice(-amountToTake);
-
         gameState.pendingAction = {
-            type: "SHOW_CARDS",
-            player: "peasant",
-            cards: topThreeCards
+            player: "king",
+            type: "SENTINEL"
         };
         return gameState;
     },
@@ -107,10 +115,9 @@ export const guardCards = {
             const card = gameState.players.peasant.hand[i];
             card.isRevealed = true;
         }
-
         gameState.pendingAction = {
-            type: "CANCEL_SHOW_CARDS",
             player: "king",
+            type: "WATCHMAN"
         };
         return gameState;
     }
