@@ -251,6 +251,20 @@ h3 {
   pointer-events: none; /* Evita clicks en zonas prohibidas */
 }
 
+.revolt-position-input {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 4px;
+  border: 2px solid #d4af37;
+  background: rgba(0,0,0,0.8);
+  color: white;
+}
+
 /* Animación para que aparezca con un pequeño "rebote" */
 @keyframes popIn {
   0% { opacity: 0; transform: scale(0.8); }

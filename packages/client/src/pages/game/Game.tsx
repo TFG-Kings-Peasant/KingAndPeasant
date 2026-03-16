@@ -215,17 +215,6 @@ function Game() {
             return (
               <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
               onClick={() => handleSelectCard(card, 'rivalTown')}>
-                {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
-                   <input 
-                     type="number" 
-                     min="0" max={gameState.deckCount}
-                     className="revolt-position-input"
-                     onClick={(e) => e.stopPropagation()} // Evita que el click quite la selección de la carta
-                     onChange={(e) => {
-                       const pos = parseInt(e.target.value) || 0;
-                       setActionTargets(prev => prev.map(t => t.uid === card.uid ? { ...t, chosenPosition: pos } : t));
-                     }}
-                   />)}
               </div>
             );
           })}

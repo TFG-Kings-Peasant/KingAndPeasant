@@ -26,7 +26,10 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         formatPayload: (selectedCards) => {
             const rebel = selectedCards.find(c => c.position === 'myTown');
             const guard = selectedCards.find(c => c.position === 'rivalTown');
-            return { rebelUid: rebel?.uid, guardUid: guard?.uid};
+            return {
+                rebelUid: rebel?.uid ?? "", 
+                guardUid: guard?.uid ?? ""
+            };
         }
     },
     'RALLY': {
@@ -45,7 +48,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona hasta 2 cartas del mazo de descartes",
         allowedZones: ['discard'],
         canConfirm: (selectedCards) => {
-            const isInDiscard = selectedCards.some(c => c.position === 'discard');
+            const isInDiscard = selectedCards.every(c => c.position === 'discard');
             return selectedCards.length >= 0 && selectedCards.length < 3 && isInDiscard;
         },
         formatPayload: (selectedCards) => {
