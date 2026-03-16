@@ -51,6 +51,9 @@ export const peasantPendingActions = {
     },
     'BRAWL': (gameState, targetData) => {
         const {rebelUid, guardUid} = targetData;
+        if (!rebelUid || !guardUid) {
+            throw new Error('Faltan los objetivos para realizar la Acción');
+        }
         const rebelIndex = gameState.players.peasant.town.findIndex(card => card.uid === rebelUid);
         const guardIndex = gameState.players.king.town.findIndex(card => card.uid === guardUid);
         
