@@ -1,6 +1,29 @@
 import { changeTurn, drawCardFromDeck } from "../../utils/helpers.js";
 
 export const guardPendingCards = {
+    "THIEF": (gameState, targetData) => {
+        //"King discards 2 cards, then Peasant takes 1 of them"
+        const discardUids = targetData?.discardUids || [];
+        if (discardUids.length > 2) {
+                throw new Error(`Solo se puede descartar 2 cartas como máximo`);
+        }
+        discardUids.forEach(uid => {
+            const index = gameState.players.king.hand.findIndex(c => c.uid === uid);
+            if (index === -1) {
+                throw new Error(`La carta con UID ${uid} no está en la mano del rey`);
+            }
+            const [handCard] = gameState.players.king.hand.splice(index, 1);
+            handCard.isRevealed = true
+            gameState.discardPile.push(handCard);
+        });
+        const amount = discardUids.length
+        gameState.pendingAction = {
+            type: "THIEF2",
+            player: "peasant",
+            amount: amount
+        };
+        return gameState;
+    },
     "CRIER": (gameState, targetData) => {
         //"Draw 1 card, then Ready up to 1 Guard"
 

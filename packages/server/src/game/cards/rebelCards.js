@@ -1,7 +1,7 @@
 import {drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
 
 export const rebelCards = {
-    1: (gameState, targetData) => {
+    1: (gameState) => {
         //Take all Rebels from the discard pile, then Hide them
         let rebelsInDiscardPile = false
         console.log("Take all Rebels from the discard pile, then Hide them")
@@ -19,6 +19,8 @@ export const rebelCards = {
         if(!rebelsInDiscardPile){
             throw new Error('No hay rebeldes en la pila de descartes');
         }
+        
+        changeTurn(gameState)
         return gameState;
     },
     2: (gameState, playedCard) => {
@@ -52,6 +54,8 @@ export const rebelCards = {
                 gameState.players.peasant.hand.push(drawnCard);
             }
         }
+
+        changeTurn(gameState)
         return gameState;
     },
     4: (gameState) => {
@@ -60,14 +64,18 @@ export const rebelCards = {
             type: "THUG",
             player: "peasant"
         };
+
         return gameState;
     },
     5: (gameState) => {
         //"Look at the top 3 cards of the deck, then take 1 and put the others back in any order"
+
+        //TODO: Logica de mostrar cartas de la deck y dejar que sean seleccionables
         gameState.pendingAction = {
             type: "COURTESAN",
             player: "peasant"
         };
+
         return gameState;
     },
     6: (gameState) => {
@@ -104,41 +112,54 @@ export const rebelCards = {
             throw new Error('No cartas en el pueblo para eliminar');
         }
 
+        changeTurn(gameState)
         return gameState;
     },
     7: (gameState) => {
         //"Draw up to 3 cards, then put the same number of cards on top of the deck in any order"
 
+        const deckLength = gameState.deck.length
+        if (deckLength === 0) {
+            throw new Error('No cartas en el mazo para robar');
+        }
+
         // Nos aseguramos de no intentar robar más cartas de las que hay en el mazo
-        const actualDraws = Math.min(3, deck.length);
+        const amount = Math.min(3, deckLength);
 
         gameState.pendingAction = {
             type: "CHARLATAN",
             player: "peasant",
-            amount: actualDraws
+            amount: amount
         };
 
         return gameState;
     },
     8: (gameState) => {
         //"Return up to 2 other Rebels back to hand, then Hide up to 2 Rebels"
+        const townLength = gameState.players.peasant.town.length
+        if (townLength === 0) {
+            throw new Error('No cartas en el pueblo del campesino para robar');
+        }
+
+        const amount = Math.min(2, townLength);
 
         gameState.pendingAction = {
-                type: "RAT",
-                player: "peasant",
+            type: "RAT",
+            player: "peasant",
+            amount: amount
         };
         return gameState;
     },
     10: (gameState) => {
         //"King discards 2 cards, then Peasant takes 1 of them"
-        const kingHand = gameState.players.king.hand;
+        const kingHandLength = gameState.players.king.hand.lenth;
 
-        if (kingHand.length === 0) {
+        if (kingHandLength === 0) {
             throw new Error('El rey no tiene cartas en la mano');
 
         }
         // Calculamos cuántas descarta (2, o 1 si solo le queda esa en la mano)
-        const cardsToDiscard = Math.min(2, kingHand.length);
+        const cardsToDiscard = Math.min(2, kingHandLength);
 
         // Le pasamos la "patata caliente" al King
         gameState.pendingAction = {
@@ -150,10 +171,10 @@ export const rebelCards = {
     },
     13: (gameState) => {
         //"Infiltrate: Peasant removes a Guard. EXILE"
+        //TODO: Mostrar cartas del pueblo del rey
         gameState.pendingAction = {
-            type: "DECOY", // Tu UI sabrá que el Peasant debe elegir un guardia
-            player: "peasant", // El Peasant toma el control
-            amount: 1
+            type: "DECOY",
+            player: "peasant"
         };
         return gameState;
     },

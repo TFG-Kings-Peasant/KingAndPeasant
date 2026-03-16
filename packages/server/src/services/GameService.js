@@ -132,7 +132,7 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
     }
 }
 
-const activateCard = async (gameId, targetData, playedCard, userRol, gameState) => {
+const activateCard = async (gameId, playedCard, userRol, gameState) => {
     playedCard.isRevealed = true;
     if (userRol === "peasant") {
         const action = rebelCards[playedCard.templateId];
