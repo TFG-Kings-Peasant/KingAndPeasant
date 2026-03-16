@@ -74,7 +74,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         formatPayload: (selectedCards) => {
             return {
                 rebelUids: selectedCards.map(c => c.uid),
-                deckPositions: selectedCards.map(c => c.chosenPosition || 0)
+                deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
             }
         },
     },
