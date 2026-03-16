@@ -9,7 +9,7 @@ export interface SelectedCard extends CardState{
 
 export interface PendingActionUIConfig {
     instructionText : string;
-    allowedZones: ('hand' | 'myTown' | 'rivalTown' | 'discard')[];
+    allowedZones: ('hand' | 'myTown' | 'rivalTown' | 'discard' | 'deck')[];
     canConfirm: (selectedCards: SelectedCard[]) => boolean;
     formatPayload: (selectedCards: SelectedCard[]) => Record<string, unknown>;
 }

@@ -4,6 +4,8 @@ import "./GameChat.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Game.css";
+import { CARDS_THAT_CAN_INFILTRATE, peasantPendingUI } from "./components/pendingActionsUI";
+import type { SelectedCard } from "./components/pendingActionsUI";
 
 interface ChatMessage {
   sender: string;
@@ -18,6 +20,10 @@ function Game() {
   const [error, setError] = useState("");
   
   const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
+  const [actionTargets, setActionTargets] = useState<SelectedCard[]>([]);
+  const activeConfig = gameState?.pendingAction
+    ? peasantPendingUI[gameState.pendingAction.type]
+    : null;
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
@@ -47,6 +53,10 @@ function Game() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    setActionTargets([]);
+  }, [gameState?.pendingAction?.type]);
 
   useEffect(() => {
     if (!socket) {
@@ -128,7 +138,21 @@ function Game() {
   };
   
   const handleSelectCard = (card: CardState, position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard'| null) => {
-    if(position){
+    if(activeConfig && position && activeConfig.allowedZones.includes(position)){
+      const isRevolt = gameState?.pendingAction?.type === 'REVOLT';
+      const isValidTarget = !isRevolt || CARDS_THAT_CAN_INFILTRATE.includes(card.templateId as number);
+
+      if (isValidTarget) {
+        setActionTargets(prev => {
+          const exists = prev.find(t => t.uid === card.uid);
+          if (exists) return prev.filter(t => t.uid !== card.uid);
+          const targetedCard: SelectedCard = {...card, position: position};
+          return [...prev, targetedCard];
+        });
+        return;
+      }
+    }
+    if(position) {
       card.position = position;
     }
     setSelectedCard(card);
@@ -186,19 +210,49 @@ function Game() {
           ))}
         </div>
         <div className="town">
-          {rivalPlayer.town.map((card) => (
-            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-            onClick={() => handleSelectCard(card, 'rivalTown')}></div>
-          ))}
+          {rivalPlayer.town.map((card) => {
+            const isSelected = actionTargets.some(t => t.uid === card.uid);
+            return (
+              <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+              onClick={() => handleSelectCard(card, 'rivalTown')}>
+                {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
+                   <input 
+                     type="number" 
+                     min="0" max={gameState.deckCount}
+                     className="revolt-position-input"
+                     onClick={(e) => e.stopPropagation()} // Evita que el click quite la selección de la carta
+                     onChange={(e) => {
+                       const pos = parseInt(e.target.value) || 0;
+                       setActionTargets(prev => prev.map(t => t.uid === card.uid ? { ...t, chosenPosition: pos } : t));
+                     }}
+                   />)}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       <div className="player-area">
         <div className="town">
-          {myPlayer.town.map((card) => (
-            <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
-            onClick={() => handleSelectCard(card, 'myTown')}></div>
-          ))}
+          {myPlayer.town.map((card) => {
+            const isSelected = actionTargets.some(t => t.uid === card.uid);
+            return(
+              <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''} ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
+              onClick={() => handleSelectCard(card, 'myTown')}>
+                {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
+                   <input 
+                     type="number" 
+                     min="0" max={gameState.deckCount}
+                     className="revolt-position-input"
+                     onClick={(e) => e.stopPropagation()} // Evita que el click quite la selección de la carta
+                     onChange={(e) => {
+                       const pos = parseInt(e.target.value) || 0;
+                       setActionTargets(prev => prev.map(t => t.uid === card.uid ? { ...t, chosenPosition: pos } : t));
+                     }}
+                   />)}
+              </div>
+            );
+          })}
         </div>
         <div className="hand">
           {myPlayer.hand.map((card) => (
@@ -267,15 +321,25 @@ function Game() {
       </div>
     </div>
     
-    {pendingAction && (
+    {pendingAction && activeConfig && (
       <div className="pending-action-overlay">
         <div className="pending-action-content">
-          <h2>¡Acción Requerida!</h2>
-          <p>Debes resolver: {gameState.pendingAction?.type}</p>
+          <h2>⚔️ ¡Acción: {gameState.pendingAction?.type}!</h2>
+          {/* Mostramos las instrucciones desde el diccionario */}
+          <p>{activeConfig.instructionText}</p>
           
-          {/* Botones temporales para probar */}
-          <button onClick={() => handleResolvePending({ action: 'SKIP' })}>Saltar</button>
-          <button onClick={() => handleResolvePending({ test: 'data' })}>Probar Acción</button>
+          {/* Botón dinámico que se desactiva si canConfirm es false */}
+          <button 
+            className="button ingame"
+            style={{ backgroundColor: activeConfig.canConfirm(actionTargets) ? '#d4af37' : '#555' }}
+            disabled={!activeConfig.canConfirm(actionTargets)}
+            onClick={() => {
+              const payload = activeConfig.formatPayload(actionTargets);
+              handleResolvePending(payload);
+            }}
+          >
+            Confirmar Acción
+          </button>
         </div>
       </div>
     )}

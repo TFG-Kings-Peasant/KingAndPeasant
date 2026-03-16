@@ -237,6 +237,20 @@ h3 {
   justify-content: center;
 }
 
+/* Resaltado de cartas seleccionadas como objetivo */
+.card.selected-target {
+  box-shadow: 0 0 15px 5px #d4af37 !important; /* Brillo dorado */
+  transform: translateY(-10px) scale(1.05);
+  border: 2px solid #d4af37;
+  z-index: 10;
+}
+
+/* Oscurecer zonas no permitidas durante una acción */
+.pending-action-active .zone-not-allowed {
+  filter: grayscale(0.8) brightness(0.5);
+  pointer-events: none; /* Evita clicks en zonas prohibidas */
+}
+
 /* Animación para que aparezca con un pequeño "rebote" */
 @keyframes popIn {
   0% { opacity: 0; transform: scale(0.8); }
