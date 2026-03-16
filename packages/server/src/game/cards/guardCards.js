@@ -6,8 +6,8 @@ export const guardCards = {
 
         drawCardFromDeck(gameState, 'king')
         gameState.pendingAction = {
-                player: "king",
-                type: "CRIER",
+            player: "king",
+            type: "CRIER",
         };
         return gameState;
     },
@@ -24,11 +24,23 @@ export const guardCards = {
             card.isRevealed = true
             gameState.discardPile.push(card)
         }
+
         changeTurn(gameState)
         return gameState;
     },
     3: (gameState) => {
         //"Ready a Guard, then Mobilize it"
+        let guardsInHand = false
+        for (let i = gameState.players.king.hand.length - 1; i >= 0; i--) {
+            const card = gameState.players.king.hand[i];
+            if (card.typeKing === "Guard") {
+                guardsInHand = true
+                break;
+            }
+        }
+        if(!guardsInHand){
+            throw new Error('No hay guardias en la mano');
+        }
         gameState.pendingAction = {
             type: "INQUISITOR",
             player: "king"
@@ -57,6 +69,7 @@ export const guardCards = {
     5: (gameState) => {
         //"Shuffle the deck and look at the top card, you may put it on the bottom of the deck"
         shuffleArray(gameState.deck);
+        //TODO: Logica de mostrar cartas de la deck
         gameState.pendingAction = {
             player: "king",
             type: "ADVISOR"
@@ -82,11 +95,13 @@ export const guardCards = {
             const card = gameState.players.peasant.town[i];
             card.isRevealed = true
         }
+
         changeTurn(gameState)
         return gameState;
     },
     7: (gameState) => {
         //"Look at any 1 card in the deck, if it is the ASSASSIN discard it, otherwise put it back in order",
+        
         gameState.pendingAction = {
             player: "king",
             type: "GUARDIAN",
@@ -95,6 +110,18 @@ export const guardCards = {
     },
     8: (gameState) => {
         //"Peasant Removes 1 hidden Rebel"
+        const peasantTown = gameState.players.peasant.town;
+        let rebelInTown = false;
+        for (let card of peasantTown) {
+            if (card.typePeasant == "Rebel" && card.isRevaled == false) {
+                rebelInTown = true;
+                break;
+            }
+        }
+        if (!rebelInTown) {
+            throw new Error('No hay rebeldes en el pueblo para revelar');
+        }
+
         gameState.pendingAction = {
             player: "peasant",
             type: "EXECUTOR"
@@ -103,6 +130,8 @@ export const guardCards = {
     },
     9: (gameState) => {
         //"Look at the top 3 cards of the deck, then put them back in any order"
+        //TODO: Logica de mostrar cartas de la deck
+
         gameState.pendingAction = {
             player: "king",
             type: "SENTINEL"
@@ -111,6 +140,8 @@ export const guardCards = {
     },
     15: (gameState) => {
         //"Look at Peasant's hand cards"
+
+        //TODO: Logica de mostrar cartas de la deck
         for (let i = gameState.players.peasant.hand.length - 1; i >= 0; i--) {
             const card = gameState.players.peasant.hand[i];
             card.isRevealed = true;

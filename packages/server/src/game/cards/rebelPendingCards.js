@@ -1,6 +1,23 @@
 import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
 
 export const rebelPendingCards = {
+    "EXECUTOR": (gameState, targetData) => {
+        //"Peasant Removes 1 hidden Rebel"
+        const { targetUid } = targetData; 
+        const cardIndex = gameState.players.king.town.findIndex(card => card.uid === targetUid);
+        if (cardIndex === -1) {
+            throw new Error('Carta no encontrada en el pueblo del jugador');
+        }
+        const [targetCard] = gameState.players.king.town.splice(cardIndex, 1);
+        if(targetCard.isRevealed === true){
+            throw new Error('La carta ya estaba revelada');
+        }
+        targetCard.isRevealed = true;
+        gameState.discardPile.push(targetCard)
+        
+        changeTurn(gameState)
+        return gameState;
+    },
     "THUG": (gameState, targetData) => {
         //"Remove a Guard, then draw 1 card"
 
@@ -137,7 +154,7 @@ export const rebelPendingCards = {
         if (targetUid === -1) {
             throw new Error(`No se ha seleccionado ninguna carta`);
         }
-        const index = gameState.discardPile.findIndex(c => c.uid === uid);
+        const index = gameState.discardPile.findIndex(c => c.uid === targetUid);
         if (index === -1) {
             throw new Error(`La carta con UID ${uid} no se ha encontrado en la pila de descartes`);
         }
@@ -154,7 +171,7 @@ export const rebelPendingCards = {
         if (targetUid === -1) {
             throw new Error(`No se ha seleccionado ninguna carta`);
         }
-        const index = gameState.players.king.town.findIndex(c => c.uid === uid);
+        const index = gameState.players.king.town.findIndex(c => c.uid === targetUid);
         if (index === -1) {
             throw new Error(`La carta con UID ${uid} no se ha encontrado en el pueblo del rey`);
         }
