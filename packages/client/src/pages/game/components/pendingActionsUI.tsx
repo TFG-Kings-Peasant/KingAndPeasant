@@ -1,6 +1,6 @@
 import type { CardState } from "./GameService";
 
-export const CARDS_THAT_CAN_INFILTRATE = ["13","16"];
+export const CARDS_THAT_CAN_INFILTRATE = [13,16];
 
 export interface SelectedCard extends CardState{
     position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard';
@@ -33,8 +33,8 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona hasta 2 rebeldes para posicionar en el pueblo boca abajo",
         allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
-            const hasRebel = selectedCards.some(c => c.position === 'hand' && c.typePeasant === 'Rebel');
-            return selectedCards.length >= 0, selectedCards.length < 3 && hasRebel;
+            const hasRebel = selectedCards.every(c => c.position === 'hand' && c.typePeasant === 'Rebel');
+            return selectedCards.length >= 0 && selectedCards.length < 3 && hasRebel;
         },
         formatPayload: (selectedCards) => {
             const selectedCardsUid = selectedCards.map(c => c.uid);
@@ -46,7 +46,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         allowedZones: ['discard'],
         canConfirm: (selectedCards) => {
             const isInDiscard = selectedCards.some(c => c.position === 'discard');
-            return selectedCards.length >= 0, selectedCards.length < 3 && isInDiscard;
+            return selectedCards.length >= 0 && selectedCards.length < 3 && isInDiscard;
         },
         formatPayload: (selectedCards) => {
             const selectedCardsUid = selectedCards.map(c => c.uid);
@@ -55,9 +55,9 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
     },
     'REASSEMBLE2': {
         instructionText: "Selecciona hasta 1 rebelde para posicionar en el pueblo boca abajo",
-        allowedZones: ['myTown'],
+        allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
-            const hasRebel = selectedCards.some(c => c.position === 'hand' && c.typePeasant === 'Rebel');
+            const hasRebel = selectedCards.every(c => c.position === 'hand' && c.typePeasant === 'Rebel');
             return selectedCards.length >= 0 && selectedCards.length < 2 && hasRebel;
         },
         formatPayload: (selectedCards) => {
@@ -68,12 +68,12 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona las posiciones en el mazo para tus infiltrados",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            const canInfiltrate = selectedCards.some(c => CARDS_THAT_CAN_INFILTRATE.includes(c.uid))
+            const canInfiltrate = selectedCards.some(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
             return selectedCards.length > 0 && canInfiltrate;
         }, 
         formatPayload: (selectedCards) => {
             return {
-                rebelsUids: selectedCards.map(c => c.uid),
+                rebelUids: selectedCards.map(c => c.uid),
                 deckPositions: selectedCards.map(c => c.chosenPosition || 0)
             }
         },
