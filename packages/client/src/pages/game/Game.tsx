@@ -127,7 +127,7 @@ function Game() {
     setCurrentMessage("");
   };
   
-  const handleSelectCard = (card: CardState, position: 'hand' | 'town' | 'deck' | 'discard'| null) => {
+  const handleSelectCard = (card: CardState, position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard'| null) => {
     if(position){
       card.position = position;
     }
@@ -188,7 +188,7 @@ function Game() {
         <div className="town">
           {rivalPlayer.town.map((card) => (
             <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-            onClick={() => handleSelectCard(card, null)}></div>
+            onClick={() => handleSelectCard(card, 'rivalTown')}></div>
           ))}
         </div>
       </div>
@@ -197,7 +197,7 @@ function Game() {
         <div className="town">
           {myPlayer.town.map((card) => (
             <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
-            onClick={() => handleSelectCard(card, "town")}></div>
+            onClick={() => handleSelectCard(card, 'myTown')}></div>
           ))}
         </div>
         <div className="hand">
