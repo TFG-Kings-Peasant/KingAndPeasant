@@ -270,6 +270,9 @@ const playActionCard = async (lobbyId,targetData, playedCard, userRol, gameState
     }
     playedCard.isRevealed = true;
     gameState.discardPile.push(playedCard); 
+    if (!gameState.pendingAction) {
+        gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
+    }
     //Guardar estado actualizado
     return await saveAndFormatGameState(lobbyId, gameState);
 }
@@ -286,6 +289,7 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
     const pendingAction = gameState.pendingAction;
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
+        gameState.pendingAction = null;
         if (userRol === 'peasant') {
             const resolver = peasantPendingActions[pendingAction.type];
             if (!resolver) {
@@ -302,7 +306,9 @@ const resolvePendingAction = async (lobbyId, userId, targetData) => {
     } else {
         throw new Error('No hay acciones pendientes para este jugador');
     }
-    gameState.pendingAction = null;
+    if (!gameState.pendingAction) {
+        gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
+    }
     return await saveAndFormatGameState(lobbyId, gameState);
 }
 

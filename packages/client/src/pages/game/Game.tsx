@@ -243,7 +243,7 @@ function Game() {
             );
           })}
         </div>
-        <div className="hand">
+        <div className={`hand ${gameState.turn !== myRoleName ? 'waiting-turn' : ''}`}>
           {myPlayer.hand.map((card) => (
             <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
             onClick={() => handleSelectCard(card, "hand")}></div>
@@ -325,6 +325,8 @@ function Game() {
             onClick={() => {
               const payload = activeConfig.formatPayload(actionTargets);
               handleResolvePending(payload);
+              setActionTargets([]); 
+              setSelectedCard(null);
             }}
           >
             Confirmar Acción

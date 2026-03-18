@@ -92,6 +92,17 @@
   display: none;
 }
 
+.hand.waiting-turn .card.ingame {
+  filter: brightness(0.6) grayscale(0.3); /* Se ven apagadas */
+  transform: translateY(10px); /* Bajan un poquito para no destacar */
+}
+
+/* Siguen haciéndose grandes al pasar el ratón para poder leerlas, pero sin recuperar todo el color */
+.hand.waiting-turn .card.ingame:hover {
+  filter: brightness(0.9) grayscale(0.1);
+  transform: translateY(-5px) scale(1.1);
+}
+
 /* =======================================================
    4. ESTÉTICA DE LA CARTA BASE
    ======================================================= */
