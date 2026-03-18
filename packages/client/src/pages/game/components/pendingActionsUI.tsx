@@ -80,6 +80,65 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
                 deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
             }
         },
-    },
+    }
+}
 
+export const kingPendingUI : Record<string, PendingActionUIConfig> = {
+    'STRIKE': {
+        instructionText: "Selecciona 2 guardias para mobilizar",
+        allowedZones: ['myTown'],
+        canConfirm: (selectedCards) => {
+            const canMobiliza = selectedCards.some(c => c.typeKing === 'Guard' && c.position === 'myTown');
+            return selectedCards.length === 2 && canMobiliza;
+        },
+        formatPayload: (selectedCards) => {
+            return {
+                guardUid1: selectedCards[0].uid,
+                guardUid2: selectedCards[1].uid
+            }
+        }
+    },
+    'ARREST': {
+        instructionText: "Descarta la carta superior del mazo o un rebelde seleccionado",
+        allowedZones: ['rivalTown', 'deck'],
+        canConfirm: (selectedCards) => {
+            if (selectedCards.length === 1) {
+                const isRebel = selectedCards.some(c => c.typePeasant === 'Rebel' && c.position === 'rivalTown');
+                return isRebel;
+            }
+            return selectedCards.length === 0;
+        },
+        formatPayload: (selectedCards) => {
+            if (selectedCards.length === 0) {
+                return { option: 'DECK' }; 
+            }
+            return { 
+                option: 'TOWN', 
+                targetUid: selectedCards[0].uid 
+            };
+        }
+    },
+    'REASSEMBLE1': {
+        instructionText: "Selecciona hasta 2 cartas del mazo de descartes",
+        allowedZones: ['discard'],
+        canConfirm: (selectedCards) => {
+            const isInDiscard = selectedCards.every(c => c.position === 'discard');
+            return selectedCards.length >= 0 && selectedCards.length < 3 && isInDiscard;
+        },
+        formatPayload: (selectedCards) => {
+            const selectedCardsUid = selectedCards.map(c => c.uid);
+            return { discardUids: selectedCardsUid};
+        }
+    },
+    'REASSEMBLE2': {
+        instructionText: "Selecciona hasta 1 guardia para posicionar en el pueblo boca arriba",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { guardUid: selectedCards[0]?.uid || ""}
+        }
+    }
 }
