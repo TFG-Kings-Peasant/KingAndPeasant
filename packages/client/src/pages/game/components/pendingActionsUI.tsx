@@ -88,7 +88,7 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona 2 guardias para mobilizar",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            const canMobiliza = selectedCards.some(c => c.typeKing === 'Guard' && c.position === 'myTown');
+            const canMobiliza = selectedCards.every(c => c.typeKing === 'Guard' && c.position === 'myTown');
             return selectedCards.length === 2 && canMobiliza;
         },
         formatPayload: (selectedCards) => {

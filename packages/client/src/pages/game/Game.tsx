@@ -24,6 +24,7 @@ function Game() {
   const activeConfig = gameState?.pendingAction
     ? peasantPendingUI[gameState.pendingAction.type]
     : null;
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
@@ -273,10 +274,10 @@ function Game() {
         <strong>{gameState.deckCount}</strong>
       </div>
       
-      <div className="discard-pile">
-        <span>DESCARTES</span>
-        <strong>{gameState.discardPile.length}</strong>
-      </div>
+      <div className="discard-pile" onClick={() => setShowDiscardModal(true)}>
+          <h3>DESCARTES</h3>
+          <p>{gameState.discardPile?.length || 0}</p>
+        </div>
 
       <div className="action-container">
         {/*<button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>*/}
@@ -378,6 +379,52 @@ function Game() {
             >
                 Volver al Menú Principal
             </button>
+        </div>
+      </div>
+    )}
+
+    {showDiscardModal && (
+      <div className="card-modal-overlay" onClick={() => setShowDiscardModal(false)}>
+        {/* El stopPropagation evita que al hacer clic dentro del recuadro se cierre el modal */}
+        <div className="discard-modal-content" onClick={(e) => e.stopPropagation()}>
+          <h2>Mazo de Descartes</h2>
+          <div className="discard-grid">
+            
+            {gameState.discardPile?.length === 0 ? (
+              <p>El mazo de descartes está vacío.</p>
+            ) : (
+              gameState.discardPile?.map((card, index) => {
+                // Comprobamos si la carta está seleccionada para brillar
+                const isSelected = actionTargets.some(t => t.uid === card.uid);
+                // Comprobamos si la acción actual permite clickar en el descarte
+                const isClickable = gameState?.pendingAction && activeConfig?.allowedZones.includes('discard');
+
+                return (
+                  <div
+                    key={`${card.uid}-${index}`}
+                    className={`card ingame ${isSelected ? 'selected-target' : ''} ${isClickable ? 'clickable' : ''}`}
+                    style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }}
+                    onClick={() => {
+                      // Solo permite seleccionar la carta si la acción lo requiere, o ampliarla si no hay acción
+                      if (isClickable) {
+                        handleSelectCard(card, 'discard');
+                      } else {
+                        setSelectedCard(card);
+                      }
+                    }}
+                  ></div>
+                );
+              })
+            )}
+
+          </div>
+          <button 
+            className="button ingame" 
+            style={{ marginTop: '20px', width: 'auto', padding: '10px 20px' }} 
+            onClick={() => setShowDiscardModal(false)}
+          >
+            Cerrar
+          </button>
         </div>
       </div>
     )}

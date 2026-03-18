@@ -179,7 +179,22 @@
 }
 
 .deck-pile { background-color: #2980b9; border: 2px solid #fff; }
-.discard-pile { background-color: #7f8c8d; border: 2px solid #bdc3c7; opacity: 0.8; }
+
+/* Integración perfecta del mazo de descartes */
+.discard-pile { 
+  background-color: #7f8c8d; 
+  border: 2px solid #bdc3c7; 
+  opacity: 0.8; 
+  cursor: pointer; /* Indica que se puede clicar */
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+/* Efecto hover al pasar el ratón por el mazo de descartes */
+.discard-pile:hover {
+  transform: scale(1.05);
+  border-color: #d4af37; /* Brillo dorado */
+  opacity: 1;
+}
 
 .action-container {
   width: 100%;
@@ -302,3 +317,31 @@ h3 {
   background: rgba(0,0,0,0.8);
   color: white;
 } 
+
+/* =======================================================
+   9. MODAL DE DESCARTES
+   ======================================================= */
+.discard-modal-content {
+  background: rgba(20, 30, 40, 0.95);
+  padding: 30px;
+  border-radius: 12px;
+  border: 2px solid #7f8c8d;
+  text-align: center;
+  color: white;
+  width: 80%;
+  max-width: 800px;
+  max-height: 80vh; /* Si hay muchas cartas, permite hacer scroll interno */
+  overflow-y: auto;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+  animation: popIn 0.2s ease-out forwards;
+  cursor: default;
+}
+
+.discard-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 10px;
+}

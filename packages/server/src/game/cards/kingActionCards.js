@@ -1,9 +1,9 @@
 export const kingActionCards = {
     10: (gameState) => {
-        const kingHand = gameState.players.king.hand;
+        const kingTown = gameState.players.king.town;
         let guardsInHand = false; 
         let countGuards = 0;
-        for (let card of kingHand) {
+        for (let card of kingTown) {
             if (card.typeKing == "Guard") {
                 countGuards = countGuards + 1;
                 if(countGuards >= 2) {
