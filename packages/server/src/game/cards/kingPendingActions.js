@@ -39,16 +39,16 @@ export const kingPendingActions = {
         if (guardUid1 === guardUid2) {
             throw new Error('No puedes seleccionar la misma carta dos veces');
         }
-        const guardIndex1 = gameState.players.king.hand.findIndex(card => card.uid === guardUid1);
-        const guardIndex2 = gameState.players.king.hand.findIndex(card => card.uid === guardUid2);
+        const guardIndex1 = gameState.players.king.town.findIndex(card => card.uid === guardUid1);
+        const guardIndex2 = gameState.players.king.town.findIndex(card => card.uid === guardUid2);
         if (guardIndex1 === -1 || guardIndex2 === -1) {
-            throw new Error('Carta no encontrada en la mano del rey');
+            throw new Error('Carta no encontrada en el pueblo del rey');
         }
         
         const indices = [guardIndex1, guardIndex2].sort((a, b) => b - a);
 
-        const [guardCard1] = gameState.players.king.hand.splice(indices[0], 1);
-        const [guardCard2] = gameState.players.king.hand.splice(indices[1], 1);
+        const [guardCard1] = gameState.players.king.town.splice(indices[0], 1);
+        const [guardCard2] = gameState.players.king.town.splice(indices[1], 1);
         guardCard1.isRevealed = true;
         guardCard2.isRevealed = true;
         
