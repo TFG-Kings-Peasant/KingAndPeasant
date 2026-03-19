@@ -4,8 +4,8 @@ export const guardPendingCards = {
     "THIEF": (gameState, targetData) => {
         //"King discards 2 cards, then Peasant takes 1 of them"
         const discardUids = targetData?.discardUids || [];
-        if (discardUids.length > 2) {
-                throw new Error(`Solo se puede descartar 2 cartas como máximo`);
+        if (discardUids.length !== 2) {
+                throw new Error(`El rey debe descartar exactamente 2 cartas, se han proporcionado ${discardUids.length}`);
         }
         discardUids.forEach(uid => {
             const index = gameState.players.king.hand.findIndex(c => c.uid === uid);

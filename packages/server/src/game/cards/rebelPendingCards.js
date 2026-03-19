@@ -131,7 +131,7 @@ export const rebelPendingCards = {
     },
     "RAT2": (gameState, targetData) => {
         //"Return up to 2 other Rebels back to hand, then Hide up to 2 Rebels"
-        const handUids = targetData?.townUids || [];
+        const handUids = targetData?.handUids || [];
         if (handUids.length > 2) {
                 throw new Error(`Solo se puede seleccionar 2 cartas como máximo`);
         }

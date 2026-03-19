@@ -80,6 +80,129 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
                 deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
             }
         },
+    },
+
+    "EXECUTOR": {
+        instructionText: "Selecciona 1 rebelde escondido en el pueblo para descartarlo",
+        allowedZones: ['myTown'],
+        canConfirm: (selectedCards) => {
+            const isHiden = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown' && !c.isRevealed);
+            return selectedCards.length > 0 && isHiden;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                targetUid: selectedCards[0]?.uid || "",
+            }
+        },
+    },
+    "THUG":  {
+        instructionText: "Selecciona 1 guardia en el pueblo rival para descartarlo",
+        allowedZones: ['rivalTown'],
+        canConfirm: (selectedCards) => {
+            const validate = selectedCards.every(c => c.typeKing === 'King' && c.position === 'rivalTown');
+            return selectedCards.length > 0 && validate;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                targetUid: selectedCards[0]?.uid || "",
+            }
+        },
+    },
+    "COURTESAN":  {
+        // TODO
+        instructionText: "Elige una de las tres cartas para robar",
+        allowedZones: ['myTown'],
+        canConfirm: (selectedCards) => {
+            const canInfiltrate = selectedCards.some(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
+            return selectedCards.length > 0 && canInfiltrate;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                rebelUids: selectedCards.map(c => c.uid),
+                deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
+            }
+        },
+    },
+    "CHARLATAN": {
+        //TODO
+        instructionText: "Roba hasta 3 cartas",
+        allowedZones: ['deck'],
+        canConfirm: (selectedCards) => {
+            const canInfiltrate = selectedCards.some(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
+            return selectedCards.length > 0 && canInfiltrate;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                rebelUids: selectedCards.map(c => c.uid),
+                deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
+            }
+        },
+    },
+    "CHARLATAN2": {
+        instructionText: "Devuelve el mismo numero de cartas que robaste a la parte superior del mazo",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const validate = selectedCards.every(c => c.position === 'hand');
+            return selectedCards.length > 0 && validate;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                handUids: selectedCards.map(c => c.uid),
+            }
+        },
+    },
+    "RAT": {
+        //TODO: Restricción para que no pueda escoger esta carta
+        instructionText: "Selecciona hasta 2 reveldes para devolver a la mano",
+        allowedZones: ['myTown'],
+        canConfirm: (selectedCards) => {
+            const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown');
+
+            return selectedCards.length > 0 && validate && selectedCards.length < 3;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                townUids: selectedCards.map(c => c.uid),
+            }
+        },
+    },
+    "RAT2": {
+        instructionText: "Selecciona hasta 2 reveldes de tu mano para esconder en el pueblo",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'hand');
+            return selectedCards.length > 0 && validate && selectedCards.length < 3;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                handUids: selectedCards.map(c => c.uid),
+            }
+        },
+    },
+    "THIEF2":{
+        // TODO: Restringir la seleccion solo a las cartas que el rey ha descartado
+        instructionText: "Selecciona una de las 2 cartas descartadas por el rey",
+        allowedZones: ['discard'],
+        canConfirm: (selectedCards) => {
+            return selectedCards.length > 0 && selectedCards.length < 2 && selectedCards.every(c => c.position === 'discard');
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                targetUid: selectedCards[0]?.uid || ""
+            }
+        },
+    },
+    "DECOY": {
+        instructionText: "Selecciona 1 guardia del pueblo del rival para descartarlo",
+        allowedZones: ['rivalTown'],
+        canConfirm: (selectedCards) => {
+            return selectedCards.length > 0 && selectedCards.length < 2 && selectedCards.every(c => c.position === 'rivalTown');
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                targetUid: selectedCards[0]?.uid || "",
+            }
+        },
     }
 }
 
@@ -140,5 +263,104 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         formatPayload: (selectedCards) => {
             return { guardUid: selectedCards[0]?.uid || ""}
         }
+    },
+
+    'THIEF':  {
+        instructionText: "Selecciona 2 cartas de tu mano para descartar",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const validate = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard' && c.position === 'hand');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && validate;
+        },
+        formatPayload: (selectedCards) => {
+            return { 
+                discardUids: selectedCards.map(c => c.uid) 
+            }
+        }
+    },
+    "CRIER": {
+        instructionText: "Selecciona hasta 1 guardia para posicionar en el pueblo boca arriba",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { targetUid: selectedCards[0]?.uid || ""}
+        }
+    },
+    "INQUISITOR": {
+        instructionText: "Selecciona 1 guardia de tu mano para mobilizar",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { targetUid: selectedCards[0]?.uid || ""}
+        }
+    },
+    "SPY": {
+        instructionText: "Selecciona 1 rebelde escondido en el pueblo rival para revelar su identidad",
+        allowedZones: ['rivalTown'],
+        canConfirm: (selectedCards) => {
+            const isHiden = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'rivalTown' && !c.isRevealed);
+
+            return selectedCards.length >= 0 && selectedCards.length < 2 && isHiden;
+        },
+        formatPayload: (selectedCards) => {
+            return { targetUid: selectedCards[0]?.uid || ""}
+        }
+    },
+    "ADVISOR":  {
+        //TODO: MOSTRAR Carta: Elegir si se coloca al final de la deck o al principio
+        instructionText: "Elige si colocar la carta al final o al principio del mazo",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { guardUid: selectedCards[0]?.uid || ""}
+        }
+    },
+    "GUARDIAN":{
+        //TODO: Seleccionar una carta de la deck para revelar
+        instructionText: "Selecciona 1 carta de la deck para revelarla ",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { guardUid: selectedCards[0]?.uid || ""}
+        }
+
+    },
+    "SENTINEL": {
+        //TODO: MOSTRAR 3 primeras cartas de la deck y esperara confirmacion para devolverlas a la deck
+        instructionText: "Selecciona hasta 1 guardia para posicionar en el pueblo boca arriba",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { guardUid: selectedCards[0]?.uid || ""}
+        }
+    },
+    "WATCHMAN": {
+        //TODO: Eperara confirmacion para volver a girar las cartas del rebel
+
+        instructionText: "Selecciona hasta 1 guardia para posicionar en el pueblo boca arriba",
+        allowedZones: ['hand'],
+        canConfirm: (selectedCards) => {
+            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
+            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+        },
+        formatPayload: (selectedCards) => {
+            return { guardUid: selectedCards[0]?.uid || ""}
+        }
+        
     }
 }
