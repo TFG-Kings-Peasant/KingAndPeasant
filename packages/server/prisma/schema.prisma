@@ -21,6 +21,9 @@ model User {
   lobbiesAsPlayer2  Lobby[]  @relation("Player2")
   friendshipsSent  Friendship[]  @relation("Sender")
   friendshipsReceived  Friendship[]  @relation("Receiver")
+  gamesAsPlayer1  Game[]  @relation("Player1")
+  gamesAsPlayer2  Game[]  @relation("Player2")
+  gamesWon  Game[]  @relation("Winner")
 }
 
 model Friendship {
@@ -59,6 +62,33 @@ model Card {
   descPeasant  String  @db.Text
 
   copies  Int  @default(1)  
+}
+
+model Game {
+  idGame  Int  @id @default(autoincrement())
+  player1Id  Int
+  player2Id  Int
+  winnerId  Int?
+  reason  Reason
+  startedAt  DateTime 
+  endedAt  DateTime  @default(now())
+  player1  User  @relation("Player1", fields: [player1Id], references: [idUser])
+  player2  User  @relation("Player2", fields: [player2Id], references: [idUser])
+  winner  User?  @relation("Winner", fields: [winnerId], references: [idUser])
+  @@index([player1Id])
+  @@index([player2Id])
+}
+
+enum Reason {
+  ASSASSIN_EXPOSED     
+  PEASANT_DECK_EMPTY   
+  
+  ASSASSIN_STRIKE    
+  KING_DECK_EMPTY   
+  
+  SURRENDER         
+  DISCONNECT_TIMEOUT
+  ADMIN_FORCE_CLOSE
 }
 
 enum LobbyPrivacy {

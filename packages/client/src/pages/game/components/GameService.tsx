@@ -3,12 +3,15 @@ export interface CardState {
     templateId?: number;
     typeKing: string;
     typePeasant: string;
-    position?: 'hand' | 'town' | 'enemyTown' | 'deck' | 'discard';
+    position?: 'hand' | 'town' | 'myTown' | 'rivalTown' | 'deck' | 'discard';
     isRevealed: boolean;
 }
 
 export interface GameState {
     id: number;
+    startedAt: string;
+    era: number;
+    scores: Record<string, number>;
     turnNumber: number;
     turn: 'king' | 'peasant';
     deckCount: number;
@@ -168,7 +171,7 @@ export const getPosibleActions = (card: CardState, isKing: boolean) => {
             case "Guard":
                 if(card.position === "hand"){
                     return "Preparar un guardia";
-                }else if(card.position === "town"){
+                }else if(card.position === "myTown"){
                     return "Movilizar un guardia";
                 }else{
                     return "";
@@ -187,7 +190,7 @@ export const getPosibleActions = (card: CardState, isKing: boolean) => {
             case "Rebel":
                 if(card.position === "hand"){
                     return "Esconder rebelde"
-                }else if(card.position === "town"){
+                }else if(card.position === "myTown"){
                     if(card.isRevealed){
                         return "Devolver a la mano";
                     }else{

@@ -1,0 +1,23 @@
+-- CreateTable
+CREATE TABLE `Game` (
+    `idGame` INTEGER NOT NULL AUTO_INCREMENT,
+    `player1Id` INTEGER NOT NULL,
+    `player2Id` INTEGER NOT NULL,
+    `winnerId` INTEGER NULL,
+    `reason` ENUM('ASSASSIN_EXPOSED', 'PEASANT_DECK_EMPTY', 'ASSASSIN_STRIKE', 'KING_DECK_EMPTY', 'SURRENDER', 'DISCONNECT_TIMEOUT', 'ADMIN_FORCE_CLOSE') NOT NULL,
+    `startedAt` DATETIME(3) NOT NULL,
+    `endedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `Game_player1Id_idx`(`player1Id`),
+    INDEX `Game_player2Id_idx`(`player2Id`),
+    PRIMARY KEY (`idGame`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Game` ADD CONSTRAINT `Game_player1Id_fkey` FOREIGN KEY (`player1Id`) REFERENCES `User`(`idUser`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Game` ADD CONSTRAINT `Game_player2Id_fkey` FOREIGN KEY (`player2Id`) REFERENCES `User`(`idUser`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Game` ADD CONSTRAINT `Game_winnerId_fkey` FOREIGN KEY (`winnerId`) REFERENCES `User`(`idUser`) ON DELETE SET NULL ON UPDATE CASCADE;

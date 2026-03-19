@@ -36,11 +36,17 @@ const playCard = async (req, res) => {
         const gameId = req.params.id;
         const { cardUid, targetData, isHand } = req.body;
         const userId  = Number(req.user.id);
-        const {dtoKing, dtoPeasant} = isHand 
+        const io = req.app.get('io');
+
+        const result = isHand 
         ? await gameService.playHandCard(gameId, cardUid, targetData, userId) 
         : await gameService.playTownCard(gameId, cardUid, targetData, userId);
     
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+        if (result.isGameOver) {
+            io.to(`game_${gameId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
 
         res.status(200).json({ message: "Carta jugada correctamente" });
     } catch (error) {
@@ -62,7 +68,7 @@ function sendGameStateUpdate (req, dtoKing, dtoPeasant) {
 
     const peasantId = dtoPeasant.players.peasant.id;
     const socketPeasant = userSockets.get(String(peasantId)) || userSockets.get(Number(peasantId));
-    if (peasantId) {
+    if (socketPeasant) {
         io.to(socketPeasant).emit('gameState', dtoPeasant);
     } else {
         console.log(`No se encontró socket activo para el CAMPESINO (${peasantId})`); 
@@ -74,10 +80,13 @@ const resolveAction = async (req, res) => {
         const gameId = req.params.id;
         const { targetData } = req.body;
         const userId  = Number(req.user.id);
-        const {dtoKing, dtoPeasant} = await gameService.resolvePendingAction(gameId, userId, targetData);
-    
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
-
+        const result = await gameService.resolvePendingAction(gameId, userId, targetData);
+        const io = req.app.get('io');
+        if (result.isGameOver) {
+            io.to(`game_${gameId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
         console.error("Error al resolver la acción:", error.message);

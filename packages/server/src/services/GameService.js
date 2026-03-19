@@ -8,8 +8,7 @@ import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 import {rebelCards} from '../game/cards/rebelCards.js'
 import {guardCards} from '../game/cards/guardCards.js'
 
-
-const createGame = async ( gameId, player1Id, player2Id) => {
+const setupNewEra = async (gameId, nextKingId, nextPeasantId, currentEra, currentScores, startedAt) => {
     const catalog = await prisma.card.findMany();
     const deck = [];
     catalog.forEach(card => {
@@ -20,45 +19,91 @@ const createGame = async ( gameId, player1Id, player2Id) => {
                 typeKing: card.typeKing,
                 typePeasant: card.typePeasant,
                 isRevealed: false
-            })
+            });
         }
-    })
+    });
     shuffleArray(deck);
     const handKing = deck.splice(0,5);
     const handPeasant = deck.splice(0,5);
-
-    /*Forzar la carta de acción
-    const targetCardId = 15; 
-    
-    const cardIndex = deck.findIndex(card => card.templateId === targetCardId);
-    
-    if (cardIndex !== -1) {
-        const [testCard] = deck.splice(cardIndex, 1);
-        handPeasant[0] = testCard; 
-    }
-    */
-    const initialState = {
-        era: 1, 
+    return {
+        startedAt: startedAt,
+        era: currentEra + 1,
+        scores: currentScores, // Novedad: Llevamos el conteo de victorias
         turnNumber: 1,
-        turn: "peasant",
+        turn: "peasant", // Las reglas dicen que empieza el campesino
         deck: deck,
         discardPile: [],
-        players:{
-            //Si queremos asignar los roles random, habria que cambiar esto
-            king: {
-                id: player1Id,
-                hand: handKing,
-                town: []
-            },
-            peasant: {
-                id: player2Id,
-                hand:handPeasant,
-                town: []
-            }
+        players: {
+            king: { id: nextKingId, hand: handKing, town: [] },
+            peasant: { id: nextPeasantId, hand: handPeasant, town: [] }
         },
-        pendingAction: null
-    }
-    return await saveAndFormatGameState(gameId, initialState);
+        pendingAction: null,
+        lastEvent: null
+    };
+}
+
+const createGame = async ( lobbyId, player1Id, player2Id) => {
+    const initialScores = {
+        [player1Id]: 0,
+        [player2Id]: 0
+    };
+
+    const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
+    /*
+    // =========================================================
+    // 🛠️ HACK PARA DESARROLLO: MESA DE PRUEBAS GLOBAL 🛠️
+    // =========================================================
+    
+    // 1. SOBRESCRIBIR LA MANO DEL REY
+    initialState.players.king.hand = [
+        { uid: "cheat_king_strike", templateId: 10, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_arrest", templateId: 11, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_raid", templateId: 12, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_reassemble", templateId: 14, typeKing: "Action", isRevealed: true },
+        // Guardias en mano para la segunda fase de REASSEMBLE (Preparar guardia de la mano)
+        { uid: "cheat_king_guard_hand_1", templateId: 1, typeKing: "Guard", isRevealed: true }, 
+        { uid: "cheat_king_guard_hand_2", templateId: 3, typeKing: "Guard", isRevealed: true }  
+    ];
+
+    // 2. SOBRESCRIBIR LA MANO DEL CAMPESINO
+    initialState.players.peasant.hand = [
+        { uid: "cheat_peasant_brawl", templateId: 3, typePeasant: "Action", isRevealed: true },       
+        { uid: "cheat_peasant_revolt", templateId: 11, typePeasant: "Action", isRevealed: true },     
+        { uid: "cheat_peasant_scatter", templateId: 12, typePeasant: "Action", isRevealed: true },    
+        { uid: "cheat_peasant_reassemble", templateId: 14, typePeasant: "Action", isRevealed: true }, 
+        { uid: "cheat_peasant_rally", templateId: 15, typePeasant: "Action", isRevealed: true },      
+        // Rebeldes en mano para esconder con RALLY o la segunda fase de REASSEMBLE
+        { uid: "cheat_peasant_rebel_hand_1", templateId: 1, typePeasant: "Rebel", isRevealed: true }, 
+        { uid: "cheat_peasant_rebel_hand_2", templateId: 2, typePeasant: "Rebel", isRevealed: true }  
+    ];
+
+    // 3. SOBRESCRIBIR EL PUEBLO DEL REY
+    // Ponemos 3 guardias: 2 para que el rey los use con STRIKE, y 1 extra para que el Campesino le pegue con BRAWL
+    initialState.players.king.town = [
+        { uid: "cheat_king_guard_town_1", templateId: 4, typeKing: "Guard", isRevealed: true }, 
+        { uid: "cheat_king_guard_town_2", templateId: 5, typeKing: "Guard", isRevealed: true }, 
+        { uid: "cheat_king_guard_town_3", templateId: 6, typeKing: "Guard", isRevealed: true }  
+    ];
+
+    // 4. SOBRESCRIBIR EL PUEBLO DEL CAMPESINO
+    // Ponemos un infiltrador para REVOLT, y dos rebeldes normales para SCATTER, BRAWL o ARREST
+    initialState.players.peasant.town = [
+        { uid: "cheat_peasant_infiltrator", templateId: 13, typePeasant: "Rebel", isRevealed: true }, // Decoy
+        { uid: "cheat_peasant_rebel_town_1", templateId: 4, typePeasant: "Rebel", isRevealed: true }, 
+        { uid: "cheat_peasant_rebel_town_2", templateId: 7, typePeasant: "Rebel", isRevealed: true }  
+    ];
+
+    // 5. SOBRESCRIBIR DESCARTES
+    // Llenamos el mazo con cartas de ambos para que la primera fase de REASSEMBLE funcione
+    initialState.discardPile = [
+        { uid: "cheat_discard_1", templateId: 6, typePeasant: "Rebel", isRevealed: true }, 
+        { uid: "cheat_discard_2", templateId: 8, typePeasant: "Rebel", isRevealed: true },
+        { uid: "cheat_discard_3", templateId: 1, typeKing: "Guard", isRevealed: true },
+        { uid: "cheat_discard_4", templateId: 3, typeKing: "Guard", isRevealed: true }
+    ];
+    // =========================================================
+    */
+    return await saveAndFormatGameState(lobbyId, initialState);
 };
 
 const getGameStateById = async (id) => {
@@ -70,6 +115,53 @@ const getGameStateById = async (id) => {
 }
 
 const saveAndFormatGameState = async (gameId, gameState) => {
+    const winStatus = await checkWinCondition(gameState); 
+
+    if (winStatus && winStatus.isGameOver) {
+        const kingId = gameState.players.king.id;
+        const peasantId = gameState.players.peasant.id;
+        const winnerId = winStatus.winnerId;
+        const loserId = winnerId === kingId? peasantId : kingId;
+
+        gameState.scores[winnerId] += 1;
+        
+
+        if(gameState.scores[winnerId] >= 2) {
+            await prisma.game.create({
+                data: {
+                    player1Id: kingId,
+                    player2Id: peasantId,
+                    winnerId: winnerId,
+                    reason: winStatus.reason,
+                    startedAt: new Date(gameState.startedAt)
+                }
+            });
+
+            await prisma.user.update({
+                where: { idUser: winnerId },
+                data: { games: {increment: 1}, wins: {increment: 1} }
+            });
+
+            await prisma.user.update({
+                where: {idUser: loserId},
+                data: { games: {increment: 1}, losses: {increment: 1}}
+            });
+            await redisClient.del(`game:${gameId}`);
+            return winStatus;
+        } else {
+            gameState = await setupNewEra(
+                gameId, 
+                winnerId, 
+                loserId, 
+                gameState.era, 
+                gameState.scores, 
+                gameState.startedAt
+            );
+        }
+    }
+
+    delete gameState.lastEvent;
+    
     const result = await redisClient.set(`game:${gameId}`, JSON.stringify(gameState));
     if (result !== 'OK') {
         throw new Error('Error al guardar el estado del juego');
@@ -189,9 +281,8 @@ const playHandCard = async (gameId, cardUid, targetData, userId) => {
     }
 }
 
+
 const playActionCard = async (gameId,targetData, playedCard, userRol, gameState) => {
-    playedCard.isRevealed = true;
-    gameState.discardPile.push(playedCard);
     //Ejecutar efecto de carta
     if (userRol === "peasant") {
         const action = peasantActionCards[playedCard.templateId];
@@ -206,7 +297,12 @@ const playActionCard = async (gameId,targetData, playedCard, userRol, gameState)
             throw new Error('Carta de acción no existe');
         }
         gameState = action(gameState, targetData)
-    }   
+    }
+    playedCard.isRevealed = true;
+    gameState.discardPile.push(playedCard); 
+    if (!gameState.pendingAction) {
+        gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
+    }
     //Guardar estado actualizado
     return await saveAndFormatGameState(gameId, gameState);
 }
@@ -223,6 +319,7 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
     const pendingAction = gameState.pendingAction;
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
+        gameState.pendingAction = null;
         if (userRol === 'peasant') {
             const resolver = peasantPendingActions[pendingAction.type];
             if (!resolver) {
@@ -239,9 +336,32 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
     } else {
         throw new Error('No hay acciones pendientes para este jugador');
     }
-    gameState.pendingAction = null;
-    changeTurn(gameState);
+    if (!gameState.pendingAction) {
+        changeTurn(gameState);
+    }
     return await saveAndFormatGameState(gameId, gameState);
+}
+
+const checkWinCondition = async (gameState) => {
+    const deckCount = gameState.deck.length;
+    const discardPile = gameState.discardPile;
+    const kingHand = gameState.players.king.hand;
+    const kingTown = gameState.players.king.town;
+    const peasantTown = gameState.players.peasant.town;
+    if (discardPile.some(card => Number(card.templateId) === 16)) {
+        return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
+    } 
+    if (deckCount === 0) {
+        return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'PEASANT_DECK_EMPTY' };
+    }
+    if (kingHand.some(card => Number(card.templateId) === 16) || 
+        peasantTown.some(card => Number(card.templateId) === 16 && card.isRevealed && kingTown.length === 0)) {
+        return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
+    }
+    if (gameState.lastEvent === 'CONDEMN_FAIL') {
+        return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
+    }
+    return { isGameOver: false};
 }
 
 const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
@@ -302,8 +422,6 @@ const peasantDrawACard = async (gameId, userId) => {
     changeTurn(gameState);
     return await saveAndFormatGameState(gameId, gameState);
 }
-
-
 
 export const gameService = {
     createGame,

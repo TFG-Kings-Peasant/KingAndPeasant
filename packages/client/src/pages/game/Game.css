@@ -1,39 +1,157 @@
-/* packages/client/src/pages/game/Game.css */
-
+/* =======================================================
+   1. LAYOUT PRINCIPAL DEL TABLERO
+   ======================================================= */
 .game-board {
   display: flex;
-  flex-direction: row; /* Diseño en dos columnas: Juego a la izquierda, Mazo a la derecha */
-  height: 100vh;
+  flex-direction: row;
+  height: 130vh;
   width: 100vw;
   background-color: #2c3e50;
   color: white;
   padding: 15px;
   box-sizing: border-box;
-  overflow: hidden; /* Evita que aparezca scroll */
+  overflow: hidden; /* Evita que la pantalla entera haga scroll */
 }
 
-/* COLUMNA IZQUIERDA: ÁREA DE JUEGO (Tablero) */
 .game-main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 15px;
   height: 100%;
 }
 
+/* =======================================================
+   2. ÁREAS DE LOS JUGADORES (50% EXACTO)
+   ======================================================= */
 .opponent-area, .player-area {
-  flex: 1;
+  height: 50%; /* MAGIA 1: Cada jugador tiene su mitad exacta, ni un píxel más ni menos */
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   padding: 10px;
-  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
-/* COLUMNA DERECHA: MAZO, DESCARTES Y ACCIONES */
+/* RIVAL: Orden (H3 -> Mano -> Pueblo). 
+   Lo agrupamos todo junto sin espacios. */
+.opponent-area {
+  justify-content: flex-start; /* Pega su bloque arriba */
+  gap: 10px; /* Distancia mínima para que no se pisen */
+}
+
+/* JUGADOR: Orden (Pueblo -> Mano -> H3). 
+   Lo agrupamos todo al fondo de la pantalla. */
+.player-area {
+  justify-content: flex-end; /* Pega tu bloque abajo */
+  gap: 0px; /* PEGADITO: 0 píxeles de separación extra entre pueblo y mano */
+}
+
+/* =======================================================
+   3. CONTENEDORES DE CARTAS (SIN MÁRGENES AUTOMÁTICOS)
+   ======================================================= */
+.town {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap; 
+  padding: 5px; /* Relleno mínimo */
+  box-sizing: border-box;
+  z-index: 10;
+  
+  /* IMPORTANTE: Ni flex:1 ni margins automáticos. 
+     Ocupa exactamente lo que miden sus cartas. */
+}
+
+.hand {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  
+  /* Arriba(40) Derecha(20) Abajo(0) Izquierda(20) */
+  /* Ese 40px sigue siendo sagrado para que el :hover no recorte la cabeza de las cartas */
+  padding: 40px 20px 0px 20px; 
+  min-height: 180px; 
+  box-sizing: border-box;
+  scrollbar-width: none;
+  z-index: 50;
+}
+
+.hand::-webkit-scrollbar {
+  display: none;
+}
+
+.hand.waiting-turn .card.ingame {
+  filter: brightness(0.6) grayscale(0.3); /* Se ven apagadas */
+  transform: translateY(10px); /* Bajan un poquito para no destacar */
+}
+
+/* Siguen haciéndose grandes al pasar el ratón para poder leerlas, pero sin recuperar todo el color */
+.hand.waiting-turn .card.ingame:hover {
+  filter: brightness(0.9) grayscale(0.1);
+  transform: translateY(-5px) scale(1.1);
+}
+
+/* =======================================================
+   4. ESTÉTICA DE LA CARTA BASE
+   ======================================================= */
+.card.ingame {
+  width: 100px;
+  height: 140px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid #34495e;
+  transition: transform 0.2s ease, margin 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.card.ingame.back {
+  background-image: url('/cards/Back.png');
+  background-color: #8e44ad;
+}
+
+.card.clickable {
+  cursor: pointer;
+}
+
+/* =======================================================
+   5. EFECTO DE SOLAPAMIENTO (OVERLAP) PARA LA MANO
+   ======================================================= */
+.hand .card.ingame {
+  margin-left: -40px; /* Solapa las cartas */
+  transform-origin: bottom center; /* La base se queda fija, crece hacia arriba */
+}
+
+.hand .card.ingame:first-child {
+  margin-left: 0; /* La primera no se mueve a la izquierda */
+}
+
+.hand .card.ingame:hover {
+  transform: translateY(-15px) scale(1.1); /* Sube un poco y se amplía */
+  z-index: 100; /* Pasa al frente */
+  margin-right: 30px; /* Empuja las siguientes para que puedas verla entera */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+  cursor: pointer;
+}
+
+/* =======================================================
+   6. SIDEBAR DERECHO (MAZO, DESCARTES, CHAT)
+   ======================================================= */
 .game-sidebar {
   width: 200px;
   display: flex;
@@ -46,43 +164,6 @@
   gap: 30px;
 }
 
-/* CONTENEDORES DE CARTAS */
-.hand, .town {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  min-height: 150px;
-  width: 100%;
-}
-
-/* LA CARTA: Tamaño original de 100x140px */
-.card.ingame {
-  width: 100px;
-  height: 140px;
-  flex-shrink: 0; /* Evita que las cartas se aplasten si hay muchas */
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: 1px solid #34495e;
-  transition: transform 0.2s ease;
-}
-
-/* Efecto hover solo para tu mano */
-.player-area .hand .card.ingame:hover {
-  transform: translateY(-15px) scale(1.05);
-  z-index: 10;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-}
-
-.card.ingame.back {
-  background-image: url('/cards/Back.png');
-  background-color: #8e44ad;
-}
-
-/* SIDEBAR: Pilas de cartas */
 .deck-pile, .discard-pile {
   display: flex;
   flex-direction: column;
@@ -97,18 +178,24 @@
   box-shadow: 0 6px 15px rgba(0,0,0,0.4);
 }
 
-.deck-pile {
-  background-color: #2980b9;
-  border: 2px solid #fff;
+.deck-pile { background-color: #2980b9; border: 2px solid #fff; }
+
+/* Integración perfecta del mazo de descartes */
+.discard-pile { 
+  background-color: #7f8c8d; 
+  border: 2px solid #bdc3c7; 
+  opacity: 0.8; 
+  cursor: pointer; /* Indica que se puede clicar */
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.discard-pile {
-  background-color: #7f8c8d;
-  border: 2px solid #bdc3c7;
-  opacity: 0.8;
+/* Efecto hover al pasar el ratón por el mazo de descartes */
+.discard-pile:hover {
+  transform: scale(1.05);
+  border-color: #d4af37; /* Brillo dorado */
+  opacity: 1;
 }
 
-/* --- BOTONES DE ACCIÓN A LA IZQUIERDA --- */
 .action-container {
   position: absolute;
   left: 30px;           /* Distancia desde el borde izquierdo de la pantalla */
@@ -138,6 +225,7 @@ button.ingame {
   font-size: 0.9rem;
   cursor: pointer;
   box-shadow: 0 4px 0 #d35400;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
 h3 {
@@ -148,115 +236,118 @@ h3 {
   opacity: 0.8;
 }
 
-/* --- ESTILOS PARA EL MODAL DE LA CARTA AMPLIADA --- */
-
-.card.clickable {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.card.clickable:hover {
-  transform: scale(1.05); /* Pequeño efecto al pasar el ratón antes de clicar */
-}
-
-/* El fondo oscuro que bloquea la pantalla */
+/* =======================================================
+   7. MODALES (CARTA AMPLIADA)
+   ======================================================= */
 .card-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.75); /* Oscurece la partida */
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Se asegura de estar por encima de todo */
-  cursor: pointer; /* Indica que clicar fuera cierra el modal */
+  z-index: 9999;
+  cursor: pointer;
 }
 
-/* El contenedor de la carta ampliada */
 .card-modal-content {
   background: transparent;
   padding: 10px;
-  cursor: default; /* Quita el cursor pointer al pasar sobre la carta en sí */
+  cursor: default;
   animation: popIn 0.2s ease-out forwards;
 }
 
-/* La imagen de la carta en grande */
 .card.zoomed {
-  width: 300px; /* Ajusta estos tamaños según la proporción de tus cartas */
+  width: 300px;
   height: 420px;
   background-size: cover;
   background-position: center;
-  border-radius: 12px; /* Dependiendo de si tus png ya tienen el borde o no */
+  border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
-/* --- OVERLAY DE ACCIÓN PENDIENTE --- */
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* =======================================================
+   8. SISTEMA DE ACCIONES PENDIENTES (BANNER Y SELECCIÓN)
+   ======================================================= */
 .pending-action-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85); /* Fondo oscuro casi opaco */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; /* Por encima de TODO (cartas, chat, etc.) */
-  backdrop-filter: blur(4px); /* Un toque moderno: difumina el tablero de fondo */
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none; /* Deja pasar los clics hacia el tablero */
 }
 
-/* --- CONTENIDO DEL MODAL DE ACCIÓN --- */
 .pending-action-content {
-  background: linear-gradient(135deg, #2c1e16 0%, #1a110c 100%); /* Tonos madera/oscuros medievales */
-  border: 2px solid #c9a358; /* Borde dorado oscuro */
+  background: rgba(0, 0, 0, 0.95);
+  padding: 15px 40px;
   border-radius: 12px;
-  padding: 30px 40px;
+  border: 2px solid #d4af37;
   text-align: center;
-  color: #fffde7;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.7), 0px 0px 15px rgba(201, 163, 88, 0.3);
-  max-width: 400px;
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  color: white;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+  pointer-events: auto; /* Reactiva los clics en el recuadro */
 }
 
-.pending-action-content h2 {
-  margin-top: 0;
-  font-size: 1.8rem;
-  color: #e6c27a;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid rgba(230, 194, 122, 0.3);
-  padding-bottom: 10px;
-  margin-bottom: 20px;
+.pending-action-content h2 { margin: 0 0 10px 0; font-size: 1.5rem; color: #d4af37; }
+.pending-action-content p { margin: 0 0 15px 0; font-size: 1.1rem; }
+
+.card.selected-target {
+  box-shadow: 0 0 15px 5px #d4af37 !important;
+  transform: translateY(-10px) scale(1.05);
+  border: 2px solid #d4af37;
+  z-index: 10;
 }
 
-.pending-action-content p {
-  font-size: 1.1rem;
-  margin-bottom: 25px;
+.pending-action-active .zone-not-allowed {
+  filter: grayscale(0.8) brightness(0.5);
+  pointer-events: none;
 }
 
-/* Opcional: Para que el contenedor de los botones quede ordenado */
-.pending-action-content .button-group {
+.revolt-position-input {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 4px;
+  border: 2px solid #d4af37;
+  background: rgba(0,0,0,0.8);
+  color: white;
+} 
+
+/* =======================================================
+   9. MODAL DE DESCARTES
+   ======================================================= */
+.discard-modal-content {
+  background: rgba(20, 30, 40, 0.95);
+  padding: 30px;
+  border-radius: 12px;
+  border: 2px solid #7f8c8d;
+  text-align: center;
+  color: white;
+  width: 80%;
+  max-width: 800px;
+  max-height: 80vh; /* Si hay muchas cartas, permite hacer scroll interno */
+  overflow-y: auto;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+  animation: popIn 0.2s ease-out forwards;
+  cursor: default;
+}
+
+.discard-grid {
   display: flex;
+  flex-wrap: wrap;
   gap: 15px;
   justify-content: center;
-}
-
-/* Animación para que aparezca con un pequeño "rebote" */
-@keyframes popIn {
-  0% { opacity: 0; transform: scale(0.8); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* Pequeña animación para que no aparezca de golpe */
-@keyframes popIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  margin-top: 20px;
+  padding: 10px;
 }
