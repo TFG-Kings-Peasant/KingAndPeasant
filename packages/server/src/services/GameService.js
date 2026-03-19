@@ -47,95 +47,62 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     };
 
     const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
-    
+    /*
     // =========================================================
-    // 🛠️ HACK PARA DESARROLLO: FORZAR ESCENARIO DE PRUEBAS 🛠️
+    // 🛠️ HACK PARA DESARROLLO: MESA DE PRUEBAS GLOBAL 🛠️
     // =========================================================
     
-    // 1. SOBRESCRIBIR la mano del Campesino (Usamos '=' para borrar las 5 cartas aleatorias previas)
+    // 1. SOBRESCRIBIR LA MANO DEL REY
+    initialState.players.king.hand = [
+        { uid: "cheat_king_strike", templateId: 10, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_arrest", templateId: 11, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_raid", templateId: 12, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_reassemble", templateId: 14, typeKing: "Action", isRevealed: true },
+        // Guardias en mano para la segunda fase de REASSEMBLE (Preparar guardia de la mano)
+        { uid: "cheat_king_guard_hand_1", templateId: 1, typeKing: "Guard", isRevealed: true }, 
+        { uid: "cheat_king_guard_hand_2", templateId: 3, typeKing: "Guard", isRevealed: true }  
+    ];
+
+    // 2. SOBRESCRIBIR LA MANO DEL CAMPESINO
     initialState.players.peasant.hand = [
-        { uid: "cheat_action_brawl", templateId: 3, typePeasant: "Action", isRevealed: true },       // BRAWL (ID: 3)
-        { uid: "cheat_action_revolt", templateId: 11, typePeasant: "Action", isRevealed: true },     // REVOLT (ID: 11)
-        { uid: "cheat_action_scatter", templateId: 12, typePeasant: "Action", isRevealed: true },    // SCATTER (ID: 12)
-        { uid: "cheat_action_reassemble", templateId: 14, typePeasant: "Action", isRevealed: true }, // REASSEMBLE (ID: 14)
-        { uid: "cheat_action_rally", templateId: 15, typePeasant: "Action", isRevealed: true },      // RALLY (ID: 15)
-        
-        { uid: "cheat_rebel_hand_1", templateId: 1, typePeasant: "Rebel", isRevealed: true }, // Heretic (ID: 1)
-        { uid: "cheat_rebel_hand_2", templateId: 2, typePeasant: "Rebel", isRevealed: true }  // Smuggler (ID: 2)
+        { uid: "cheat_peasant_brawl", templateId: 3, typePeasant: "Action", isRevealed: true },       
+        { uid: "cheat_peasant_revolt", templateId: 11, typePeasant: "Action", isRevealed: true },     
+        { uid: "cheat_peasant_scatter", templateId: 12, typePeasant: "Action", isRevealed: true },    
+        { uid: "cheat_peasant_reassemble", templateId: 14, typePeasant: "Action", isRevealed: true }, 
+        { uid: "cheat_peasant_rally", templateId: 15, typePeasant: "Action", isRevealed: true },      
+        // Rebeldes en mano para esconder con RALLY o la segunda fase de REASSEMBLE
+        { uid: "cheat_peasant_rebel_hand_1", templateId: 1, typePeasant: "Rebel", isRevealed: true }, 
+        { uid: "cheat_peasant_rebel_hand_2", templateId: 2, typePeasant: "Rebel", isRevealed: true }  
     ];
 
-    // 2. SOBRESCRIBIR el pueblo del Campesino
-    initialState.players.peasant.town = [
-        { uid: "cheat_infiltrator_1", templateId: 13, typePeasant: "Rebel", isRevealed: true }, // Decoy (ID: 13)
-        { uid: "cheat_infiltrator_2", templateId: 16, typePeasant: "Rebel", isRevealed: true }, // Assassin (ID: 16)
-        { uid: "cheat_normal_rebel", templateId: 4, typePeasant: "Rebel", isRevealed: true }    // Thug (ID: 4)
-    ];
-
-    // 3. SOBRESCRIBIR el pueblo del Rey
+    // 3. SOBRESCRIBIR EL PUEBLO DEL REY
+    // Ponemos 3 guardias: 2 para que el rey los use con STRIKE, y 1 extra para que el Campesino le pegue con BRAWL
     initialState.players.king.town = [
-        { uid: "cheat_guard_1", templateId: 1, typeKing: "Guard", isRevealed: true }, // Crier (ID: 1)
-        { uid: "cheat_guard_2", templateId: 3, typeKing: "Guard", isRevealed: true }  // Inquisitor (ID: 3)
+        { uid: "cheat_king_guard_town_1", templateId: 4, typeKing: "Guard", isRevealed: true }, 
+        { uid: "cheat_king_guard_town_2", templateId: 5, typeKing: "Guard", isRevealed: true }, 
+        { uid: "cheat_king_guard_town_3", templateId: 6, typeKing: "Guard", isRevealed: true }  
     ];
 
-    // 4. SOBRESCRIBIR el mazo de Descartes
+    // 4. SOBRESCRIBIR EL PUEBLO DEL CAMPESINO
+    // Ponemos un infiltrador para REVOLT, y dos rebeldes normales para SCATTER, BRAWL o ARREST
+    initialState.players.peasant.town = [
+        { uid: "cheat_peasant_infiltrator", templateId: 13, typePeasant: "Rebel", isRevealed: true }, // Decoy
+        { uid: "cheat_peasant_rebel_town_1", templateId: 4, typePeasant: "Rebel", isRevealed: true }, 
+        { uid: "cheat_peasant_rebel_town_2", templateId: 7, typePeasant: "Rebel", isRevealed: true }  
+    ];
+
+    // 5. SOBRESCRIBIR DESCARTES
+    // Llenamos el mazo con cartas de ambos para que la primera fase de REASSEMBLE funcione
     initialState.discardPile = [
-        { uid: "cheat_discard_1", templateId: 6, typePeasant: "Rebel", isRevealed: true }, // Mob (ID: 6)
-        { uid: "cheat_discard_2", templateId: 8, typePeasant: "Rebel", isRevealed: true }  // Rat (ID: 8)
+        { uid: "cheat_discard_1", templateId: 6, typePeasant: "Rebel", isRevealed: true }, 
+        { uid: "cheat_discard_2", templateId: 8, typePeasant: "Rebel", isRevealed: true },
+        { uid: "cheat_discard_3", templateId: 1, typeKing: "Guard", isRevealed: true },
+        { uid: "cheat_discard_4", templateId: 3, typeKing: "Guard", isRevealed: true }
     ];
     // =========================================================
-    
+    */
     return await saveAndFormatGameState(lobbyId, initialState);
 };
-
-/*
-const createGame = async ( lobbyId, player1Id, player2Id) => {
-    
-    const initialScores = {
-        [player1Id]: 0,
-        [player2Id]: 0
-    };
-
-    const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
-    
-    // =========================================================
-    // 🛠️ HACK PARA DESARROLLO: FORZAR ESCENARIO DE PRUEBAS 🛠️
-    // =========================================================
-    
-    // 1. Añadir TODAS las cartas de Acción a la mano del Campesino (IDs reales)
-    initialState.players.peasant.hand.push(
-        { uid: "cheat_action_brawl", templateId: 3, typePeasant: "Action", isRevealed: true },       // BRAWL (ID: 3)
-        { uid: "cheat_action_revolt", templateId: 11, typePeasant: "Action", isRevealed: true },     // REVOLT (ID: 11)
-        { uid: "cheat_action_scatter", templateId: 12, typePeasant: "Action", isRevealed: true },    // SCATTER (ID: 12)
-        { uid: "cheat_action_reassemble", templateId: 14, typePeasant: "Action", isRevealed: true }, // REASSEMBLE (ID: 14)
-        { uid: "cheat_action_rally", templateId: 15, typePeasant: "Action", isRevealed: true },      // RALLY (ID: 15)
-        
-        // Rebeldes en mano para poder usar RALLY y REASSEMBLE (te piden esconder Rebeldes de tu mano)
-        { uid: "cheat_rebel_hand_1", templateId: 1, typePeasant: "Rebel", isRevealed: true }, // Heretic (ID: 1)
-        { uid: "cheat_rebel_hand_2", templateId: 2, typePeasant: "Rebel", isRevealed: true }  // Smuggler (ID: 2)
-    );
-
-    // 2. Poblar el pueblo del Campesino para REVOLT, BRAWL y SCATTER
-    initialState.players.peasant.town.push(
-        { uid: "cheat_infiltrator_1", templateId: 13, typePeasant: "Rebel", isRevealed: true }, // Decoy (Infiltrador válido, ID: 13)
-        { uid: "cheat_infiltrator_2", templateId: 16, typePeasant: "Rebel", isRevealed: true }, // Assassin (Infiltrador válido, ID: 16)
-        { uid: "cheat_normal_rebel", templateId: 4, typePeasant: "Rebel", isRevealed: true }    // Thug (Rebelde normal para Brawl)
-    );
-
-    // 3. Poblar el pueblo del Rey para que el Campesino tenga objetivos en BRAWL
-    initialState.players.king.town.push(
-        { uid: "cheat_guard_1", templateId: 1, typeKing: "Guard", isRevealed: true }, // Crier (ID: 1)
-        { uid: "cheat_guard_2", templateId: 3, typeKing: "Guard", isRevealed: true }  // Inquisitor (ID: 3)
-    );
-
-    // 4. Añadir cartas al mazo de Descartes para la acción REASSEMBLE (Recuperar del descarte)
-    initialState.discardPile.push(
-        { uid: "cheat_discard_1", templateId: 6, typePeasant: "Rebel", isRevealed: true }, // Mob (ID: 6)
-        { uid: "cheat_discard_2", templateId: 8, typePeasant: "Rebel", isRevealed: true }  // Rat (ID: 8)
-    );
-    // =========================================================
-    return await saveAndFormatGameState(lobbyId, initialState);
-};
-*/
 
 const getGameStateById = async (id) => {
     const gameState = await redisClient.get(`game:${id}`);

@@ -246,11 +246,21 @@ function Game() {
             );
           })}
         </div>
+        
         <div className={`hand ${gameState.turn !== myRoleName ? 'waiting-turn' : ''}`}>
-          {myPlayer.hand.map((card) => (
-            <div key={card.uid} className="card ingame" style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-            onClick={() => handleSelectCard(card, "hand")}></div>
-          ))}
+          {myPlayer.hand.map((card) => {
+            const isSelected = actionTargets.some(t => t.uid === card.uid);
+            const isClickable = gameState?.pendingAction && activeConfig?.allowedZones.includes("hand");
+
+            return (
+              <div 
+                key={card.uid} 
+                className={`card ingame ${isSelected ? 'selected-target' : ''} ${isClickable ? 'clickable' : ''}`}
+                style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+                onClick={() => handleSelectCard(card, "hand")}
+              ></div>
+            );
+          })}
         </div>
         <h3>TU MANO ({myRoleName}) - Turno: {gameState.turn.toUpperCase()}</h3>
       </div>
