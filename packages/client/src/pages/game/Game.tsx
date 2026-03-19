@@ -4,7 +4,7 @@ import "./GameChat.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Game.css";
-import { CARDS_THAT_CAN_INFILTRATE, peasantPendingUI } from "./components/pendingActionsUI";
+import { CARDS_THAT_CAN_INFILTRATE, peasantPendingUI, kingPendingUI } from "./components/pendingActionsUI";
 import type { SelectedCard } from "./components/pendingActionsUI";
 
 interface ChatMessage {
@@ -22,7 +22,9 @@ function Game() {
   const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
   const [actionTargets, setActionTargets] = useState<SelectedCard[]>([]);
   const activeConfig = gameState?.pendingAction
-    ? peasantPendingUI[gameState.pendingAction.type]
+    ? (gameState.pendingAction.player === "king" 
+        ? kingPendingUI[gameState.pendingAction.type] 
+        : peasantPendingUI[gameState.pendingAction.type])
     : null;
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   
