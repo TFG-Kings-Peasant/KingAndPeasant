@@ -207,7 +207,7 @@ function Game() {
     }
     const cardToPlayUid = selectedCard.uid;
     try {
-      if(selectedCard.position === 'enemyTown' && isKing){
+      if(selectedCard.position === 'rivalTown' && isKing){
         await condemnRebel(Number(id), false,cardToPlayUid, user.authToken)
       }else if(selectedCard.position === 'hand'){
         await playCard(Number(id), cardToPlayUid, {}, true, user.authToken)
