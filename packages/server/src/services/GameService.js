@@ -47,7 +47,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     };
 
     const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
-    /*
+    
     // =========================================================
     // 🛠️ HACK PARA DESARROLLO: MESA DE PRUEBAS GLOBAL 🛠️
     // =========================================================
@@ -100,7 +100,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         { uid: "cheat_discard_4", templateId: 3, typeKing: "Guard", isRevealed: true }
     ];
     // =========================================================
-    */
+    
     return await saveAndFormatGameState(lobbyId, initialState);
 };
 
