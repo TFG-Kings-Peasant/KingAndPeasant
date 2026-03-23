@@ -141,6 +141,10 @@ function Game() {
   };
   
   const handleSelectCard = (card: CardState, position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard'| null) => {
+    if (position === 'rivalTown' && !card.templateId) {
+      return; 
+    }
+    
     if(activeConfig && position && activeConfig.allowedZones.includes(position)){
       const isRevolt = gameState?.pendingAction?.type === 'REVOLT';
       const isValidTarget = !isRevolt || CARDS_THAT_CAN_INFILTRATE.includes(card.templateId as number);
@@ -216,8 +220,12 @@ function Game() {
           {rivalPlayer.town.map((card) => {
             const isSelected = actionTargets.some(t => t.uid === card.uid);
             return (
-              <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-              onClick={() => handleSelectCard(card, 'rivalTown')}>
+              <div 
+                key={card.uid} 
+                className={`card ingame ${!card.templateId ? 'back' : ''} ${isSelected ? 'selected-target' : ''}`} 
+                style={card.templateId ? { backgroundImage: `url('/cards/${card.templateId}.png')` } : {}} 
+                onClick={() => handleSelectCard(card, 'rivalTown')}
+              >
               </div>
             );
           })}
@@ -228,9 +236,14 @@ function Game() {
         <div className="town">
           {myPlayer.town.map((card) => {
             const isSelected = actionTargets.some(t => t.uid === card.uid);
+            const isHiddenForRival = card.isRevealed === false;
             return(
-              <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''} ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
-              onClick={() => handleSelectCard(card, 'myTown')}>
+              <div 
+                key={card.uid} 
+                className= {`card ingame ${isHiddenForRival ? 'hidden-style' : ''} ${isSelected ? 'selected-target' : ''}`} 
+                style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+                onClick={() => handleSelectCard(card, 'myTown')}
+              >
                 {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
                    <input 
                      type="number" 
@@ -292,7 +305,6 @@ function Game() {
         </div>
 
       <div className="action-container">
-        {/*<button className = "button ingame" onClick={handleMakeAction}>PASAR TURNO</button>*/}
 
       <div className="chat-container">
         <h3 className="chat-header">
@@ -348,7 +360,6 @@ function Game() {
       </div>
     )}
 
-    {/* --- NUEVO: MODAL DE CARTA AMPLIADA --- */}
     {selectedCard && (
       <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
         {/* Al hacer click en el contenido evitamos que se cierre (propagation) */}
@@ -357,7 +368,7 @@ function Game() {
             className="card zoomed" 
             style={{ backgroundImage: `url('/cards/${selectedCard.templateId}.png')` }}
           ></div>
-          {gameState.turn === myRoleName && selectedCard.position === "hand" && (
+         {gameState.turn === myRoleName && selectedCard.position === "hand" && !gameState?.pendingAction && (
           <button
             onClick={handlePlayCard}
             className="button ingame"
@@ -405,7 +416,15 @@ function Game() {
             {gameState.discardPile?.length === 0 ? (
               <p>El mazo de descartes está vacío.</p>
             ) : (
-              gameState.discardPile?.map((card, index) => {
+              //Arreglo para la carta de Acción Reassemble
+              gameState.discardPile
+                .filter((card, index, array) => {
+                if (gameState.pendingAction) {
+                  return index !== array.length - 1;
+                }
+                return true;
+              })
+              .map((card, index) => {
                 // Comprobamos si la carta está seleccionada para brillar
                 const isSelected = actionTargets.some(t => t.uid === card.uid);
                 // Comprobamos si la acción actual permite clickar en el descarte
