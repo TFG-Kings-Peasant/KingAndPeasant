@@ -211,7 +211,7 @@ function Game() {
         await condemnRebel(Number(id), false,cardToPlayUid, user.authToken)
       }else if(selectedCard.position === 'hand'){
         await playCard(Number(id), cardToPlayUid, {}, true, user.authToken)
-      }else if(selectedCard.position === 'town'){
+      }else if(selectedCard.position === 'myTown'){
         await playCard(Number(id), cardToPlayUid, {}, false, user.authToken)
       }
 
@@ -271,9 +271,15 @@ function Game() {
       <div className="opponent-area">
         <h3>RIVAL ({rivalRoleName})</h3>
         <div className="hand">
-          {rivalPlayer.hand.map((card) => (
-            <div key={card.uid} className="card ingame back"></div>
-          ))}
+          {rivalPlayer.hand.map((card) => {
+            const isSelected = actionTargets.some(t => t.uid === card.uid);
+            return (
+              card.isRevealed ? <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+              onClick={() => handleSelectCard(card, 'rivalTown')}>
+              </div>: 
+            <div key={card.uid} className="card ingame back" onClick={() => handleSelectCard(card, 'rivalTown')}></div>
+            );
+          })}
         </div>
         <div className="town">
           {rivalPlayer.town.map((card) => {
@@ -425,7 +431,7 @@ function Game() {
       
           <div 
             className="card zoomed" 
-            style={(selectedCard.isRevealed || selectedCard.position == 'hand' || selectedCard.position == 'town') 
+            style={(selectedCard.isRevealed || selectedCard.position == 'hand' || selectedCard.position == 'myTown') 
               ? { backgroundImage: `url('/cards/${selectedCard.templateId}.png')` } 
             : { backgroundImage: `url('/cards/Back.png')` } }
           ></div>

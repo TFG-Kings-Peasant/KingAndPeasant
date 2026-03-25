@@ -1,4 +1,4 @@
-import {drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
 
 export const rebelCards = {
     1: (gameState) => {
@@ -20,27 +20,27 @@ export const rebelCards = {
             throw new Error('No hay rebeldes en la pila de descartes');
         }
         
-        changeTurn(gameState)
         return gameState;
     },
     2: (gameState, playedCard) => {
         //"Shuffle all other Rebels in Town and cards in hand into the deck, then draw 3 cards"
         console.log("Shuffle all other Rebels in Town and cards in hand into the deck, then draw 3 cards")
-
+        console.log("Played card:", playedCard)
         // 1. Mover los "otros" Rebeldes del Town al mazo
         for (let i = gameState.players.peasant.town.length - 1; i >= 0; i--) {
-            const card = gameState.players.peasant.town[i];
-            
-            // Verificamos que sea Rebelde y que NO sea la carta que estamos jugando
+            const [card] = gameState.players.peasant.town.splice(i, 1);
+
             if (card.typePeasant === "Rebel" && card.uid !== playedCard.uid) {
-                gameState.deck.push(card); // La metemos al mazo
-                gameState.players.peasant.town.splice(i, 1); // La sacamos del town
+                card.isRevealed = false; 
+                gameState.deck.push(card); 
+            }else{
+                gameState.players.peasant.town.push(card);
             }
         }
 
         // 2. Mover TODAS las cartas de la mano al mazo
         for (let i = gameState.players.peasant.hand.length - 1; i >= 0; i--) {
-            const card = gameState.players.peasant.hand.splice(i, 1);
+            const [card] = gameState.players.peasant.hand.splice(i, 1);
             gameState.deck.push(card);
         }
 
@@ -51,11 +51,11 @@ export const rebelCards = {
         for (let i = 0; i < 3; i++) {
             if (gameState.deck.length > 0) {
                 const drawnCard = gameState.deck.pop();
+                console.log("Carta robada:", drawnCard)
                 gameState.players.peasant.hand.push(drawnCard);
             }
         }
 
-        changeTurn(gameState)
         return gameState;
     },
     4: (gameState) => {
@@ -112,7 +112,6 @@ export const rebelCards = {
             throw new Error('No cartas en el pueblo para eliminar');
         }
 
-        changeTurn(gameState)
         return gameState;
     },
     7: (gameState) => {
@@ -135,18 +134,10 @@ export const rebelCards = {
         return gameState;
     },
     8: (gameState) => {
-        //"Return up to 2 other Rebels back to hand, then Hide up to 2 Rebels"
-        const townLength = gameState.players.peasant.town.length
-        if (townLength === 0) {
-            throw new Error('No cartas en el pueblo del campesino para robar');
-        }
-
-        const amount = Math.min(2, townLength);
-
+        //"Return up to 2 other Rebels back to hand, then Hide up to 2 Rebelss
         gameState.pendingAction = {
             type: "RAT",
             player: "peasant",
-            amount: amount
         };
         return gameState;
     },
@@ -159,14 +150,15 @@ export const rebelCards = {
 
         }
         // Calculamos cuántas descarta (2, o 1 si solo le queda esa en la mano)
-        const cardsToDiscard = Math.min(2, kingHandLength);
+        //const cardsToDiscard = Math.min(2, kingHandLength);
 
         // Le pasamos la "patata caliente" al King
         gameState.pendingAction = {
             type: "THIEF",
             player: "king",
-            amount: cardsToDiscard
+            //amount: cardsToDiscard
         };
+        changeTurn(gameState)
         return gameState;
     },
     13: (gameState) => {

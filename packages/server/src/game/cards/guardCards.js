@@ -14,18 +14,17 @@ export const guardCards = {
     2: (gameState) => {
         //"Discard the top 2 cards of the deck"
         console.log("Discard the top 2 cards of the deck")
-        if(gameState.deck.lenght > 0){
+        if(gameState.deck.length > 0){
             const card = gameState.deck.pop()
             card.isRevealed = true
             gameState.discardPile.push(card)
         }
-        if(gameState.deck.lenght > 0){
+        if(gameState.deck.length > 0){
             const card = gameState.deck.pop()
             card.isRevealed = true
             gameState.discardPile.push(card)
         }
 
-        changeTurn(gameState)
         return gameState;
     },
     3: (gameState) => {
@@ -113,7 +112,7 @@ export const guardCards = {
         const peasantTown = gameState.players.peasant.town;
         let rebelInTown = false;
         for (let card of peasantTown) {
-            if (card.typePeasant == "Rebel" && card.isRevaled == false) {
+            if (card.typePeasant == "Rebel" && card.isRevealed == false) {
                 rebelInTown = true;
                 break;
             }
@@ -126,6 +125,7 @@ export const guardCards = {
             player: "peasant",
             type: "EXECUTOR"
         };
+        changeTurn(gameState)
         return gameState;
     },
     9: (gameState) => {
@@ -141,7 +141,7 @@ export const guardCards = {
     15: (gameState) => {
         //"Look at Peasant's hand cards"
 
-        //TODO: Logica de mostrar cartas de la deck
+        //TODO: Logica de mostrar cartas de la mano
         for (let i = gameState.players.peasant.hand.length - 1; i >= 0; i--) {
             const card = gameState.players.peasant.hand[i];
             card.isRevealed = true;

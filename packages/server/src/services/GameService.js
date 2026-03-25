@@ -211,15 +211,15 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
     if (cardIndex === -1) {
         throw new Error('Carta no encontrada en el pueblo del jugador');
     }
-    const playedCard = gameState.players[userRol].town[cardIndex];
+    const [playedCard] = gameState.players[userRol].town.splice(cardIndex, 1);
 
     if(userRol==='king'){
-        return await activateCard(gameId, targetData, playedCard, userRol, gameState);
+        return await activateCard(gameId, playedCard, userRol, gameState);
     }else{
         if(playedCard.isRevealed){
             return await returnRebeldToHand(gameId, gameState, cardIndex)
         }else{
-            return await activateCard(gameId, targetData, playedCard, userRol, gameState);
+            return await activateCard(gameId, playedCard, userRol, gameState);
         }
     }
 }
@@ -232,20 +232,25 @@ const activateCard = async (gameId, playedCard, userRol, gameState) => {
             throw new Error('Carta de Rebel no existe');
         }
         gameState = action(gameState, playedCard);
+        playedCard.isRevealed = true;
+
     } else {
         const action = guardCards[playedCard.templateId];
         if (!action) {
             throw new Error('Carta de Guard no existe');
         }
         gameState = action(gameState, playedCard)
+        gameState.discardPile.push(playedCard); 
     }   
-    changeTurn(gameState); // Esto no va aqui, deberia depender de si se ha acabado la pending action.
-
+    if (!gameState.pendingAction) {
+        gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
+    }
     return await saveAndFormatGameState(gameId, gameState);
 }
 
 const returnRebeldToHand = async (gameId, gameState, cardIndex) => {
     const [card] = gameState.players.peasant.town.splice(cardIndex, 1);
+    console.log(cardIndex)
     gameState.players.peasant.hand.push(card)
     changeTurn(gameState);
 
@@ -309,13 +314,8 @@ const playActionCard = async (gameId,targetData, playedCard, userRol, gameState)
 
 const resolvePendingAction = async (gameId, userId, targetData) => {
     let gameState = await getGameStateById(gameId);
-    /* Formato del pendingAction
-    gameState.pendingAction = {
-        player: 'peasant',
-        type: 'RALLY',
-    };
-    */
-    const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
+
+    const userRol = getUserRol(gameState, userId);
     const pendingAction = gameState.pendingAction;
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
@@ -325,13 +325,21 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
             if (!resolver) {
                 throw new Error(`Resolutor no encontrado para la acción: ${pendingAction.type}`);
             }
-            gameState = resolver(gameState, targetData);
+            gameState = resolver(gameState, targetData); 
+
         } else {
             const resolver = kingPendingActions[pendingAction.type];
             if (!resolver) {
                 throw new Error(`Resolutor no encontrado para la acción: ${pendingAction.type}`)
             }
-            gameState = resolver(gameState, targetData); 
+            if(pendingAction.type === 'INQUISITOR'){
+                const result = resolver(gameState, targetData);
+                gameState = await activateCard(gameId, result.handCard, userRol, result.gameState);
+                return await saveAndFormatGameState(gameId, gameState);
+
+            }else{
+                gameState = resolver(gameState, targetData);
+            }
         }    
     } else {
         throw new Error('No hay acciones pendientes para este jugador');

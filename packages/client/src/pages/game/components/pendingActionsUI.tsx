@@ -99,7 +99,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona 1 guardia en el pueblo rival para descartarlo",
         allowedZones: ['rivalTown'],
         canConfirm: (selectedCards) => {
-            const validate = selectedCards.every(c => c.typeKing === 'King' && c.position === 'rivalTown');
+            const validate = selectedCards.every(c => c.typeKing === 'Guard' && c.position === 'rivalTown');
             return selectedCards.length > 0 && validate;
         }, 
         formatPayload: (selectedCards) => {
@@ -152,13 +152,12 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "RAT": {
-        //TODO: Restricción para que no pueda escoger esta carta
-        instructionText: "Selecciona hasta 2 reveldes para devolver a la mano",
+        instructionText: "Selecciona hasta 2 rebeldes para devolver a la mano",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
             const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown');
 
-            return selectedCards.length > 0 && validate && selectedCards.length < 3;
+            return validate && selectedCards.length < 3;
         }, 
         formatPayload: (selectedCards) => {
             return {
@@ -167,11 +166,11 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "RAT2": {
-        instructionText: "Selecciona hasta 2 reveldes de tu mano para esconder en el pueblo",
+        instructionText: "Selecciona hasta 2 rebeldes de tu mano para esconder en el pueblo",
         allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
             const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'hand');
-            return selectedCards.length > 0 && validate && selectedCards.length < 3;
+            return validate && selectedCards.length < 3;
         }, 
         formatPayload: (selectedCards) => {
             return {
@@ -294,21 +293,22 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
             const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            return selectedCards.length > 0 && selectedCards.length < 2 && hasGuard;
         },
         formatPayload: (selectedCards) => {
-            return { targetUid: selectedCards[0]?.uid || ""}
+            return { targetUid: selectedCards[0].uid}
         }
     },
     "SPY": {
         instructionText: "Selecciona 1 rebelde escondido en el pueblo rival para revelar su identidad",
         allowedZones: ['rivalTown'],
         canConfirm: (selectedCards) => {
-            const isHiden = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'rivalTown' && !c.isRevealed);
+            const isHiden = selectedCards.every(c => !c.isRevealed);
 
-            return selectedCards.length >= 0 && selectedCards.length < 2 && isHiden;
+            return selectedCards.length > 0 && selectedCards.length < 2 && isHiden;
         },
         formatPayload: (selectedCards) => {
+            console.log("Selected card for SPY action:", selectedCards[0]);
             return { targetUid: selectedCards[0]?.uid || ""}
         }
     },
@@ -351,15 +351,13 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
     },
     "WATCHMAN": {
         //TODO: Eperara confirmacion para volver a girar las cartas del rebel
-
-        instructionText: "Selecciona hasta 1 guardia para posicionar en el pueblo boca arriba",
-        allowedZones: ['hand'],
+        instructionText: "Pulsa el botón de confirmar acción para volver a girar las cartas del campesino",
+        allowedZones: [],
         canConfirm: (selectedCards) => {
-            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            return true;
         },
         formatPayload: (selectedCards) => {
-            return { guardUid: selectedCards[0]?.uid || ""}
+            return { }
         }
         
     }
