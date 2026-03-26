@@ -308,7 +308,6 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
             return selectedCards.length > 0 && selectedCards.length < 2 && isHiden;
         },
         formatPayload: (selectedCards) => {
-            console.log("Selected card for SPY action:", selectedCards[0]);
             return { targetUid: selectedCards[0]?.uid || ""}
         }
     },

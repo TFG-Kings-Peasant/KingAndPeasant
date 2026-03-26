@@ -14,7 +14,7 @@ export interface GameState {
     scores: Record<string, number>;
     turnNumber: number;
     turn: 'king' | 'peasant';
-    deckCount: number;
+    deck: CardState[];
     discardPile: CardState[];
     players: {
         king: {

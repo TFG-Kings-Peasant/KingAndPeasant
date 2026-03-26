@@ -177,11 +177,16 @@ const getGameStateDTO = async (gameId) => {
 //Obtiene el GameState y devuelve los DTOs
 const transformGameStateDTO = (gameState) => {
     const dtoKing = JSON.parse(JSON.stringify(gameState));
-    dtoKing.deckCount = dtoKing.deck.length;
-    delete dtoKing.deck;
+//    dtoKing.deckCount = dtoKing.deck.length;
+//    delete dtoKing.deck;
     const dtoPeasant = JSON.parse(JSON.stringify(gameState));
-    dtoPeasant.deckCount = dtoPeasant.deck.length;
-    delete dtoPeasant.deck;
+//    dtoPeasant.deckCount = dtoPeasant.deck.length;
+//    delete dtoPeasant.deck;
+
+    const deck = dtoKing.deck.map(card => ({uid: card.uid}));
+
+    dtoKing.deck = deck;
+    dtoPeasant.deck = deck;
 
     dtoKing.players.peasant.hand = dtoKing.players.peasant.hand.map(card => ({
         uid: card.uid

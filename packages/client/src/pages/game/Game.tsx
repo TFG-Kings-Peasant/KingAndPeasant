@@ -27,6 +27,7 @@ function Game() {
         : peasantPendingUI[gameState.pendingAction.type])
     : null;
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [showDeckModal, setShowDeckModal] = useState(false);
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
@@ -304,7 +305,7 @@ function Game() {
                 {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
                    <input 
                      type="number" 
-                     min="0" max={gameState.deckCount}
+                     min="0" max={gameState.deck.length}
                      className="revolt-position-input"
                      onClick={(e) => e.stopPropagation()} // Evita que el click quite la selección de la carta
                      onChange={(e) => {
@@ -351,9 +352,9 @@ function Game() {
           </div>
       </div>
 
-      <div className="deck-pile">
+      <div className="deck-pile" onClick={() => setShowDeckModal(true)}>
         <span>MAZO</span>
-        <strong>{gameState.deckCount}</strong>
+        <strong>{gameState.deck.length}</strong>
       </div>
       
       <div className="discard-pile" onClick={() => setShowDiscardModal(true)}>
@@ -512,6 +513,52 @@ function Game() {
             className="button ingame" 
             style={{ marginTop: '20px', width: 'auto', padding: '10px 20px' }} 
             onClick={() => setShowDiscardModal(false)}
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    )}
+
+    {showDeckModal && (
+      <div className="card-modal-overlay" onClick={() => setShowDeckModal(false)}>
+        {/* El stopPropagation evita que al hacer clic dentro del recuadro se cierre el modal */}
+        <div className="discard-modal-content" onClick={(e) => e.stopPropagation()}>
+          <h2>Mazo</h2>
+          <div className="discard-grid">
+            
+            {gameState.deck.length === 0 ? (
+              <p>El mazo está vacío.</p>
+            ) : (
+              gameState.deck.map((card, index) => {
+                // Comprobamos si la carta está seleccionada para brillar
+                const isSelected = actionTargets.some(t => t.uid === card.uid);
+                // Comprobamos si la acción actual permite clickar en el descarte
+                const isClickable = gameState?.pendingAction && activeConfig?.allowedZones.includes('deck');
+
+                return (
+                  <div
+                    key={`${card.uid}-${index}`}
+                    className={`card ingame ${isSelected ? 'selected-target' : 'back'} ${isClickable ? 'clickable' : ''}`}
+                    style={{ backgroundImage: undefined }}
+                    onClick={() => {
+                      // Solo permite seleccionar la carta si la acción lo requiere, o ampliarla si no hay acción
+                      if (isClickable) {
+                        handleSelectCard(card, 'deck');
+                      } else {
+                        setSelectedCard(card);
+                      }
+                    }}
+                  ></div>
+                );
+              })
+            )}
+
+          </div>
+          <button 
+            className="button ingame" 
+            style={{ marginTop: '20px', width: 'auto', padding: '10px 20px' }} 
+            onClick={() => setShowDeckModal(false)}
           >
             Cerrar
           </button>
