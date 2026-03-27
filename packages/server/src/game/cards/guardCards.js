@@ -1,4 +1,4 @@
-import { changeTurn, drawCardFromDeck } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
 
 export const guardCards = {
     1: (gameState) => {
@@ -30,6 +30,7 @@ export const guardCards = {
     3: (gameState) => {
         //"Ready a Guard, then Mobilize it"
         let guardsInHand = false
+        console.log(gameState.players.king.hand.length)
         for (let i = gameState.players.king.hand.length - 1; i >= 0; i--) {
             const card = gameState.players.king.hand[i];
             if (card.typeKing === "Guard") {
@@ -68,6 +69,8 @@ export const guardCards = {
     5: (gameState) => {
         //"Shuffle the deck and look at the top card, you may put it on the bottom of the deck"
         shuffleArray(gameState.deck);
+        gameState.deck[gameState.deck.length - 1].isRevealed = true;
+
         //TODO: Logica de mostrar cartas de la deck
         gameState.pendingAction = {
             player: "king",
@@ -130,8 +133,11 @@ export const guardCards = {
     },
     9: (gameState) => {
         //"Look at the top 3 cards of the deck, then put them back in any order"
-        //TODO: Logica de mostrar cartas de la deck
-
+        for (let i = gameState.deck.length -1 ; i >= gameState.deck.length - 3; i--) {
+            if (gameState.deck.length > 0) {
+                gameState.deck[i].isRevealed = true;
+            }
+        }
         gameState.pendingAction = {
             player: "king",
             type: "SENTINEL"
@@ -141,10 +147,8 @@ export const guardCards = {
     15: (gameState) => {
         //"Look at Peasant's hand cards"
 
-        //TODO: Logica de mostrar cartas de la mano
         for (let i = gameState.players.peasant.hand.length - 1; i >= 0; i--) {
-            const card = gameState.players.peasant.hand[i];
-            card.isRevealed = true;
+            gameState.players.peasant.hand[i].isRevealed = true;
         }
         gameState.pendingAction = {
             player: "king",

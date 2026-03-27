@@ -183,21 +183,21 @@ const transformGameStateDTO = (gameState) => {
 //    dtoPeasant.deckCount = dtoPeasant.deck.length;
 //    delete dtoPeasant.deck;
 
-    const deck = dtoKing.deck.map(card => ({uid: card.uid}));
+    const deck = dtoKing.deck.map(card => card.isRevealed ? card : {uid: card.uid});
 
     dtoKing.deck = deck;
     dtoPeasant.deck = deck;
 
-    dtoKing.players.peasant.hand = dtoKing.players.peasant.hand.map(card => ({
-        uid: card.uid
-    }));
+    dtoKing.players.peasant.hand = dtoKing.players.peasant.hand.map(card => 
+        card.isRevealed ? card : {uid: card.uid}
+    );
     dtoKing.players.peasant.town = dtoKing.players.peasant.town.map(card => 
         card.isRevealed ? card : {uid: card.uid}
     );
 
-    dtoPeasant.players.king.hand = dtoPeasant.players.king.hand.map(card => ({
-        uid: card.uid
-    }));
+    dtoPeasant.players.king.hand = dtoPeasant.players.king.hand.map(card =>
+        card.isRevealed ? card : {uid: card.uid}
+    );
     dtoPeasant.players.king.town = dtoPeasant.players.king.town.map(card => 
         card.isRevealed ? card : {uid: card.uid}
     );
@@ -216,28 +216,29 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
     if (cardIndex === -1) {
         throw new Error('Carta no encontrada en el pueblo del jugador');
     }
-    const [playedCard] = gameState.players[userRol].town.splice(cardIndex, 1);
+    const playedCard = gameState.players[userRol].town[cardIndex];
 
     if(userRol==='king'){
-        return await activateCard(gameId, playedCard, userRol, gameState);
+        gameState.players[userRol].town.splice(cardIndex, 1);
+
+        return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
     }else{
         if(playedCard.isRevealed){
             return await returnRebeldToHand(gameId, gameState, cardIndex)
         }else{
-            return await activateCard(gameId, playedCard, userRol, gameState);
+            return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
         }
     }
 }
 
-const activateCard = async (gameId, playedCard, userRol, gameState) => {
-    playedCard.isRevealed = true;
+const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) => {
     if (userRol === "peasant") {
         const action = rebelCards[playedCard.templateId];
         if (!action) {
             throw new Error('Carta de Rebel no existe');
         }
+        gameState.players.peasant.town[cardIndex].isRevealed = true;
         gameState = action(gameState, playedCard);
-        playedCard.isRevealed = true;
 
     } else {
         const action = guardCards[playedCard.templateId];
@@ -245,7 +246,9 @@ const activateCard = async (gameId, playedCard, userRol, gameState) => {
             throw new Error('Carta de Guard no existe');
         }
         gameState = action(gameState, playedCard)
-        gameState.discardPile.push(playedCard); 
+        if(playedCard.templateId !== 9){
+            gameState.discardPile.push(playedCard); 
+        }
     }   
     if (!gameState.pendingAction) {
         gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
@@ -324,6 +327,7 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
     const pendingAction = gameState.pendingAction;
     //Comprobacion de acción pendiente para el jugador
     if (pendingAction && pendingAction.player === userRol) {
+        targetData = pendingAction.amount ? {...targetData, amount: pendingAction.amount} : targetData;
         gameState.pendingAction = null;
         if (userRol === 'peasant') {
             const resolver = peasantPendingActions[pendingAction.type];
@@ -339,9 +343,12 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
             }
             if(pendingAction.type === 'INQUISITOR'){
                 const result = resolver(gameState, targetData);
-                gameState = await activateCard(gameId, result.handCard, userRol, result.gameState);
-                return await saveAndFormatGameState(gameId, gameState);
+                const cardIndex = gameState.players[userRol].town.findIndex(card => card.uid === result.handCard);
 
+                gameState.players[userRol].town.splice(cardIndex, 1);
+
+
+                return await activateCard(gameId, result.handCard, cardIndex, userRol, result.gameState);
             }else{
                 gameState = resolver(gameState, targetData);
             }

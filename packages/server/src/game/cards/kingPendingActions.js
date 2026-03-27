@@ -167,6 +167,7 @@ export const kingPendingActions = {
         //"Shuffle the deck and look at the top card, you may put it on the bottom of the deck"
         const bottom = targetData.bottom
         const card = gameState.deck.pop();
+        card.isRevealed = false
         if(bottom){
             gameState.deck.unshift(card)
         }else{
@@ -177,20 +178,28 @@ export const kingPendingActions = {
     },
     "GUARDIAN": (gameState, targetData) => {
         //"Look at any 1 card in the deck, if it is the ASSASSIN discard it, otherwise put it back in order",
-        const { cardIndex} = targetData.cardIndex || -1
-        if(cardIndex === -1){
-            throw new Error(`No se ha seleccionado el indice de la carta a mostrar`);
+        const targetUid = targetData.targetUid || -1
+        if(targetUid === -1){
+            throw new Error(`No se ha seleccionado el UID de la carta a mostrar`);
         }
-        const [card] = gameState.deck.splice(cardIndex, 1);
-        card.isRevealed = true
-        //TODO: Logica de mostrar cartas de la deck
-        if(card.namePeasant === 'Assassin'){
+        const cardIndex = gameState.deck.findIndex(c => c.uid === targetUid);
+        if (cardIndex === -1) {
+            throw new Error(`La carta con UID ${targetUid} no está en el mazo`);
+        }
+        gameState.deck[cardIndex].isRevealed = true;
+        if(gameState.deck[cardIndex].namePeasant === 'Assassin'){
             //TODO: Condicion de victoria. El rey a desvelado al asesino
             console.log("TODO: Condicion de victoria. El rey a desvelado al asesino")
-        }else{
-            gameState.deck.splice(cardIndex, 0, card);
         }
 
+        gameState.pendingAction = {
+            player: "king",
+            type: "GUARDIAN2",
+        };
+        return gameState;
+    },
+    "GUARDIAN2": (gameState, targetData) => {
+        gameState.deck.map(card => card.isRevealed = false);
         return gameState;
     },
     "SENTINEL": (gameState, targetData) => {
@@ -214,8 +223,8 @@ export const kingPendingActions = {
     "WATCHMAN": (gameState) => {
         //"Look at Peasant's hand cards"
         for (let i = gameState.players.peasant.hand.length - 1; i >= 0; i--) {
-            const card = gameState.players.peasant.hand[i];
-            card.isRevealed = false;
+            gameState.players.peasant.hand[i].isRevealed = false;
+
         }
 
         return gameState;

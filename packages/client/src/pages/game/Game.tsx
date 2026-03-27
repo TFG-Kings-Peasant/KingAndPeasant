@@ -285,11 +285,13 @@ function Game() {
         <div className="town">
           {rivalPlayer.town.map((card) => {
             const isSelected = actionTargets.some(t => t.uid === card.uid);
+            const isClickable = gameState?.pendingAction && activeConfig?.allowedZones.includes("rivalTown");
             return (
-              card.isRevealed ? <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+              card.isRevealed ? <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''} ${isClickable ? 'clickable' : ''}`} 
+              style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
               onClick={() => handleSelectCard(card, 'rivalTown')}>
               </div>: 
-            <div key={card.uid} className="card ingame back" onClick={() => handleSelectCard(card, 'rivalTown')}></div>
+            <div key={card.uid} className={`card ingame ${isClickable ? 'clickable' : 'back'}`} onClick={() => handleSelectCard(card, 'rivalTown')}></div>
             );
           })}
         </div>
@@ -410,8 +412,8 @@ function Game() {
           {/* Botón dinámico que se desactiva si canConfirm es false */}
           <button 
             className="button ingame"
-            style={{ backgroundColor: activeConfig.canConfirm(actionTargets) ? '#d4af37' : '#555' }}
-            disabled={!activeConfig.canConfirm(actionTargets)}
+            style={{ backgroundColor: activeConfig.canConfirm(actionTargets, gameState.pendingAction?.amount) ? '#d4af37' : '#555' }}
+            disabled={!activeConfig.canConfirm(actionTargets, gameState.pendingAction?.amount)}
             onClick={() => {
               const payload = activeConfig.formatPayload(actionTargets);
               handleResolvePending(payload);
@@ -540,7 +542,7 @@ function Game() {
                   <div
                     key={`${card.uid}-${index}`}
                     className={`card ingame ${isSelected ? 'selected-target' : 'back'} ${isClickable ? 'clickable' : ''}`}
-                    style={{ backgroundImage: undefined }}
+                    style={{ backgroundImage: card.isRevealed ? `url('/cards/${card.templateId}.png')` : undefined }}
                     onClick={() => {
                       // Solo permite seleccionar la carta si la acción lo requiere, o ampliarla si no hay acción
                       if (isClickable) {

@@ -1,19 +1,19 @@
 import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
 
 export const rebelCards = {
-    1: (gameState) => {
+    1: (gameState, playedCard) => {
         //Take all Rebels from the discard pile, then Hide them
         let rebelsInDiscardPile = false
-        console.log("Take all Rebels from the discard pile, then Hide them")
         for (let i = gameState.discardPile.length - 1; i >= 0; i--) {
             const card = gameState.discardPile[i];
 
-            if (card.typePeasant === "Rebel") {
+            if (card.typePeasant === "Rebel" && card.uid !== playedCard.uid) {
+                gameState.discardPile.splice(i, 1);
+
                 card.isRevealed = false;
                 rebelsInDiscardPile = true;
                 gameState.players.peasant.town.push(card);
 
-                gameState.discardPile.splice(i, 1);
             }
         }
         if(!rebelsInDiscardPile){
@@ -24,17 +24,14 @@ export const rebelCards = {
     },
     2: (gameState, playedCard) => {
         //"Shuffle all other Rebels in Town and cards in hand into the deck, then draw 3 cards"
-        console.log("Shuffle all other Rebels in Town and cards in hand into the deck, then draw 3 cards")
-        console.log("Played card:", playedCard)
-        // 1. Mover los "otros" Rebeldes del Town al mazo
+
         for (let i = gameState.players.peasant.town.length - 1; i >= 0; i--) {
-            const [card] = gameState.players.peasant.town.splice(i, 1);
+            const card = gameState.players.peasant.town[i];
 
             if (card.typePeasant === "Rebel" && card.uid !== playedCard.uid) {
+                gameState.players.peasant.town.splice(i, 1);
                 card.isRevealed = false; 
                 gameState.deck.push(card); 
-            }else{
-                gameState.players.peasant.town.push(card);
             }
         }
 
@@ -69,8 +66,11 @@ export const rebelCards = {
     },
     5: (gameState) => {
         //"Look at the top 3 cards of the deck, then take 1 and put the others back in any order"
-
-        //TODO: Logica de mostrar cartas de la deck y dejar que sean seleccionables
+        for (let i = gameState.deck.length -1 ; i >= gameState.deck.length - 3; i--) {
+            if (gameState.deck.length > 0) {
+                gameState.deck[i].isRevealed = true;
+            }
+        }
         gameState.pendingAction = {
             type: "COURTESAN",
             player: "peasant"
@@ -122,13 +122,9 @@ export const rebelCards = {
             throw new Error('No cartas en el mazo para robar');
         }
 
-        // Nos aseguramos de no intentar robar más cartas de las que hay en el mazo
-        const amount = Math.min(3, deckLength);
-
         gameState.pendingAction = {
             type: "CHARLATAN",
-            player: "peasant",
-            amount: amount
+            player: "peasant"
         };
 
         return gameState;

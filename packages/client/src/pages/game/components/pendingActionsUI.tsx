@@ -7,10 +7,10 @@ export interface SelectedCard extends CardState{
     chosenPosition?: number;
 }
 
-export interface PendingActionUIConfig {
+export interface PendingActionUIConfig{
     instructionText : string;
     allowedZones: ('hand' | 'myTown' | 'rivalTown' | 'discard' | 'deck')[];
-    canConfirm: (selectedCards: SelectedCard[]) => boolean;
+    canConfirm: (selectedCards: SelectedCard[], amount?: number) => boolean;
     formatPayload: (selectedCards: SelectedCard[]) => Record<string, unknown>;
 }
 
@@ -99,7 +99,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona 1 guardia en el pueblo rival para descartarlo",
         allowedZones: ['rivalTown'],
         canConfirm: (selectedCards) => {
-            const validate = selectedCards.every(c => c.typeKing === 'Guard' && c.position === 'rivalTown');
+            const validate = selectedCards.every(c => c.position === 'rivalTown' && c.isRevealed && c.typeKing === 'Guard');
             return selectedCards.length > 0 && validate;
         }, 
         formatPayload: (selectedCards) => {
@@ -109,41 +109,36 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "COURTESAN":  {
-        // TODO
-        instructionText: "Elige una de las tres cartas para robar",
-        allowedZones: ['myTown'],
+        instructionText: "Elige una de las tres cartas reveladas en el mazo para robar",
+        allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
-            const canInfiltrate = selectedCards.some(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
-            return selectedCards.length > 0 && canInfiltrate;
+            const validate = selectedCards.every(c => c.position === 'deck' && c.isRevealed);
+            return selectedCards.length === 1 && validate;
         }, 
         formatPayload: (selectedCards) => {
             return {
-                rebelUids: selectedCards.map(c => c.uid),
-                deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
+                targetUid: selectedCards[0]?.uid || "",
             }
         },
     },
     "CHARLATAN": {
-        //TODO
         instructionText: "Roba hasta 3 cartas",
         allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
-            const canInfiltrate = selectedCards.some(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
-            return selectedCards.length > 0 && canInfiltrate;
+            return selectedCards.length < 4;
         }, 
         formatPayload: (selectedCards) => {
             return {
-                rebelUids: selectedCards.map(c => c.uid),
-                deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
+                deckUids: selectedCards.map(c => c.uid),
             }
         },
     },
-    "CHARLATAN2": {
+    "CHARLATAN2":{
         instructionText: "Devuelve el mismo numero de cartas que robaste a la parte superior del mazo",
         allowedZones: ['hand'],
-        canConfirm: (selectedCards) => {
+        canConfirm: (selectedCards, amount) => {
             const validate = selectedCards.every(c => c.position === 'hand');
-            return selectedCards.length > 0 && validate;
+            return selectedCards.length === amount && validate;
         }, 
         formatPayload: (selectedCards) => {
             return {
@@ -312,40 +307,47 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         }
     },
     "ADVISOR":  {
-        //TODO: MOSTRAR Carta: Elegir si se coloca al final de la deck o al principio
-        instructionText: "Elige si colocar la carta al final o al principio del mazo",
-        allowedZones: ['hand'],
+        instructionText: "Selecciona la carta si quieres dejarla al principio del mazo, no la seleccioens si la quieres mandar la fondo del mazo",
+        allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
-            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            const isRevealed = selectedCards.every(c => c.position === 'deck' && c.isRevealed);
+            return selectedCards.length < 2 && isRevealed;
         },
         formatPayload: (selectedCards) => {
-            return { guardUid: selectedCards[0]?.uid || ""}
+            return { bottom: selectedCards.length === 0 }
         }
     },
     "GUARDIAN":{
-        //TODO: Seleccionar una carta de la deck para revelar
         instructionText: "Selecciona 1 carta de la deck para revelarla ",
-        allowedZones: ['hand'],
+        allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
-            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            return selectedCards.length === 1;
         },
         formatPayload: (selectedCards) => {
-            return { guardUid: selectedCards[0]?.uid || ""}
+            return { targetUid: selectedCards[0]?.uid || ""}
+        }
+
+    },
+    "GUARDIAN2":{
+        instructionText: "Confirma la acción para volver a ocultar las cartas del mazo",
+        allowedZones: [],
+        canConfirm: (selectedCards) => {
+            return true;
+        },
+        formatPayload: (selectedCards) => {
+            return {}
         }
 
     },
     "SENTINEL": {
-        //TODO: MOSTRAR 3 primeras cartas de la deck y esperara confirmacion para devolverlas a la deck
-        instructionText: "Selecciona hasta 1 guardia para posicionar en el pueblo boca arriba",
-        allowedZones: ['hand'],
+        instructionText: "Selecciona las cartas del mazo reveladas en el orden en que quieres devolverlas al mazo",
+        allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
-            const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            const validate = selectedCards.every(c => c.position === 'deck' && c.isRevealed);
+            return selectedCards.length === 3 && validate;
         },
         formatPayload: (selectedCards) => {
-            return { guardUid: selectedCards[0]?.uid || ""}
+            return { selectedUids: selectedCards.map(c => c.uid) }
         }
     },
     "WATCHMAN": {

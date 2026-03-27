@@ -31,6 +31,7 @@ export interface GameState {
     pendingAction: {
         player: 'king' | 'peasant';
         type: string;
+        amount?: number;
     }
 
 }

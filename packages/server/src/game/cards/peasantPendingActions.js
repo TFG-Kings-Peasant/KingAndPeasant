@@ -145,28 +145,19 @@ export const peasantPendingActions = {
     },
     "COURTESAN": (gameState, targetData) => {
         //"Look at the top 3 cards of the deck, then take 1 and put the others back in any order"
-        const { targetUid, firstUid, secondUid} = targetData; 
-
+        const {targetUid} = targetData; 
+        gameState.deck.slice(-3).forEach(card => {
+            card.isRevealed = false;
+        });
+        
         const targetCardIndex = gameState.deck.findIndex(card => card.uid === targetUid);
-        const firstCardIndex = gameState.deck.findIndex(card => card.uid === firstUid);
-        const secondCardIndex = gameState.deck.findIndex(card => card.uid === secondUid);
 
-        if (targetCardIndex === -1 || firstCardIndex === -1 || secondCardIndex === -1) {
+        if (targetCardIndex === -1) {
             throw new Error('Carta no encontrada en el mazo');
         }
 
         const [targetCard] = gameState.deck.splice(targetCardIndex, 1);
-        const [firtsCard] = gameState.deck.splice(firstCardIndex, 1);
-        const [secondCard] = gameState.deck.splice(secondCardIndex, 1);
-
-
-        targetCard.isRevealed = false
-        firtsCard.isRevealed = false
-        secondCard.isRevealed = false
-        
         gameState.players.peasant.hand.push(targetCard)
-        gameState.deck.push(firtsCard)
-        gameState.deck.push(secondCard)
 
         return gameState;
     },
@@ -196,6 +187,11 @@ export const peasantPendingActions = {
     "CHARLATAN2": (gameState, targetData) => {
         //"Draw up to 3 cards, then put the same number of cards on top of the deck in any order"
         const handUids = targetData?.handUids || [];
+        const expectedAmount = targetData?.amount || 0;
+        if (handUids.length !== expectedAmount) {
+            throw new Error(`Acción inválida: Debes devolver exactamente ${expectedAmount} carta(s).`);
+        }
+
         handUids.forEach(uid => {
             const index = gameState.players.peasant.hand.findIndex(c => c.uid === uid);
             if (index === -1) {
