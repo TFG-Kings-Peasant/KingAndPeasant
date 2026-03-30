@@ -49,32 +49,32 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     };
 
     const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
-    /*
+    
     // =========================================================
     // 🛠️ HACK PARA DESARROLLO: MESA DE PRUEBAS GLOBAL 🛠️
     // =========================================================
     
     // 1. SOBRESCRIBIR LA MANO DEL REY
     initialState.players.king.hand = [
-        { uid: "cheat_king_strike", templateId: 10, typeKing: "Action", isRevealed: true },
-        { uid: "cheat_king_arrest", templateId: 11, typeKing: "Action", isRevealed: true },
-        { uid: "cheat_king_raid", templateId: 12, typeKing: "Action", isRevealed: true },
-        { uid: "cheat_king_reassemble", templateId: 14, typeKing: "Action", isRevealed: true },
+        { uid: "cheat_king_strike", templateId: 10, typeKing: "Action", isRevealed: false },
+        { uid: "cheat_king_arrest", templateId: 11, typeKing: "Action", isRevealed: false },
+        { uid: "cheat_king_raid", templateId: 12, typeKing: "Action", isRevealed: false },
+        { uid: "cheat_king_reassemble", templateId: 14, typeKing: "Action", isRevealed: false },
         // Guardias en mano para la segunda fase de REASSEMBLE (Preparar guardia de la mano)
-        { uid: "cheat_king_guard_hand_1", templateId: 1, typeKing: "Guard", isRevealed: true }, 
-        { uid: "cheat_king_guard_hand_2", templateId: 3, typeKing: "Guard", isRevealed: true }  
+        { uid: "cheat_king_guard_hand_1", templateId: 1, typeKing: "Guard", isRevealed: false }, 
+        { uid: "cheat_king_guard_hand_2", templateId: 3, typeKing: "Guard", isRevealed: false }  
     ];
 
     // 2. SOBRESCRIBIR LA MANO DEL CAMPESINO
     initialState.players.peasant.hand = [
-        { uid: "cheat_peasant_brawl", templateId: 3, typePeasant: "Action", isRevealed: true },       
-        { uid: "cheat_peasant_revolt", templateId: 11, typePeasant: "Action", isRevealed: true },     
-        { uid: "cheat_peasant_scatter", templateId: 12, typePeasant: "Action", isRevealed: true },    
-        { uid: "cheat_peasant_reassemble", templateId: 14, typePeasant: "Action", isRevealed: true }, 
-        { uid: "cheat_peasant_rally", templateId: 15, typePeasant: "Action", isRevealed: true },      
+        { uid: "cheat_peasant_brawl", templateId: 3, typePeasant: "Action", isRevealed: false },       
+        { uid: "cheat_peasant_revolt", templateId: 11, typePeasant: "Action", isRevealed: false },     
+        { uid: "cheat_peasant_scatter", templateId: 12, typePeasant: "Action", isRevealed: false },    
+        { uid: "cheat_peasant_reassemble", templateId: 14, typePeasant: "Action", isRevealed: false }, 
+        { uid: "cheat_peasant_rally", templateId: 15, typePeasant: "Action", isRevealed: false },      
         // Rebeldes en mano para esconder con RALLY o la segunda fase de REASSEMBLE
-        { uid: "cheat_peasant_rebel_hand_1", templateId: 1, typePeasant: "Rebel", isRevealed: true }, 
-        { uid: "cheat_peasant_rebel_hand_2", templateId: 2, typePeasant: "Rebel", isRevealed: true }  
+        { uid: "cheat_peasant_rebel_hand_1", templateId: 1, typePeasant: "Rebel", isRevealed: false }, 
+        { uid: "cheat_peasant_rebel_hand_2", templateId: 2, typePeasant: "Rebel", isRevealed: false }  
     ];
 
     // 3. SOBRESCRIBIR EL PUEBLO DEL REY
@@ -88,9 +88,9 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
     // 4. SOBRESCRIBIR EL PUEBLO DEL CAMPESINO
     // Ponemos un infiltrador para REVOLT, y dos rebeldes normales para SCATTER, BRAWL o ARREST
     initialState.players.peasant.town = [
-        { uid: "cheat_peasant_infiltrator", templateId: 13, typePeasant: "Rebel", isRevealed: true }, // Decoy
-        { uid: "cheat_peasant_rebel_town_1", templateId: 4, typePeasant: "Rebel", isRevealed: true }, 
-        { uid: "cheat_peasant_rebel_town_2", templateId: 7, typePeasant: "Rebel", isRevealed: true }  
+        { uid: "cheat_peasant_infiltrator", templateId: 13, typePeasant: "Rebel", isRevealed: false }, // Decoy
+        { uid: "cheat_peasant_rebel_town_1", templateId: 4, typePeasant: "Rebel", isRevealed: false }, 
+        { uid: "cheat_peasant_rebel_town_2", templateId: 7, typePeasant: "Rebel", isRevealed: false }  
     ];
 
     // 5. SOBRESCRIBIR DESCARTES
@@ -102,7 +102,7 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         { uid: "cheat_discard_4", templateId: 3, typeKing: "Guard", isRevealed: true }
     ];
     // =========================================================
-    */
+    
     return await saveAndFormatGameState(lobbyId, initialState);
 };
 

@@ -80,7 +80,6 @@ export const guardCards = {
     },
     6: (gameState) => {
         //"Reveal all Rebels"
-        console.log("Reveal all Rebels")
 
         const peasantTown = gameState.players.peasant.town;
         let rebelInTown = false;
@@ -98,7 +97,6 @@ export const guardCards = {
             card.isRevealed = true
         }
 
-        changeTurn(gameState)
         return gameState;
     },
     7: (gameState) => {

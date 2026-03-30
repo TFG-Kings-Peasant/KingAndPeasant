@@ -301,9 +301,14 @@ function Game() {
         <div className="town">
           {myPlayer.town.map((card) => {
             const isSelected = actionTargets.some(t => t.uid === card.uid);
+            const isHiddenForRival = card.isRevealed === false;
             return(
-              <div key={card.uid} className= {`card ingame ${!card.templateId ? 'back' : ''} ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: card.templateId ? `url('/cards/${card.templateId}.png')` : undefined }} 
-              onClick={() => handleSelectCard(card, 'myTown')}>
+              <div 
+                key={card.uid} 
+                className= {`card ingame ${isHiddenForRival ? 'hidden-style' : ''} ${isSelected ? 'selected-target' : ''}`} 
+                style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+                onClick={() => handleSelectCard(card, 'myTown')}
+              >
                 {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
                    <input 
                      type="number" 
@@ -427,7 +432,6 @@ function Game() {
       </div>
     )}
 
-    {/* --- NUEVO: MODAL DE CARTA AMPLIADA --- */}
     {selectedCard && (
       <div className="card-modal-overlay" onClick={() => setSelectedCard(null)}>
         <div className="card-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -438,7 +442,7 @@ function Game() {
               ? { backgroundImage: `url('/cards/${selectedCard.templateId}.png')` } 
             : { backgroundImage: `url('/cards/Back.png')` } }
           ></div>
-          {gameState.turn === myRoleName && (
+         {gameState.turn === myRoleName && !gameState?.pendingAction && getPosibleActions(selectedCard, isKing) !== "" && (
           <button
             onClick={handlePlayCard}
             className="button ingame"
@@ -486,7 +490,15 @@ function Game() {
             {gameState.discardPile?.length === 0 ? (
               <p>El mazo de descartes está vacío.</p>
             ) : (
-              gameState.discardPile?.map((card, index) => {
+              //Arreglo para la carta de Acción Reassemble
+              gameState.discardPile
+                .filter((card, index, array) => {
+                if (gameState.pendingAction) {
+                  return index !== array.length - 1;
+                }
+                return true;
+              })
+              .map((card, index) => {
                 // Comprobamos si la carta está seleccionada para brillar
                 const isSelected = actionTargets.some(t => t.uid === card.uid);
                 // Comprobamos si la acción actual permite clickar en el descarte

@@ -129,6 +129,11 @@
   cursor: pointer;
 }
 
+.card.ingame.hidden-style {
+  filter: saturate(0.5) brightness(0.8);
+  border: 2px dashed #8e44ad; /* Un borde morado para indicar que es secreta */
+}
+
 /* =======================================================
    5. EFECTO DE SOLAPAMIENTO (OVERLAP) PARA LA MANO
    ======================================================= */
