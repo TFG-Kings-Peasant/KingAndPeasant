@@ -10,7 +10,7 @@ export interface SelectedCard extends CardState{
 export interface PendingActionUIConfig{
     instructionText : string;
     allowedZones: ('hand' | 'myTown' | 'rivalTown' | 'discard' | 'deck')[];
-    canConfirm: (selectedCards: SelectedCard[], amount?: number) => boolean;
+    canConfirm: (selectedCards: SelectedCard[], amount?: any) => boolean;
     formatPayload: (selectedCards: SelectedCard[]) => Record<string, unknown>;
 }
 
@@ -174,11 +174,11 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "THIEF2":{
-        // TODO: Restringir la seleccion solo a las cartas que el rey ha descartado
         instructionText: "Selecciona una de las 2 cartas descartadas por el rey",
         allowedZones: ['discard'],
-        canConfirm: (selectedCards) => {
-            return selectedCards.length > 0 && selectedCards.length < 2 && selectedCards.every(c => c.position === 'discard');
+        canConfirm: (selectedCards, amount) => {
+            const validate = selectedCards.every(c => c.uid === amount[0] || c.uid === amount[1]);
+            return selectedCards.length === 1 && validate;
         }, 
         formatPayload: (selectedCards) => {
             return {
@@ -263,8 +263,7 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona 2 cartas de tu mano para descartar",
         allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
-            const validate = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard' && c.position === 'hand');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && validate;
+            return selectedCards.length === 2;
         },
         formatPayload: (selectedCards) => {
             return { 

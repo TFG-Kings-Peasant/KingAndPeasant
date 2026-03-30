@@ -145,21 +145,16 @@ export const rebelCards = {
             throw new Error('El rey no tiene cartas en la mano');
 
         }
-        // Calculamos cuántas descarta (2, o 1 si solo le queda esa en la mano)
-        //const cardsToDiscard = Math.min(2, kingHandLength);
 
-        // Le pasamos la "patata caliente" al King
         gameState.pendingAction = {
             type: "THIEF",
             player: "king",
-            //amount: cardsToDiscard
         };
         changeTurn(gameState)
         return gameState;
     },
     13: (gameState) => {
         //"Infiltrate: Peasant removes a Guard. EXILE"
-        //TODO: Mostrar cartas del pueblo del rey
         gameState.pendingAction = {
             type: "DECOY",
             player: "peasant"

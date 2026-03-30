@@ -108,7 +108,7 @@ export const kingPendingActions = {
             handCard.isRevealed = true
             gameState.discardPile.push(handCard);
         });
-        const amount = discardUids.length
+        const amount = discardUids
         gameState.pendingAction = {
             type: "THIEF2",
             player: "peasant",

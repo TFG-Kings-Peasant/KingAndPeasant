@@ -270,7 +270,6 @@ export const peasantPendingActions = {
             throw new Error(`La carta con UID ${uid} no se ha encontrado en el pueblo del rey`);
         }
         const [targetCard] = gameState.players.king.town.splice(index, 1);
-        targetCard.isRevealed = false
         gameState.discardPile.push(targetCard);
 
         return gameState;
