@@ -52,7 +52,7 @@ export const guardCards = {
         const peasantTown = gameState.players.peasant.town;
         let rebelInTown = false;
         for (let card of peasantTown) {
-            if (card.typePeasant == "Rebel") {
+            if (card.typePeasant == "Rebel" && card.isRevealed == false) {
                 rebelInTown = true;
                 break;
             }

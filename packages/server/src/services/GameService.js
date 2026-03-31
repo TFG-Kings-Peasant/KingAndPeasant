@@ -251,14 +251,14 @@ const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) =
         }
     }   
     if (!gameState.pendingAction) {
-        gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
+        gameState = changeTurnAndCheckDraw(gameState, userRol);
     }
     return await saveAndFormatGameState(gameId, gameState);
 }
 
 const returnRebeldToHand = async (gameId, gameState, cardIndex) => {
     const [card] = gameState.players.peasant.town.splice(cardIndex, 1);
-    console.log(cardIndex)
+    card.isRevealed = false;
     gameState.players.peasant.hand.push(card)
     changeTurn(gameState);
 
@@ -271,7 +271,7 @@ const passTurn = async (gameId, userId) => {
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
-    gameState = changeTurn(gameState);
+    gameState = changeTurnAndCheckDraw(gameState, userRol);
     return await saveAndFormatGameState(gameId, gameState);
 }
 
@@ -357,7 +357,7 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
         throw new Error('No hay acciones pendientes para este jugador');
     }
     if (!gameState.pendingAction) {
-        changeTurn(gameState);
+        gameState = changeTurnAndCheckDraw(gameState, userRol);
     }
     return await saveAndFormatGameState(gameId, gameState);
 }
@@ -393,7 +393,7 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
             gameState.players.king.town.push(playedCard);
         }
         gameState.pendingAction = null;
-        changeTurn(gameState);
+        gameState = changeTurnAndCheckDraw(gameState, userRol);
 
         return await saveAndFormatGameState(gameId, gameState);
 }
@@ -425,6 +425,7 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
     card.isRevealed = true;
     //TODO: CONDICIÓN DE VICTORIA: Si la carta condenada es el Asesino, el rey gana, en caso contrario, el rey pierde.
     console.log("Un rebelde a sido condenado, esta era ha acabado. TODO: Evaluar de quien es la victoria")
+    gameState = changeTurnAndCheckDraw(gameState, userRol);
     return await saveAndFormatGameState(gameId, gameState);
 
 }
@@ -441,6 +442,14 @@ const peasantDrawACard = async (gameId, userId) => {
     gameState = drawCardFromDeck(gameState, userRol)
     changeTurn(gameState);
     return await saveAndFormatGameState(gameId, gameState);
+}
+
+const changeTurnAndCheckDraw = (gameState, userRol) => {
+    if(userRol !== "peasant"){
+        gameState = drawCardFromDeck(gameState, userRol)
+    }   
+    changeTurn(gameState);
+    return gameState;
 }
 
 export const gameService = {
