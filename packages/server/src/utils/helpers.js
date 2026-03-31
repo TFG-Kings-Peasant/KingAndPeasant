@@ -21,7 +21,7 @@ export function getCardType(playedCard, userRol){
 }
 
 export function canInfiltrate(card){
-    return card.descPeasant.includes("Infiltrate:")
+    return card.templateId === 13 || card.templateId === 16;
 }
 
 

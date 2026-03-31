@@ -225,10 +225,24 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
     }else{
         if(playedCard.isRevealed){
             return await returnRebeldToHand(gameId, gameState, cardIndex)
+        }else if (canInfiltrate(playedCard)){
+            return await infiltrateRebel(gameId, cardIndex, gameState);
         }else{
             return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
         }
     }
+}
+
+const infiltrateRebel = async (gameId, cardIndex, gameState) => {
+    const [card] = gameState.players.peasant.town.splice(cardIndex, 1);
+    card.isRevealed = false;
+    gameState.pendingAction = {
+        type: "INFILTRATE",
+        player: "peasant",
+        amount: card
+    };
+    
+    return await saveAndFormatGameState(gameId, gameState);
 }
 
 const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) => {

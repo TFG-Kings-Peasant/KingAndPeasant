@@ -2,6 +2,22 @@ import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.j
 
 
 export const peasantPendingActions = {
+// INFILTRATE
+    'INFILTRATE': (gameState, targetData) => {
+        const card = targetData.amount;
+        const targetUid = targetData.targetUid || "";
+        if (!targetUid) {
+            throw new Error('No se ha seleccionado ningún objetivo para la acción');
+        }
+        if(targetUid != ""){
+            const index = gameState.players.king.town.findIndex(c => c.uid === targetUid);
+            gameState.deck.splice(index + 1, 0, card);
+        }else{
+            gameState.deck.unshift(card);
+        }
+
+        return gameState;
+    },
     'RALLY': (gameState, targetData) => {
         const { selectedCardsUid = [] } = targetData || {};
         if (selectedCardsUid.length > 2) {

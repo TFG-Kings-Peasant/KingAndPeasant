@@ -197,6 +197,18 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
                 targetUid: selectedCards[0]?.uid || "",
             }
         },
+    },
+    "INFILTRATE": {
+        instructionText: "Selecciona 1 carta del mazo para infiltrar la carta delante de ella o no selecciones ninguna carta para infiltrarla al final del mazo",
+        allowedZones: ['deck'],
+        canConfirm: (selectedCards) => {
+            return selectedCards.length < 2;
+        }, 
+        formatPayload: (selectedCards) => {
+            return {
+                targetUid: selectedCards[0]?.uid || "",
+            }
+        },
     }
 }
 
