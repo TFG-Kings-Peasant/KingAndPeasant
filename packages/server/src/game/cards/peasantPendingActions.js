@@ -4,18 +4,16 @@ import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.j
 export const peasantPendingActions = {
 // INFILTRATE
     'INFILTRATE': (gameState, targetData) => {
-        const card = targetData.amount;
-        const targetUid = targetData.targetUid || "";
-        if (!targetUid) {
-            throw new Error('No se ha seleccionado ningún objetivo para la acción');
+        const { targetUid , deckPositions = [] } = targetData
+        if (deckPositions.length !== 1 || !targetUid) {
+            throw new Error('Debes seleccionar exactamente una posición en el mazo para infiltrar la carta');
         }
-        if(targetUid != ""){
-            const index = gameState.players.king.town.findIndex(c => c.uid === targetUid);
-            gameState.deck.splice(index + 1, 0, card);
-        }else{
-            gameState.deck.unshift(card);
-        }
-
+        const index = gameState.players.peasant.town.findIndex(c => c.uid === targetUid);
+        const [card] = gameState.players.peasant.town.splice(index, 1);
+        card.isRevealed = false;
+        gameState.deck.splice(deckPositions[0], 0, card);
+        console.log(`Carta ${card.templateId} infiltrada en la posición ${deckPositions[0]} del mazo`);
+        console.log(gameState.deck)
         return gameState;
     },
     'RALLY': (gameState, targetData) => {

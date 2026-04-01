@@ -234,12 +234,9 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
 }
 
 const infiltrateRebel = async (gameId, cardIndex, gameState) => {
-    const [card] = gameState.players.peasant.town.splice(cardIndex, 1);
-    card.isRevealed = false;
     gameState.pendingAction = {
         type: "INFILTRATE",
-        player: "peasant",
-        amount: card
+        player: "peasant"
     };
     
     return await saveAndFormatGameState(gameId, gameState);

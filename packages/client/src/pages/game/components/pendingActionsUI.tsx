@@ -199,14 +199,16 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "INFILTRATE": {
-        instructionText: "Selecciona 1 carta del mazo para infiltrar la carta delante de ella o no selecciones ninguna carta para infiltrarla al final del mazo",
-        allowedZones: ['deck'],
+        instructionText: "Selecciona la carta a infiltrar y elige la posicion del mazo donde colocarla",
+        allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            return selectedCards.length < 2;
+            const canInfiltrate = selectedCards.every(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
+            return selectedCards.length === 1 && canInfiltrate; 
         }, 
         formatPayload: (selectedCards) => {
             return {
                 targetUid: selectedCards[0]?.uid || "",
+                deckPositions: selectedCards.map(c => c.chosenPosition ?? 0)
             }
         },
     }

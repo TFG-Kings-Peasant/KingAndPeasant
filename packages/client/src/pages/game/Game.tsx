@@ -143,7 +143,7 @@ function Game() {
   
   const handleSelectCard = (card: CardState, position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard'| null) => {
     if(activeConfig && position && activeConfig.allowedZones.includes(position)){
-      const isRevolt = gameState?.pendingAction?.type === 'REVOLT';
+      const isRevolt = gameState?.pendingAction?.type === 'REVOLT' || gameState?.pendingAction?.type === 'INFILTRATE';
       const isValidTarget = !isRevolt || CARDS_THAT_CAN_INFILTRATE.includes(card.templateId as number);
 
       if (isValidTarget) {
@@ -309,7 +309,7 @@ function Game() {
                 style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
                 onClick={() => handleSelectCard(card, 'myTown')}
               >
-                {isSelected && gameState?.pendingAction?.type === 'REVOLT' && (
+                {isSelected && gameState?.pendingAction?.type === 'REVOLT' || gameState?.pendingAction?.type === 'INFILTRATE' && (
                    <input 
                      type="number" 
                      min="0" max={gameState.deck.length}
