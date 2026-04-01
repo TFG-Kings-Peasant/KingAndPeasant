@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import "./Game.css";
 import { CARDS_THAT_CAN_INFILTRATE, peasantPendingUI, kingPendingUI } from "./components/pendingActionsUI";
 import type { SelectedCard } from "./components/pendingActionsUI";
+import { InfiltrateModal } from "./components/InfiltrateModal";
 
 interface ChatMessage {
   sender: string;
@@ -33,6 +34,7 @@ function Game() {
   const [currentMessage, setCurrentMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [infiltrateCard, setInfiltrateCard] = useState<SelectedCard | null>(null);
   const {socket, user} = useAuth()
 
   const [gameOverData, setGameOverData] = useState<{
@@ -147,12 +149,19 @@ function Game() {
       const isValidTarget = !isRevolt || CARDS_THAT_CAN_INFILTRATE.includes(card.templateId as number);
 
       if (isValidTarget) {
-        setActionTargets(prev => {
-          const exists = prev.find(t => t.uid === card.uid);
-          if (exists) return prev.filter(t => t.uid !== card.uid);
-          const targetedCard: SelectedCard = {...card, position: position};
-          return [...prev, targetedCard];
-        });
+        const exists = actionTargets.find(t => t.uid === card.uid);
+        if (exists) {
+          setActionTargets(prev => prev.filter(t => t.uid !== card.uid));
+          return;
+        }
+
+        if (isRevolt && position === 'myTown') {
+          setInfiltrateCard({ ...card, position });
+          return;
+        }
+
+        const targetedCard: SelectedCard = {...card, position: position};
+        setActionTargets(prev => [...prev, targetedCard]);
         return;
       }
     }
@@ -309,17 +318,6 @@ function Game() {
                 style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
                 onClick={() => handleSelectCard(card, 'myTown')}
               >
-                {isSelected && gameState?.pendingAction?.type === 'REVOLT' || gameState?.pendingAction?.type === 'INFILTRATE' && (
-                   <input 
-                     type="number" 
-                     min="0" max={gameState.deck.length}
-                     className="revolt-position-input"
-                     onClick={(e) => e.stopPropagation()} // Evita que el click quite la selección de la carta
-                     onChange={(e) => {
-                       const pos = parseInt(e.target.value) || 0;
-                       setActionTargets(prev => prev.map(t => t.uid === card.uid ? { ...t, chosenPosition: pos } : t));
-                     }}
-                   />)}
               </div>
             );
           })}
@@ -578,6 +576,19 @@ function Game() {
           </button>
         </div>
       </div>
+    )}
+
+    {infiltrateCard && (
+      <InfiltrateModal
+        card={infiltrateCard}
+        deckCount={gameState.deck.length}
+        onSelectPosition={(pos) => {
+          const targetedCard: SelectedCard = { ...infiltrateCard, chosenPosition: pos };
+          setActionTargets(prev => [...prev, targetedCard]);
+          setInfiltrateCard(null); 
+        }}
+        onCancel={() => setInfiltrateCard(null)}
+      />
     )}
 
   </div>

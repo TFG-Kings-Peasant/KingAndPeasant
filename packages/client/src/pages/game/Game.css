@@ -315,20 +315,6 @@ h3 {
   pointer-events: none;
 }
 
-.revolt-position-input {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  text-align: center;
-  font-weight: bold;
-  border-radius: 4px;
-  border: 2px solid #d4af37;
-  background: rgba(0,0,0,0.8);
-  color: white;
-} 
-
 /* =======================================================
    9. MODAL DE DESCARTES
    ======================================================= */
@@ -355,4 +341,73 @@ h3 {
   justify-content: center;
   margin-top: 20px;
   padding: 10px;
+}
+
+/* =======================================================
+   10. MODAL DE INFILTRACIÓN (VISUAL)
+   ======================================================= */
+.infiltrate-modal-content {
+  background: rgba(20, 30, 40, 0.95);
+  padding: 30px;
+  border-radius: 12px;
+  border: 2px solid #d4af37;
+  text-align: center;
+  color: white;
+  width: 90%;
+  max-width: 900px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.8);
+  animation: popIn 0.2s ease-out forwards;
+  cursor: default;
+}
+
+.infiltrate-deck-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  overflow-x: auto;
+  padding: 20px 0;
+}
+
+.card.ingame.small {
+  width: 60px;
+  height: 84px;
+}
+
+.infiltrate-gap {
+  width: 35px;
+  height: 84px;
+  margin: 0 5px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infiltrate-gap:hover {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: #d4af37;
+  transform: scale(1.1);
+}
+
+.infiltrate-gap::after {
+  content: '⬇';
+  font-size: 1.5rem;
+  color: #d4af37;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.infiltrate-gap:hover::after {
+  opacity: 1;
+}
+
+.infiltrate-target-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
 }
