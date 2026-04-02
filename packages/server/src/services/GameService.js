@@ -435,7 +435,7 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
     }
     card.isRevealed = true;
 
-    if (Number(card.templateId !== 16)) {
+    if (Number(card.templateId) !== 16) {
         gameState.discardPile.push(card);
         return {
             isGameOver: true,
