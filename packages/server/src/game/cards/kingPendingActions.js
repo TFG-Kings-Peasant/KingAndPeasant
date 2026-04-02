@@ -67,7 +67,7 @@ export const kingPendingActions = {
             if (gameState.deck.length === 0) {
                 throw new Error('No hay cartas en el mazo para descartar');
             }
-            const card = gameState.deck.shift();
+            const card = gameState.deck.pop();
             card.isRevealed = true;
             gameState.discardPile.push(card);
         } else if (targetData.option === 'TOWN') {

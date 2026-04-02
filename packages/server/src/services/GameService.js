@@ -382,7 +382,7 @@ const checkWinCondition = async (gameState) => {
     if (discardPile.some(card => Number(card.templateId) === 16)) {
         return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
     } 
-    if (deckCount === 0) {
+    if (deckCount === 0 && !gameState.pendingAction) {
         return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'PEASANT_DECK_EMPTY' };
     }
     if (kingHand.some(card => Number(card.templateId) === 16) || 
@@ -434,8 +434,19 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
         throw new Error('No se puede condenar a un rebelde revelado');
     }
     card.isRevealed = true;
-    //TODO: CONDICIÓN DE VICTORIA: Si la carta condenada es el Asesino, el rey gana, en caso contrario, el rey pierde.
-    console.log("Un rebelde a sido condenado, esta era ha acabado. TODO: Evaluar de quien es la victoria")
+
+    if (Number(card.templateId !== 16)) {
+        gameState.discardPile.push(card);
+        return {
+            isGameOver: true,
+            winnerId: gameState.players.peasant.id,
+            reason: 'CONDEMN_FAIL'
+        }
+    }
+
+    gameState.discardPile.push(card);
+
+    console.log("Un rebelde a sido condenado, esta era ha acabado.")
     gameState = changeTurnAndCheckDraw(gameState, userRol);
     return await saveAndFormatGameState(gameId, gameState);
 
