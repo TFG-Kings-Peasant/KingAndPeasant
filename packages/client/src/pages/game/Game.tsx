@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { condemnRebel, drawACard, getGameStateById, getPosibleActions, passTurn, playCard, resolvePendingAction, type CardState, type GameState } from "./components/GameService";
+import { condemnRebel, drawACard, getGameStateById, getPosibleActions, passTurn, playCard, resolvePendingAction, type CardPosition, type CardState, type GameState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -143,7 +143,7 @@ function Game() {
     setCurrentMessage("");
   };
   
-  const handleSelectCard = (card: CardState, position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard'| null) => {
+  const handleSelectCard = (card: CardState, position: CardPosition | null) => {
     if(activeConfig && position && activeConfig.allowedZones.includes(position)){
       const isRevolt = gameState?.pendingAction?.type === 'REVOLT' || gameState?.pendingAction?.type === 'INFILTRATE';
       const isValidTarget = !isRevolt || CARDS_THAT_CAN_INFILTRATE.includes(card.templateId as number);
@@ -283,11 +283,12 @@ function Game() {
         <div className="hand">
           {rivalPlayer.hand.map((card) => {
             const isSelected = actionTargets.some(t => t.uid === card.uid);
+            const isClickable = gameState?.pendingAction && activeConfig?.allowedZones.includes("rivalHand");
             return (
-              card.isRevealed ? <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
-              onClick={() => handleSelectCard(card, 'rivalTown')}>
+              card.isRevealed ? <div key={card.uid} className={`card ingame ${isSelected ? 'selected-target' : '' } ${isClickable ? 'clickable' : ''}`} style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
+              onClick={() => handleSelectCard(card, 'rivalHand')}>
               </div>: 
-            <div key={card.uid} className="card ingame back" onClick={() => handleSelectCard(card, 'rivalTown')}></div>
+            <div key={card.uid} className="card ingame back" onClick={() => handleSelectCard(card, 'rivalHand')}></div>
             );
           })}
         </div>
@@ -300,7 +301,7 @@ function Game() {
               style={{ backgroundImage: `url('/cards/${card.templateId}.png')` }} 
               onClick={() => handleSelectCard(card, 'rivalTown')}>
               </div>: 
-            <div key={card.uid} className={`card ingame ${isClickable ? 'clickable' : 'back'}`} onClick={() => handleSelectCard(card, 'rivalTown')}></div>
+            <div key={card.uid} className={`card ingame back ${isClickable ? 'clickable' : ''}`} onClick={() => handleSelectCard(card, 'rivalTown')}></div>
             );
           })}
         </div>
@@ -552,7 +553,7 @@ function Game() {
                   <div
                     key={`${card.uid}-${index}`}
                     className={`card ingame ${isSelected ? 'selected-target' : 'back'} ${isClickable ? 'clickable' : ''}`}
-                    style={{ backgroundImage: card.isRevealed ? `url('/cards/${card.templateId}.png')` : undefined }}
+                    style={{ backgroundImage: card.isRevealed ? `url('/cards/${card.templateId}.png')` : `url('/cards/Back.png')` }}
                     onClick={() => {
                       // Solo permite seleccionar la carta si la acción lo requiere, o ampliarla si no hay acción
                       if (isClickable) {

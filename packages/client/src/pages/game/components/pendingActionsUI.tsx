@@ -1,15 +1,15 @@
-import type { CardState } from "./GameService";
+import type { CardPosition, CardState } from "./GameService";
 
 export const CARDS_THAT_CAN_INFILTRATE = [13,16];
 
 export interface SelectedCard extends CardState{
-    position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard';
+    position: CardPosition;
     chosenPosition?: number;
 }
 
 export interface PendingActionUIConfig{
     instructionText : string;
-    allowedZones: ('hand' | 'myTown' | 'rivalTown' | 'discard' | 'deck')[];
+    allowedZones: CardPosition[];
     canConfirm: (selectedCards: SelectedCard[], amount?: any) => boolean;
     formatPayload: (selectedCards: SelectedCard[]) => Record<string, unknown>;
 }
