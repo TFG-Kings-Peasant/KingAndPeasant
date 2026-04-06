@@ -87,7 +87,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
             const isHiden = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown' && !c.isRevealed);
-            return selectedCards.length > 0 && isHiden;
+            return selectedCards.length === 1 && isHiden;
         }, 
         formatPayload: (selectedCards) => {
             return {
