@@ -163,9 +163,6 @@ export const rebelCards = {
     },
     16: (gameState) => {
         //Infiltrate: Peasant wins. Dispatch: Peasant wins if there are no Guards in Town"
-        
-        //TODO: CONDICION DE VICTORIA: El peasant gana, el rey a pillado el Asesino
-        console.log("CONDICION DE VICTORIA: El peasant gana, el rey a pillado el Asesino")
         return gameState;
     }
 }

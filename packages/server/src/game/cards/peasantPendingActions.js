@@ -12,8 +12,6 @@ export const peasantPendingActions = {
         const [card] = gameState.players.peasant.town.splice(index, 1);
         card.isRevealed = false;
         gameState.deck.splice(deckPositions[0], 0, card);
-        console.log(`Carta ${card.templateId} infiltrada en la posición ${deckPositions[0]} del mazo`);
-        console.log(gameState.deck)
         return gameState;
     },
     'RALLY': (gameState, targetData) => {

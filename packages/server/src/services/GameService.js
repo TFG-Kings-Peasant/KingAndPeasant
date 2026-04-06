@@ -132,11 +132,7 @@ const getGameStateDTO = async (gameId) => {
 //Obtiene el GameState y devuelve los DTOs
 const transformGameStateDTO = (gameState) => {
     const dtoKing = JSON.parse(JSON.stringify(gameState));
-//    dtoKing.deckCount = dtoKing.deck.length;
-//    delete dtoKing.deck;
     const dtoPeasant = JSON.parse(JSON.stringify(gameState));
-//    dtoPeasant.deckCount = dtoPeasant.deck.length;
-//    delete dtoPeasant.deck;
 
     const deck = dtoKing.deck.map(card => card.isRevealed ? card : {uid: card.uid});
 
@@ -179,8 +175,10 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
         return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
     }else{
         if(playedCard.isRevealed){
-            return await returnRebeldToHand(gameId, gameState, cardIndex)
-        }else if (canInfiltrate(playedCard)){
+            return await returnRebeldToHand(gameId, gameState, cardIndex);
+
+        }else if(canInfiltrate(playedCard) && !(playedCard.templateId === 16 && gameState.players.king.town.length === 0)){
+            
             return await infiltrateRebel(gameId, cardIndex, gameState);
         }else{
             return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
