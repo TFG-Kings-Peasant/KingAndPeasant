@@ -202,7 +202,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona la carta a infiltrar y elige la posicion del mazo donde colocarla",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            const canInfiltrate = selectedCards.every(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
+            const canInfiltrate = selectedCards.every(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number) && !c.isRevealed)
             return selectedCards.length === 1 && canInfiltrate; 
         }, 
         formatPayload: (selectedCards) => {

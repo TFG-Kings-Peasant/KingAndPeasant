@@ -155,7 +155,7 @@ function Game() {
           return;
         }
 
-        if (isRevolt && position === 'myTown') {
+        if (isRevolt && position === 'myTown' && card.isRevealed === false) {
           setInfiltrateCard({ ...card, position });
           return;
         }
