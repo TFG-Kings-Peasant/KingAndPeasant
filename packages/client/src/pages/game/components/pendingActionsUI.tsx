@@ -10,8 +10,8 @@ export interface SelectedCard extends CardState{
 export interface PendingActionUIConfig{
     instructionText : string;
     allowedZones: CardPosition[];
-    canConfirm: (selectedCards: SelectedCard[], amount?: any) => boolean;
-    formatPayload: (selectedCards: SelectedCard[]) => Record<string, unknown>;
+    canConfirm: (selectedCards: SelectedCard[], amount?: any, numberInput?: number) => boolean;
+    formatPayload: (selectedCards: SelectedCard[], numberInput?: number) => Record<string, unknown>;
 }
 
 export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
@@ -122,14 +122,14 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "CHARLATAN": {
-        instructionText: "Roba hasta 3 cartas",
-        allowedZones: ['deck'],
-        canConfirm: (selectedCards) => {
-            return selectedCards.length < 4;
+        instructionText: "Selecciona el numero de cartas a robar",
+        allowedZones: [],
+        canConfirm: (selectedCards, amount, numberInput) => {
+            return numberInput !== undefined && numberInput > 0 && numberInput < amount+1;
         }, 
-        formatPayload: (selectedCards) => {
+        formatPayload: (selectedCards, numberInput) => {
             return {
-                deckUids: selectedCards.map(c => c.uid),
+                amountToDraw: numberInput
             }
         },
     },
@@ -290,7 +290,7 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
             const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            return selectedCards.length > 0 && selectedCards.length < 2 && hasGuard;
         },
         formatPayload: (selectedCards) => {
             return { targetUid: selectedCards[0]?.uid || ""}
@@ -364,7 +364,6 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         }
     },
     "WATCHMAN": {
-        //TODO: Eperara confirmacion para volver a girar las cartas del rebel
         instructionText: "Pulsa el botón de confirmar acción para volver a girar las cartas del campesino",
         allowedZones: [],
         canConfirm: (selectedCards) => {

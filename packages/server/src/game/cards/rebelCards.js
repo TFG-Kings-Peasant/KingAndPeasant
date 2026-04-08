@@ -124,7 +124,8 @@ export const rebelCards = {
 
         gameState.pendingAction = {
             type: "CHARLATAN",
-            player: "peasant"
+            player: "peasant",
+            amount: Math.min(3, deckLength)
         };
 
         return gameState;

@@ -175,24 +175,20 @@ export const peasantPendingActions = {
     },
     "CHARLATAN": (gameState, targetData) => {
         //"Draw up to 3 cards, then put the same number of cards on top of the deck in any order"
-        const deckUids = targetData?.deckUids || [];
-        deckUids.forEach(uid => {
-            const index = gameState.deck.findIndex(c => c.uid === uid);
-            if (index === -1) {
-                throw new Error(`La carta con UID ${uid} no está en el mazo`);
-            }
-            
-            const [deckCard] = gameState.deck.splice(index, 1);
-            
+        const amountToDraw = targetData?.amountToDraw || 0;
+        // Robar siempre desde "arriba" del mazo (el final del array)
+        for (let i = 0; i < amountToDraw; i++) {
+            if (gameState.deck.length === 0) break; // Por seguridad, si el mazo se vacía
+
+            const deckCard = gameState.deck.pop(); 
             deckCard.isRevealed = false; 
-            
             gameState.players.peasant.hand.push(deckCard);
-        });
+        }
 
         gameState.pendingAction = {
             type: "CHARLATAN2",
             player: "peasant",
-            amount: deckUids.length
+            amount: amountToDraw
         };
         return gameState;
     },

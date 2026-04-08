@@ -22,6 +22,7 @@ function Game() {
   
   const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
   const [actionTargets, setActionTargets] = useState<SelectedCard[]>([]);
+  const [numberInput, setNumberInput] = useState<number | null>(null);
   const activeConfig = gameState?.pendingAction
     ? (gameState.pendingAction.player === "king" 
         ? kingPendingUI[gameState.pendingAction.type] 
@@ -413,16 +414,42 @@ function Game() {
           {/* Mostramos las instrucciones desde el diccionario */}
           <p>{activeConfig.instructionText}</p>
           
+          {/* INPUT NUMÉRICO PARA CHARLATAN */}
+          {gameState?.pendingAction?.type === 'CHARLATAN' && (
+             <div style={{ margin: '15px 0' }}>
+               <label htmlFor="charlatan-input" style={{ marginRight: '10px' }}>
+                 Cartas a robar (1-3):
+               </label>
+               <input 
+                 id="charlatan-input"
+                 type="number" 
+                 min="1" 
+                 max="3" 
+                 value={numberInput || ''} 
+                 onChange={(e) => setNumberInput(parseInt(e.target.value, 10))}
+                 style={{ 
+                   padding: '5px', 
+                   width: '60px', 
+                   textAlign: 'center', 
+                   borderRadius: '5px',
+                   border: '1px solid #ccc'
+                 }}
+               />
+             </div>
+          )}
+
+
           {/* Botón dinámico que se desactiva si canConfirm es false */}
           <button 
             className="button ingame"
-            style={{ backgroundColor: activeConfig.canConfirm(actionTargets, gameState.pendingAction?.amount) ? '#d4af37' : '#555' }}
-            disabled={!activeConfig.canConfirm(actionTargets, gameState.pendingAction?.amount)}
+            style={{ backgroundColor: activeConfig.canConfirm(actionTargets, gameState.pendingAction?.amount, numberInput || undefined) ? '#d4af37' : '#555' }}
+            disabled={!activeConfig.canConfirm(actionTargets, gameState.pendingAction?.amount, numberInput || undefined)}
             onClick={() => {
-              const payload = activeConfig.formatPayload(actionTargets);
+              const payload = activeConfig.formatPayload(actionTargets, numberInput || undefined);
               handleResolvePending(payload);
               setActionTargets([]); 
               setSelectedCard(null);
+              setNumberInput(null);
             }}
           >
             Confirmar Acción
@@ -492,7 +519,7 @@ function Game() {
               //Arreglo para la carta de Acción Reassemble
               gameState.discardPile
                 .filter((card, index, array) => {
-                if (gameState.pendingAction) {
+                if (gameState.pendingAction?.type === 'REASSEMBLE') {
                   return index !== array.length - 1;
                 }
                 return true;
