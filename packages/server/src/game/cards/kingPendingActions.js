@@ -156,10 +156,14 @@ export const kingPendingActions = {
         }
         const index = gameState.players.peasant.town.findIndex(c => c.uid === targetUid);
         if (index === -1) {
-            throw new Error(`La carta con UID ${uid} no está en la mano del rey`);
+            throw new Error(`La carta con UID ${targetUid} no está en la mano del rey`);
         }
         const townCard = gameState.players.peasant.town[index];
         townCard.isRevealed = true
+
+        if (Number(townCard.templateId) === 16) {
+            gameState.lastEvent = 'KING_REVEALED_ASSASSIN';
+        }
 
         return gameState;
     },

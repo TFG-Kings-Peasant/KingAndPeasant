@@ -332,6 +332,10 @@ const checkWinCondition = async (gameState) => {
     const kingHand = gameState.players.king.hand;
     const kingTown = gameState.players.king.town;
     const peasantTown = gameState.players.peasant.town;
+    if (gameState.lastEvent === 'KING_REVEALED_ASSASSIN') {
+        return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
+    }
+
     if (discardPile.some(card => Number(card.templateId) === 16)) {
         return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
     } 

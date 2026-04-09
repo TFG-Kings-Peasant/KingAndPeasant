@@ -94,7 +94,10 @@ export const guardCards = {
         }
         for (let i = gameState.players.peasant.town.length - 1; i >= 0; i--) {
             const card = gameState.players.peasant.town[i];
-            card.isRevealed = true
+            card.isRevealed = true;
+            if (Number(card.templateId) === 16) {
+                gameState.lastEvent = 'KING_REVEALED_ASSASSIN';
+            }
         }
 
         return gameState;
