@@ -191,9 +191,12 @@ export const kingPendingActions = {
             throw new Error(`La carta con UID ${targetUid} no está en el mazo`);
         }
         gameState.deck[cardIndex].isRevealed = true;
-        if(gameState.deck[cardIndex].namePeasant === 'Assassin'){
-            //TODO: Condicion de victoria. El rey a desvelado al asesino
-            console.log("TODO: Condicion de victoria. El rey a desvelado al asesino")
+        if(Number(gameState.deck[cardIndex].templateId) === 16){
+            const [assassinCard] = gameState.deck.splice(cardIndex, 1);
+            gameState.discardPile.push(assassinCard);
+            gameState.lastEvent = 'KING_REVEALED_ASSASSIN';
+            gameState.pendingAction = null;
+            return gameState;
         }
 
         gameState.pendingAction = {
