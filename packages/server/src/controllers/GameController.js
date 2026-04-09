@@ -100,9 +100,14 @@ const condemnARebel = async (req, res) => {
         const userId  = Number(req.user.id);
         const { isDeck, cardUid } = req.body;
 
-        const {dtoKing, dtoPeasant} = await gameService.condemnARebel(gameId, isDeck, cardUid, userId);
-    
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+        const result = await gameService.condemnARebel(gameId, isDeck, cardUid, userId);
+        const io = req.app.get('io');
+
+        if (result.isGameOver) {
+            io.to(`game_${gameId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
 
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
@@ -115,10 +120,14 @@ const peasantDrawACard = async (req, res) => {
     try {
         const gameId = req.params.id;
         const userId  = Number(req.user.id);
-        const {dtoKing, dtoPeasant} = await gameService.peasantDrawACard(gameId, userId);
-    
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+        const result = await gameService.peasantDrawACard(gameId, userId);
+        const io = req.app.get('io');
 
+        if (result.isGameOver) {
+            io.to(`game_${gameId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
         console.error("Error al robar carta:", error.message);
@@ -130,10 +139,14 @@ const passTurn = async (req, res) => {
     try {
         const gameId = req.params.id;
         const userId  = Number(req.user.id);
-        const {dtoKing, dtoPeasant} = await gameService.passTurn(gameId, userId);
-    
-        sendGameStateUpdate(req, dtoKing, dtoPeasant);
+        const result = await gameService.passTurn(gameId, userId);
+        const io = req.app.get('io');
 
+        if (result.isGameOver) {
+            io.to(`game_${gameId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+        }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
         console.error("Error al pasar turno:", error.message);
