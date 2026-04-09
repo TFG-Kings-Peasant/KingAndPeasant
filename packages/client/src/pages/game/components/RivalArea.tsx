@@ -62,7 +62,7 @@ export const RivalArea: React.FC<RivalAreaProps> = ({
           ) : (
             <div
               key={card.uid}
-              className={`card ingame back ${isClickable ? "clickable" : ""}`}
+              className={`card ingame back ${isSelected ? "selected-target" : ""} ${isClickable ? "clickable" : ""}`}
               onClick={() => onSelectCard(card, "rivalTown")}
             ></div>
           );

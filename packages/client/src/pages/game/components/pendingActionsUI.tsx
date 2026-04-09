@@ -231,10 +231,10 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
     },
     'ARREST': {
         instructionText: "Descarta la carta superior del mazo o un rebelde seleccionado",
-        allowedZones: ['rivalTown', 'deck'],
+        allowedZones: ['rivalTown'],
         canConfirm: (selectedCards) => {
             if (selectedCards.length === 1) {
-                const isRebel = selectedCards.some(c => c.typePeasant === 'Rebel' && c.position === 'rivalTown');
+                const isRebel = selectedCards.some(c =>c.position === 'rivalTown');
                 return isRebel;
             }
             return selectedCards.length === 0;
