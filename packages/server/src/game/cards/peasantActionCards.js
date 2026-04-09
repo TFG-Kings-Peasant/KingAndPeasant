@@ -37,12 +37,11 @@ export const peasantActionCards = {
         return gameState;
     },
     12: (gameState) => {
-        if (gameState.players.peasant.town.length === 0) {
-            throw new Error('No existen las cartas suficientes en el pueblo para realizar esta acción');
+        if (gameState.players.peasant.town.length !== 0) {
+            const cardsTown = gameState.players.peasant.town.splice(0, gameState.players.peasant.town.length); 
+            cardsTown.forEach(card => card.isRevealed = false);
+            gameState.players.peasant.hand.push(...cardsTown);
         }
-        const cardsTown = gameState.players.peasant.town.splice(0, gameState.players.peasant.town.length); 
-        cardsTown.forEach(card => card.isRevealed = false);
-        gameState.players.peasant.hand.push(...cardsTown);
         const cardsDiscard = gameState.discardPile.splice(0, gameState.discardPile.length);
         cardsDiscard.forEach(card => card.isRevealed = false);
         gameState.deck.push(...cardsDiscard);

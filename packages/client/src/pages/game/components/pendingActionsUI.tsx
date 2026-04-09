@@ -320,7 +320,7 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         }
     },
     "ADVISOR":  {
-        instructionText: "Selecciona la carta si quieres dejarla al principio del mazo, no la seleccioens si la quieres mandar la fondo del mazo",
+        instructionText: "Selecciona la carta si quieres dejarla al principio del mazo, no la selecciones si la quieres mandar la fondo del mazo",
         allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
             const isRevealed = selectedCards.every(c => c.position === 'deck' && c.isRevealed);

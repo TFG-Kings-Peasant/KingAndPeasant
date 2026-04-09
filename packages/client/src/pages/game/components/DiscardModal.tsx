@@ -29,7 +29,7 @@ export const DiscardModal: React.FC<DiscardModalProps> = ({
           ) : (
             gameState.discardPile
               ?.filter((card, index, array) => {
-                if (gameState.pendingAction?.type === "REASSEMBLE") {
+                if (gameState.pendingAction?.type === "REASSEMBLE1") {
                   return index !== array.length - 1;
                 }
                 return true;
