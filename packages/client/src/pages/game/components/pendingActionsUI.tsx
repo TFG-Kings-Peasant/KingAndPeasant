@@ -150,7 +150,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona hasta 2 rebeldes para devolver a la mano",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown');
+            const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown' && c.templateId !== 8);
 
             return validate && selectedCards.length < 3;
         }, 
