@@ -1,17 +1,17 @@
-import type { CardState } from "./GameService";
+import type { CardPosition, CardState } from "./GameService";
 
 export const CARDS_THAT_CAN_INFILTRATE = [13,16];
 
 export interface SelectedCard extends CardState{
-    position: 'hand' | 'myTown' | 'rivalTown' | 'deck' | 'discard';
+    position: CardPosition;
     chosenPosition?: number;
 }
 
 export interface PendingActionUIConfig{
     instructionText : string;
-    allowedZones: ('hand' | 'myTown' | 'rivalTown' | 'discard' | 'deck')[];
-    canConfirm: (selectedCards: SelectedCard[], amount?: any) => boolean;
-    formatPayload: (selectedCards: SelectedCard[]) => Record<string, unknown>;
+    allowedZones: CardPosition[];
+    canConfirm: (selectedCards: SelectedCard[], amount?: any, numberInput?: number) => boolean;
+    formatPayload: (selectedCards: SelectedCard[], numberInput?: number) => Record<string, unknown>;
 }
 
 export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
@@ -122,14 +122,14 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "CHARLATAN": {
-        instructionText: "Roba hasta 3 cartas",
-        allowedZones: ['deck'],
-        canConfirm: (selectedCards) => {
-            return selectedCards.length < 4;
+        instructionText: "Selecciona el numero de cartas a robar",
+        allowedZones: [],
+        canConfirm: (selectedCards, amount, numberInput) => {
+            return numberInput !== undefined && numberInput > 0 && numberInput < amount+1;
         }, 
-        formatPayload: (selectedCards) => {
+        formatPayload: (selectedCards, numberInput) => {
             return {
-                deckUids: selectedCards.map(c => c.uid),
+                amountToDraw: numberInput
             }
         },
     },
@@ -150,7 +150,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona hasta 2 rebeldes para devolver a la mano",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown');
+            const validate = selectedCards.every(c => c.typePeasant === 'Rebel' && c.position === 'myTown' && c.templateId !== 8);
 
             return validate && selectedCards.length < 3;
         }, 
@@ -202,7 +202,7 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         instructionText: "Selecciona la carta a infiltrar y elige la posicion del mazo donde colocarla",
         allowedZones: ['myTown'],
         canConfirm: (selectedCards) => {
-            const canInfiltrate = selectedCards.every(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number))
+            const canInfiltrate = selectedCards.every(c => CARDS_THAT_CAN_INFILTRATE.includes(c.templateId as number) && !c.isRevealed)
             return selectedCards.length === 1 && canInfiltrate; 
         }, 
         formatPayload: (selectedCards) => {
@@ -231,10 +231,10 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
     },
     'ARREST': {
         instructionText: "Descarta la carta superior del mazo o un rebelde seleccionado",
-        allowedZones: ['rivalTown', 'deck'],
+        allowedZones: ['rivalTown'],
         canConfirm: (selectedCards) => {
             if (selectedCards.length === 1) {
-                const isRebel = selectedCards.some(c => c.typePeasant === 'Rebel' && c.position === 'rivalTown');
+                const isRebel = selectedCards.some(c =>c.position === 'rivalTown');
                 return isRebel;
             }
             return selectedCards.length === 0;
@@ -290,7 +290,7 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         allowedZones: ['hand'],
         canConfirm: (selectedCards) => {
             const hasGuard = selectedCards.every(c => c.position === 'hand' && c.typeKing === 'Guard');
-            return selectedCards.length >= 0 && selectedCards.length < 2 && hasGuard;
+            return selectedCards.length > 0 && selectedCards.length < 2 && hasGuard;
         },
         formatPayload: (selectedCards) => {
             return { targetUid: selectedCards[0]?.uid || ""}
@@ -320,7 +320,7 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         }
     },
     "ADVISOR":  {
-        instructionText: "Selecciona la carta si quieres dejarla al principio del mazo, no la seleccioens si la quieres mandar la fondo del mazo",
+        instructionText: "Selecciona la carta si quieres dejarla al principio del mazo, no la selecciones si la quieres mandar la fondo del mazo",
         allowedZones: ['deck'],
         canConfirm: (selectedCards) => {
             const isRevealed = selectedCards.every(c => c.position === 'deck' && c.isRevealed);
@@ -364,7 +364,6 @@ export const kingPendingUI : Record<string, PendingActionUIConfig> = {
         }
     },
     "WATCHMAN": {
-        //TODO: Eperara confirmacion para volver a girar las cartas del rebel
         instructionText: "Pulsa el botón de confirmar acción para volver a girar las cartas del campesino",
         allowedZones: [],
         canConfirm: (selectedCards) => {

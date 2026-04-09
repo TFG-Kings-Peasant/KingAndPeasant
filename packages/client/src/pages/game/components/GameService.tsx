@@ -1,11 +1,14 @@
+export type CardPosition = 'hand' | 'town' | 'myTown' | 'rivalTown' | 'rivalHand' | 'deck' | 'discard';
+
 export interface CardState {
     uid: string;
     templateId?: number;
     typeKing: string;
     typePeasant: string;
-    position?: 'hand' | 'town' | 'myTown' | 'rivalTown' | 'deck' | 'discard';
+    position?: CardPosition;
     isRevealed: boolean;
 }
+
 
 export interface GameState {
     id: number;
@@ -178,7 +181,7 @@ export const getPosibleActions = (card: CardState, isKing: boolean) => {
                     return "";
                 }
             default:
-                if(!card.isRevealed){
+                if(!card.isRevealed && (card.position === "rivalTown")){
                     return "Condenar rebelde";
                 }else{
                     return "";

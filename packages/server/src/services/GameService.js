@@ -132,11 +132,7 @@ const getGameStateDTO = async (gameId) => {
 //Obtiene el GameState y devuelve los DTOs
 const transformGameStateDTO = (gameState) => {
     const dtoKing = JSON.parse(JSON.stringify(gameState));
-//    dtoKing.deckCount = dtoKing.deck.length;
-//    delete dtoKing.deck;
     const dtoPeasant = JSON.parse(JSON.stringify(gameState));
-//    dtoPeasant.deckCount = dtoPeasant.deck.length;
-//    delete dtoPeasant.deck;
 
     const deck = dtoKing.deck.map(card => card.isRevealed ? card : {uid: card.uid});
 
@@ -179,8 +175,10 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
         return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
     }else{
         if(playedCard.isRevealed){
-            return await returnRebeldToHand(gameId, gameState, cardIndex)
-        }else if (canInfiltrate(playedCard)){
+            return await returnRebeldToHand(gameId, gameState, cardIndex);
+
+        }else if(canInfiltrate(playedCard) && !(playedCard.templateId === 16 && gameState.players.king.town.length === 0)){
+            
             return await infiltrateRebel(gameId, cardIndex, gameState);
         }else{
             return await activateCard(gameId, playedCard, cardIndex, userRol, gameState);
@@ -379,6 +377,9 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
         card = gameState.deck.splice(gameState.deck.length - 1, 1)[0];
     }else{  
         cardIndex = gameState.players.peasant.town.findIndex(card => card.uid === cardUid);
+        if (cardIndex === -1) {
+            throw new Error('Carta no encontrada en el pueblo');
+        }
         card = gameState.players.peasant.town.splice(cardIndex, 1)[0];
     }
     if(!card)
@@ -389,20 +390,12 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
         throw new Error('No se puede condenar a un rebelde revelado');
     }
     card.isRevealed = true;
-
-    if (Number(card.templateId) !== 16) {
-        gameState.discardPile.push(card);
-        return {
-            isGameOver: true,
-            winnerId: gameState.players.peasant.id,
-            reason: 'CONDEMN_FAIL'
-        }
-    }
-
     gameState.discardPile.push(card);
 
-    console.log("Un rebelde a sido condenado, esta era ha acabado.")
-    gameState = changeTurnAndCheckDraw(gameState, userRol);
+    if (Number(card.templateId) !== 16) {
+        gameState.lastEvent = 'CONDEMN_FAIL';
+    }
+
     return await saveAndFormatGameState(gameId, gameState);
 
 }
