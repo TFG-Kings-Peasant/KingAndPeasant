@@ -181,6 +181,11 @@ const playTownCard = async (gameId, cardUid, targetData, userId) => {
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
+
+    if (gameState.pendingAction) {
+        throw new Error('Debes resolver la acción pendiente antes de realizar otra acción');
+    }
+
     const cardIndex = gameState.players[userRol].town.findIndex(card => card.uid === cardUid);
 
     if (cardIndex === -1) {
@@ -254,6 +259,9 @@ const passTurn = async (gameId, userId) => {
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
+    if (gameState.pendingAction) {
+        throw new Error('Debes resolver la acción pendiente antes de realizar otra acción');
+    }
     gameState = changeTurnAndCheckDraw(gameState, userRol);
     return await saveAndFormatGameState(gameId, gameState);
 }
@@ -263,6 +271,9 @@ const playHandCard = async (gameId, cardUid, targetData, userId) => {
     const userRol = getUserRol(gameState, userId);
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
+    }
+    if (gameState.pendingAction) {
+        throw new Error('Debes resolver la acción pendiente antes de realizar otra acción');
     }
     const cardIndex = gameState.players[userRol].hand.findIndex(card => card.uid === cardUid);
     if (cardIndex === -1) {
@@ -394,6 +405,9 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
     }
+    if (gameState.pendingAction) {
+        throw new Error('Debes resolver la acción pendiente antes de realizar otra acción');
+    }
     let cardIndex = null
     let card = null
     if(isDeck){
@@ -428,6 +442,9 @@ const peasantDrawACard = async (gameId, userId) => {
     const userRol = Number(gameState.players.king.id) === Number(userId) ? "king" : "peasant";
     if (gameState.turn !== userRol) {
         throw new Error('No es el turno del jugador');
+    }
+    if (gameState.pendingAction) {
+        throw new Error('Debes resolver la acción pendiente antes de realizar otra acción');
     }
     if(userRol !== "peasant"){
         throw new Error('Solo el campesino puede realizar la acción de robar carta');

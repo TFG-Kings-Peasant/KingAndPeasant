@@ -16,9 +16,16 @@ export const useGameActions = (
     }
     return true;
   };
+  const checkNoPendingAction = () => {
+    if (gameState?.pendingAction) {
+      alert("Debes resolver la acción pendiente primero");
+      return false;
+    }
+    return true;
+  };
 
   const handlePassTurn = async () => {
-    if (!id || !user?.authToken || !checkTurn()) return;
+    if (!id || !user?.authToken || !checkTurn() || !checkNoPendingAction()) return;
     try {
       await passTurn(Number(id), user.authToken);
     } catch (err: any) {
@@ -28,7 +35,7 @@ export const useGameActions = (
   };
 
   const handleDrawCard = async () => {
-    if (!id || !user?.authToken || !checkTurn()) return;
+    if (!id || !user?.authToken || !checkTurn() || !checkNoPendingAction()) return;
     try {
       await drawACard(Number(id), user.authToken);
     } catch (err: any) {
@@ -38,7 +45,7 @@ export const useGameActions = (
   };
 
   const handlePlayCard = async (selectedCard: CardState, isKing: boolean) => {
-    if (!id || !user?.authToken || !checkTurn() || !selectedCard) return;
+    if (!id || !user?.authToken || !checkTurn() || !checkNoPendingAction() || !selectedCard) return;
     const cardToPlayUid = selectedCard.uid;
     try {
       if (selectedCard.position === "rivalTown" && isKing) {
@@ -56,7 +63,7 @@ export const useGameActions = (
   };
 
   const handleCondemnDeckCard = async () => {
-    if (!id || !user?.authToken || !checkTurn()) return;
+    if (!id || !user?.authToken || !checkTurn() || !checkNoPendingAction()) return;
     try {
       await condemnRebel(Number(id), true, "", user.authToken);
       setSelectedCard(null);

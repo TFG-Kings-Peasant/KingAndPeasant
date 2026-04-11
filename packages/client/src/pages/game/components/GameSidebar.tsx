@@ -31,6 +31,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
   onDrawCard,
   onCondemnDeckCard,
 }) => {
+  const canPerformStandardActions = gameState.turn === myRoleName && !gameState.pendingAction;
   return (
     <div className="game-sidebar">
       {/* Marcador */}
@@ -74,7 +75,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
 
       {/* Botones de Acción */}
       <div className="action-container">
-        {gameState.turn === myRoleName ? (
+        {canPerformStandardActions ? (
           <div>
             <button className="button ingame" onClick={onPassTurn}>
               PASAR TURNO
