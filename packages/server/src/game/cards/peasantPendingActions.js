@@ -278,8 +278,13 @@ export const peasantPendingActions = {
             throw new Error(`La carta con UID ${uid} no se ha encontrado en el pueblo del rey`);
         }
         const [targetCard] = gameState.players.king.town.splice(index, 1);
+        if(targetCard.typeKing !== "Guard"){
+            throw new Error(`La carta seleccionada no es un Guard`);
+        }
+        targetCard.isRevealed = true
         gameState.discardPile.push(targetCard);
-
+        
+        gameState.turn = 'king';
         return gameState;
     }
 }

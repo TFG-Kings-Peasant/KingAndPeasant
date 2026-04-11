@@ -189,10 +189,10 @@ export const peasantPendingUI : Record<string, PendingActionUIConfig> = {
         },
     },
     "DECOY": {
-        instructionText: "Selecciona 1 guardia del pueblo del rival para descartarlo",
+        instructionText: "El rey a robado la carta DECOY: Selecciona 1 guardia del pueblo del rival para descartarlo",
         allowedZones: ['rivalTown'],
         canConfirm: (selectedCards) => {
-            return selectedCards.length > 0 && selectedCards.length < 2 && selectedCards.every(c => c.position === 'rivalTown');
+            return selectedCards.length > 0 && selectedCards.length < 2 && selectedCards.every(c => c.typeKing === 'Guard' && c.position === 'rivalTown');
         }, 
         formatPayload: (selectedCards) => {
             return {

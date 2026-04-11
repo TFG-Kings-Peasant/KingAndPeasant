@@ -115,6 +115,25 @@ const saveAndFormatGameState = async (gameId, gameState) => {
         }
     }
 
+    if (!gameState.pendingAction) {
+        // Buscamos si el Rey tiene el Decoy (templateId === 13) en la mano
+        const decoyIndex = gameState.players.king.hand.findIndex(card => Number(card.templateId) === 13);
+        
+        if (decoyIndex !== -1) {
+            // Exiliar el DECOY: Lo eliminamos directamente de la partida
+            gameState.players.king.hand.splice(decoyIndex, 1);
+            
+            // Le damos una acción obligatoria al campesino para que elimine un guardia
+            gameState.pendingAction = {
+                type: 'DECOY',
+                player: 'peasant'
+            };
+            
+            // Aseguramos que el turno lo tiene el campesino para que pueda actuar
+            gameState.turn = 'peasant';
+        }
+    }
+
     delete gameState.lastEvent;
     
     const result = await redisClient.set(`game:${gameId}`, JSON.stringify(gameState));
