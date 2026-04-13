@@ -17,6 +17,7 @@ import { useGameActions } from "../../hooks/useGameActions";
 import { RivalArea } from "./components/RivalArea";
 import { PlayerArea } from "./components/PlayerArea";
 import { GameSidebar } from "./components/GameSidebar";
+import { ErrorToast } from "./components/ErrorToast";
 
 function Game() {
   const { id } = useParams();
@@ -37,13 +38,15 @@ function Game() {
   const [showDeckModal, setShowDeckModal] = useState(false);
 
   const [infiltrateCard, setInfiltrateCard] = useState<SelectedCard | null>(null);
-  
-
-  
-
   useEffect(() => {
     setActionTargets([]);
   }, [gameState?.pendingAction?.type]);
+
+  useEffect(() => {
+    if (error) {
+      setSelectedCard(null);
+    }
+  }, [error]);
 
   if (loading || !gameState || !user || !id) return <div>Cargando el Tablero...</div>;
 
@@ -204,6 +207,10 @@ function Game() {
       />
     )}
 
+    <ErrorToast 
+      error={error} 
+      onClose={() => setError("")} 
+    />
   </div>
   );
 }

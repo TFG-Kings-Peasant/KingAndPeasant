@@ -11,14 +11,14 @@ export const useGameActions = (
   
   const checkTurn = () => {
     if (gameState?.turn !== myRoleName) {
-      alert("No es tu turno");
+      setError("No es tu turno");
       return false;
     }
     return true;
   };
   const checkNoPendingAction = () => {
     if (gameState?.pendingAction) {
-      alert("Debes resolver la acción pendiente primero");
+      setError("Debes resolver la acción pendiente primero");
       return false;
     }
     return true;
@@ -29,7 +29,6 @@ export const useGameActions = (
     try {
       await passTurn(Number(id), user.authToken);
     } catch (err: any) {
-      alert(err.message || "Ocurrió un error");
       setError(err.message);
     }
   };
@@ -39,7 +38,6 @@ export const useGameActions = (
     try {
       await drawACard(Number(id), user.authToken);
     } catch (err: any) {
-      alert(err.message || "Ocurrió un error");
       setError(err.message);
     }
   };
@@ -57,8 +55,7 @@ export const useGameActions = (
       }
       setSelectedCard(null);
     } catch (err: any) {
-      alert(err.message || "Ocurrió un error");
-      setError("Error jugando una carta");
+      setError(err.message);
     }
   };
 
@@ -68,8 +65,7 @@ export const useGameActions = (
       await condemnRebel(Number(id), true, "", user.authToken);
       setSelectedCard(null);
     } catch (err: any) {
-      alert(err.message || "Ocurrió un error");
-      setError("Error al condenar carta del mazo");
+      setError(err.message);
     }
   };
 
@@ -78,8 +74,7 @@ export const useGameActions = (
     try {
       await resolvePendingAction(Number(id), targetData, user.authToken);
     } catch (err: any) {
-      alert(err.message || "Ocurrió un error");
-      setError("Error jugando una carta");
+      setError(err.message);
     }
   };
 
