@@ -13,7 +13,11 @@ function LobbyRoom() {
   const [lobby, setLobby] = useState<LobbyBackend | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [announcement, setAnnouncement] = useState<{ title: string; message: string; isConfirm?: boolean;} | null>(null);
+  const [announcement, setAnnouncement] = useState<{ 
+    title: string;
+    message: string;
+    confirmAction?: "START" | "LEAVE";
+    } | null>(null);
   const { user, isLogin} = useUser();
   const { socket } = useAuth();
 
@@ -84,25 +88,31 @@ function LobbyRoom() {
   };
 
 
-  const handleLeave = async () => {
-    if (!lobby) return;
-    if (!user) return;
-
-    if (window.confirm("¿Seguro que quieres salir?")) {
-        try {
-            navigate("/lobbyList");
-        } catch (err) {
-            setError("No se pudo salir del lobby");
-            console.error(err);
-        }
-    }
+  const handleLeaveClick = () => {
+    setAnnouncement({
+        title: "🏃‍♂️ ABANDONAR SALA",
+        message: "¿Estás seguro de que quieres huir de la batalla y salir de la sala?",
+        confirmAction: "LEAVE" 
+    });
   };
+
+  const executeLeave = async () => {
+    setAnnouncement(null);
+    if(!lobby || !user) return;
+    
+    try {
+        navigate("/lobbyList");
+    } catch (err) {
+        setError("No se pudo salir del lobby");
+        console.error(err);
+    }
+  }
 
   const handleStartGameClick = () => {
     setAnnouncement({
       title: "⚔️ ¿TODO LISTO?",
       message: "Vas a dar comienzo al duelo. ¿Estás seguro de que vuestras estrategias están preparadas?",
-      isConfirm: true
+      confirmAction: "START"
     });
   };
 
@@ -160,19 +170,27 @@ function LobbyRoom() {
         : (<div></div>)}
 
 
-        <button className="exit-btn" onClick={handleLeave}>
+        <button className="exit-btn" onClick={handleLeaveClick}>
             SALIR DEL LOBBY
         </button>
       </footer>
 
         <AnnouncementModal
-            isOpen={!!announcement}
-            onClose={() => setAnnouncement(null)}
-            title={announcement?.title || ""}
-            message={announcement?.message || ""}
-            onConfirm={announcement?.isConfirm ? executeStartGame : undefined}
-            confirmText="¡A LA BATALLA!"
-        />
+          isOpen={!!announcement}
+          onClose={() => setAnnouncement(null)}
+          title={announcement?.title || ""}
+          message={announcement?.message || ""}
+          onConfirm={
+              announcement?.confirmAction === "START" ? executeStartGame :
+              announcement?.confirmAction === "LEAVE" ? executeLeave : 
+              undefined
+          }
+          confirmText={
+              announcement?.confirmAction === "START" ? "¡A LA BATALLA!" : 
+              announcement?.confirmAction === "LEAVE" ? "ABANDONAR" : 
+              "CONTINUAR"
+          }
+      />
 
     </div>
   );
