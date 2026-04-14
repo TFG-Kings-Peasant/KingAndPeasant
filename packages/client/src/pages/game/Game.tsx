@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { condemnRebel, drawACard, getGameStateById, getPosibleActions, passTurn, playCard, resolvePendingAction, type CardPosition, type CardState, type GameState } from "./components/GameService";
+import { useEffect, useState } from "react";
+import { getPosibleActions, type CardPosition, type CardState } from "./components/GameService";
 import "./GameChat.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -18,13 +18,14 @@ import { RivalArea } from "./components/RivalArea";
 import { PlayerArea } from "./components/PlayerArea";
 import { GameSidebar } from "./components/GameSidebar";
 import { ErrorToast } from "./components/ErrorToast";
+import { AnnouncementModal } from "./components/AnnouncementModal";
 
 function Game() {
   const { id } = useParams();
   const navigate = useNavigate();
   
   const {socket, user} = useAuth()
-  const { gameState, loading, error, setError, gameOverData } = useGameData(id, user, socket);
+  const { gameState, loading, error, setError, gameOverData, announcement, setAnnouncement } = useGameData(id, user, socket);
   
   const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
   const [actionTargets, setActionTargets] = useState<SelectedCard[]>([]);
@@ -206,6 +207,13 @@ function Game() {
         onCancel={() => setInfiltrateCard(null)}
       />
     )}
+
+    <AnnouncementModal
+        isOpen={!!announcement}
+        onClose={() => setAnnouncement(null)}
+        title={announcement?.title || ""}
+        message={announcement?.message || ""}
+      />
 
     <ErrorToast 
       error={error} 

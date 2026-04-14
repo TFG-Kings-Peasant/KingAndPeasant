@@ -6,13 +6,14 @@ import { startGame } from "../game/components/GameService";
 import { useNavigate, useParams } from "react-router";
 import { useUser } from "../../hooks/useUser";
 import { useAuth } from "../../hooks/useAuth";
+import { AnnouncementModal } from "../game/components/AnnouncementModal";
 
 function LobbyRoom() {
   const { id } = useParams();
   const [lobby, setLobby] = useState<LobbyBackend | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [announcement, setAnnouncement] = useState<{ title: string; message: string; isConfirm?: boolean;} | null>(null);
   const { user, isLogin} = useUser();
   const { socket } = useAuth();
 
@@ -97,17 +98,23 @@ function LobbyRoom() {
     }
   };
 
-  const handleStartGame = async () => {
-    if (!lobby) return;
-    if (!user || !user.authToken) return;
+  const handleStartGameClick = () => {
+    setAnnouncement({
+      title: "⚔️ ¿TODO LISTO?",
+      message: "Vas a dar comienzo al duelo. ¿Estás seguro de que vuestras estrategias están preparadas?",
+      isConfirm: true
+    });
+  };
 
-    if (window.confirm("¿Seguro que quieres comenzar la partida?")) {
-        try {
-            await startGame(lobby.id, lobby.player1Id, lobby.player2Id!, user.authToken);
-        } catch (err) {
-            setError("No se pudo comenzar la partida");
-            console.error(err);
-        }
+  const executeStartGame = async () => {
+    setAnnouncement(null); // Cerramos el modal primero
+    if (!lobby || !user || !user.authToken) return;
+
+    try {
+        await startGame(lobby.id, lobby.player1Id, lobby.player2Id!, user.authToken);
+    } catch (err) {
+        setError("No se pudo comenzar la partida");
+        console.error(err);
     }
   };
 
@@ -135,6 +142,7 @@ function LobbyRoom() {
         ) : (
             <div className="waiting-card">Esperando rival...</div>
         )}
+
       </div>
       <footer className="lobby-footer">
         <div className="footer-info">
@@ -145,7 +153,7 @@ function LobbyRoom() {
         </div>
         
         {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
-            <button className="start-btn" onClick={handleStartGame}>
+            <button className="start-btn" onClick={handleStartGameClick}>
                 COMENZAR PARTIDA
             </button>
         )
@@ -156,6 +164,16 @@ function LobbyRoom() {
             SALIR DEL LOBBY
         </button>
       </footer>
+
+        <AnnouncementModal
+            isOpen={!!announcement}
+            onClose={() => setAnnouncement(null)}
+            title={announcement?.title || ""}
+            message={announcement?.message || ""}
+            onConfirm={announcement?.isConfirm ? executeStartGame : undefined}
+            confirmText="¡A LA BATALLA!"
+        />
+
     </div>
   );
 }
