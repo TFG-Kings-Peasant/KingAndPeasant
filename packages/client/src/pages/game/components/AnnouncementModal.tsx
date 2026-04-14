@@ -1,6 +1,5 @@
 import React from "react";
-import { Modal } from "../../../components/Modal";
-import "../../../components/ParchmentMenu.css";
+import "../../../components/ParchmentMenu.css"; // Usamos tus estilos existentes
 import "../Game.css";
 
 interface AnnouncementModalProps {
@@ -18,29 +17,37 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = "Continuar"
+  confirmText = "CONTINUAR"
 }) => {
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="parchment-menu announcement-parchment-wrapper">
-        <h2 className="announcement-title">{title}</h2>
-        <div className="announcement-message">{message}</div>
-        
-        <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '20px' }}>
-          {onConfirm && (
-            <button className="button ingame" onClick={onConfirm} style={{ flex: 1 }}>
-              {confirmText}
+    <div className="announcement-overlay" onClick={onClose}>
+      {/* Usamos la clase parchment-menu de tu proyecto + nuestra nueva clase para el marco */}
+      <div 
+        className="parchment-menu announcement-card-ornate" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="announcement-content-inner">
+          <h2 className="announcement-title">{title}</h2>
+          <p className="announcement-message">{message}</p>
+          
+          <div className="announcement-buttons-row">
+            {onConfirm && (
+              <button className="button ingame" onClick={onConfirm}>
+                {confirmText}
+              </button>
+            )}
+            <button 
+              className="button ingame secondary" 
+              onClick={onClose}
+              style={{ backgroundColor: onConfirm ? '#8d6e63' : undefined }}
+            >
+              {onConfirm ? "CANCELAR" : "CERRAR"}
             </button>
-          )}
-          <button 
-            className="button ingame" 
-            onClick={onClose} 
-            style={{ flex: 1, backgroundColor: onConfirm ? '#8d6e63' : undefined }}
-          >
-            {onConfirm ? "CANCELAR" : "CERRAR"}
-          </button>
+          </div>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 };
