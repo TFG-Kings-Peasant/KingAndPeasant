@@ -10,7 +10,10 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
     winnerId: number;
     reason: string;
   } | null>(null);
-  const [announcement, setAnnouncement] = useState<{ title: string; message: string } | null>(null);
+  const [announcement, setAnnouncement] = useState<{
+    title: string;
+    message: string
+  } | null>(null);
   
   useEffect(() => {
     const fetchGameState = async () => {

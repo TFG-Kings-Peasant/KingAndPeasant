@@ -8,7 +8,6 @@ import { CARDS_THAT_CAN_INFILTRATE, peasantPendingUI, kingPendingUI } from "./co
 import type { SelectedCard } from "./components/pendingActionsUI";
 import { InfiltrateModal } from "./components/InfiltrateModal";
 import { CardDetailModal } from "./components/CardDetailModal";
-import { GameOverModal } from "./components/GameOverModal";
 import { DiscardModal } from "./components/DiscardModal";
 import { DeckModal } from "./components/DeckModal";
 import { PendingActionModal } from "./components/PendingActionModal";
@@ -54,7 +53,7 @@ function Game() {
   const isKing = Number(user.id) === gameState.players.king.id;
   const myPlayer = isKing ? gameState.players.king : gameState.players.peasant;
   const rivalPlayer = isKing ? gameState.players.peasant : gameState.players.king;
-
+  const isWinner = gameOverData ? Number(user?.id) === gameOverData.winnerId : false;
   const myRoleName = isKing ? "king" : "peasant";
   const rivalRoleName = isKing ? "peasant" : "king";
   const pendingAction = gameState.pendingAction && gameState.pendingAction.player == myRoleName? true: false;
@@ -165,14 +164,6 @@ function Game() {
       />
     )}
 
-    {gameOverData && (
-      <GameOverModal 
-        gameOverData={gameOverData}
-        userId={Number(user.id)}
-        onNavigateHome={() => navigate('/')}
-      />
-    )}
-
     {showDiscardModal && (
       <DiscardModal 
         gameState={gameState}
@@ -209,11 +200,25 @@ function Game() {
     )}
 
     <AnnouncementModal
-        isOpen={!!announcement}
-        onClose={() => setAnnouncement(null)}
-        title={announcement?.title || ""}
-        message={announcement?.message || ""}
-      />
+      isOpen={!!announcement || !!gameOverData}
+      onClose={() => {
+        if (gameOverData) navigate('/');
+        setAnnouncement(null);
+      }}
+      title={
+        gameOverData 
+          ? (isWinner ? "👑 ¡VICTORIA REAL!" : "💀 DERROTA ABSOLUTA") 
+          : (announcement?.title || "")
+      }
+      message={
+        gameOverData 
+          ? (isWinner 
+              ? `Habéis prevalecido. Razón: ${gameOverData.reason}` 
+              : `Vuestras fuerzas han flaqueado. Razón: ${gameOverData.reason}`)
+          : (announcement?.message || "")
+      }
+      onConfirm={undefined}
+    />
 
     <ErrorToast 
       error={error} 
