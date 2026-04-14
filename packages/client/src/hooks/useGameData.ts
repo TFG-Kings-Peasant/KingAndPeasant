@@ -31,7 +31,7 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
 
   // Sockets
   useEffect(() => {
-    if (!socket || !id) return;
+    if (!socket || !id || !user) return;
 
     const handleGameStateUpdate = (newGameState: GameState) => {
       console.log("=== TABLERO ACTUALIZADO VÍA SOCKET ===", newGameState);
@@ -45,7 +45,10 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
       });
     };
 
-    socket.emit("joinGame", `game_${id}`);
+    socket.emit("joinGame", { 
+        roomName: `game_${id}`, 
+        userId: Number(user.id) 
+    });
     socket.on("gameState", handleGameStateUpdate);
     socket.on("game:finished", (data: any) => {
       console.log("=== PARTIDA TERMINADA ===", data);
@@ -55,8 +58,12 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
     return () => {
       socket.off("gameState", handleGameStateUpdate);
       socket.off("game:finished");
+
+      console.log("Saliendo de la partida, desconectando socket...");
+      socket.disconnect();
+      socket.connect();
     };
-  }, [socket, id]);
+  }, [socket, id, user]);
 
   return { gameState, loading, error, setError, gameOverData };
 };

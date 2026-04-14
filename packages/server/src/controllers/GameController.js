@@ -45,7 +45,7 @@ const playCard = async (req, res) => {
         if (result.isGameOver) {
             io.to(`game_${gameId}`).emit('game:finished', result);
         } else {
-            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant, gameId);
         }
 
         res.status(200).json({ message: "Carta jugada correctamente" });
@@ -55,24 +55,15 @@ const playCard = async (req, res) => {
     }
 }
 
-function sendGameStateUpdate (req, dtoKing, dtoPeasant) {
+function sendGameStateUpdate (req, dtoKing, dtoPeasant, gameId) {
     const io = req.app.get('io');
-    const userSockets = req.app.get('userSockets');
+    
     const kingId = dtoKing.players.king.id;
-    const socketKing = userSockets.get(String(kingId)) || userSockets.get(Number(kingId));
-    if (socketKing) {
-        io.to(socketKing).emit('gameState', dtoKing);
-    } else {
-        console.log(`No se encontró socket activo para el REY (${kingId})`);
-    }
-
     const peasantId = dtoPeasant.players.peasant.id;
-    const socketPeasant = userSockets.get(String(peasantId)) || userSockets.get(Number(peasantId));
-    if (socketPeasant) {
-        io.to(socketPeasant).emit('gameState', dtoPeasant);
-    } else {
-        console.log(`No se encontró socket activo para el CAMPESINO (${peasantId})`); 
-    }
+
+    // Usamos Socket.IO nativo para enviar el estado exacto a cada jugador
+    io.to(`game_${gameId}_user_${kingId}`).emit('gameState', dtoKing);
+    io.to(`game_${gameId}_user_${peasantId}`).emit('gameState', dtoPeasant);
 }
 
 const resolveAction = async (req, res) => {
@@ -85,7 +76,7 @@ const resolveAction = async (req, res) => {
         if (result.isGameOver) {
             io.to(`game_${gameId}`).emit('game:finished', result);
         } else {
-            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant, gameId);
         }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
@@ -106,7 +97,7 @@ const condemnARebel = async (req, res) => {
         if (result.isGameOver) {
             io.to(`game_${gameId}`).emit('game:finished', result);
         } else {
-            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant, gameId);
         }
 
         res.status(200).json({ message: "Acción resuelta correctamente" });
@@ -126,7 +117,7 @@ const peasantDrawACard = async (req, res) => {
         if (result.isGameOver) {
             io.to(`game_${gameId}`).emit('game:finished', result);
         } else {
-            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant, gameId);
         }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
@@ -145,7 +136,7 @@ const passTurn = async (req, res) => {
         if (result.isGameOver) {
             io.to(`game_${gameId}`).emit('game:finished', result);
         } else {
-            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant);
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant, gameId);
         }
         res.status(200).json({ message: "Acción resuelta correctamente" });
     } catch (error) {
