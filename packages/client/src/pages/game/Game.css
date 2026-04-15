@@ -450,3 +450,62 @@ h3 {
 .error-toast-close:hover {
   color: #ffffff;
 }
+
+/* =======================================================
+   11. MODAL ANUNCIO
+   ======================================================= */
+
+.announcement-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85); /* Fondo bien oscuro como pediste */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+/* El marco decorativo (Basado en tu clase parchment-menu) */
+.announcement-card-ornate {
+  position: relative;
+  max-width: 500px;
+  width: 90%;
+  padding: 5px; /* Espacio para el borde doble */
+  border: 4px solid #4a3b2a; /* Borde oscuro exterior */
+  box-shadow: 0 0 0 4px #d4af37, 0 15px 35px rgba(0,0,0,0.8); /* El marco dorado */
+  background-color: #f5e6c8 !important; /* Color pergamino de tu proyecto */
+}
+
+/* Contenido interior para el efecto de pergamino */
+.announcement-content-inner {
+  border: 1px solid rgba(139, 90, 43, 0.3);
+  padding: 30px;
+  text-align: center;
+}
+
+.announcement-title {
+  color: #5d4037;
+  font-family: 'Cinzel', serif; /* O la fuente medieval que tengas cargada */
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.announcement-message {
+  color: #3e2723;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.announcement-buttons-row {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.announcement-buttons-row button {
+  flex: 1;
+  min-width: 140px;
+}

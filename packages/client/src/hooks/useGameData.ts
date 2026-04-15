@@ -10,8 +10,11 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
     winnerId: number;
     reason: string;
   } | null>(null);
-
-  // Fetch inicial
+  const [announcement, setAnnouncement] = useState<{
+    title: string;
+    message: string
+  } | null>(null);
+  
   useEffect(() => {
     const fetchGameState = async () => {
       try {
@@ -29,7 +32,6 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
     fetchGameState();
   }, [id, user]);
 
-  // Sockets
   useEffect(() => {
     if (!socket || !id || !user) return;
 
@@ -37,9 +39,10 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
       console.log("=== TABLERO ACTUALIZADO VÍA SOCKET ===", newGameState);
       setGameState((prevState) => {
         if (prevState && newGameState.era > prevState.era) {
-          alert(
-            `🚩 ¡FIN DE LA ERA!\nAlguien ha ganado la Era ${prevState.era}.\n\n¡Comienza la Era ${newGameState.era} y se han intercambiado los roles!`
-          );
+          setAnnouncement({
+            title: "🚩 ¡FIN DE LA ERA!",
+            message: `Alguien ha ganado la Era ${prevState.era}.\n\n¡Comienza la Era ${newGameState.era} y se han intercambiado los roles!`
+          });
         }
         return newGameState;
       });
@@ -65,5 +68,13 @@ export const useGameData = (id: string | undefined, user: any, socket: any) => {
     };
   }, [socket, id, user]);
 
-  return { gameState, loading, error, setError, gameOverData };
+  return { 
+    gameState,
+    loading,
+    error,
+    setError,
+    gameOverData,
+    announcement,
+    setAnnouncement
+  };
 };
