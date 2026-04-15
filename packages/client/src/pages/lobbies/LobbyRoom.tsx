@@ -1,3 +1,4 @@
+// packages/client/src/pages/lobbies/LobbyRoom.tsx
 import { useEffect, useState } from "react";
 import PlayerCard from "./components/PlayerCard";
 import "./LobbyRoom.css";
@@ -15,7 +16,6 @@ function LobbyRoom() {
 
   const { user, isLogin} = useUser();
   const { socket } = useAuth();
-
   const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,7 +37,6 @@ function LobbyRoom() {
             socket.emit('leaveLobby', user.id, id);
             socket.off('lobbyUpdated');
             socket.off('gameStarted');
-            
             window.removeEventListener('beforeunload', handleUnload);
         };
     }, [socket, id, user?.id]);
@@ -53,9 +52,6 @@ function LobbyRoom() {
             setError("La sala ya no existe");
         }
 
-        if (data.status === 'ONGOING') {
-            navigate(`/game/${id}`);
-        }
     } catch (err) {
         console.error(err);
         if (showLoading) setError("Error al cargar el lobby");
@@ -67,10 +63,10 @@ function LobbyRoom() {
   const handleToggleReady = async () => {
     if (!lobby) return;
     if (!isLogin) return;
-    if (!socket) {
-        console.log("Socket no disponible aún...");
-        return;
-    }
+    if (!socket) return;
+    
+    if (lobby.status === 'ONGOING') return;
+
     try {
         const isPlayer1 = lobby.player1Id === Number(user?.id);
         const currentReadyStatus = isPlayer1 ? lobby.player1Ready : lobby.player2Ready;
@@ -82,12 +78,11 @@ function LobbyRoom() {
     }
   };
 
-
   const handleLeave = async () => {
     if (!lobby) return;
     if (!user) return;
 
-    if (window.confirm("¿Seguro que quieres salir?")) {
+    if (window.confirm("¿Seguro que quieres salir de la sala?")) {
         try {
             navigate("/lobbyList");
         } catch (err) {
@@ -120,7 +115,7 @@ function LobbyRoom() {
       <div className="lobby-body">
         <PlayerCard playerId={lobby.player1Id} 
             isReady={lobby.player1Ready}
-            isCurrentUser={lobby.player1Id === Number(user?.id)} // ¿Soy yo?
+            isCurrentUser={lobby.player1Id === Number(user?.id)}
             onToggleReady={handleToggleReady}/>
 
         <h1 className="vs-divider">VS</h1>
@@ -129,31 +124,40 @@ function LobbyRoom() {
             <PlayerCard 
                 playerId={lobby.player2Id} 
                 isReady={lobby.player2Ready}
-                isCurrentUser={lobby.player2Id === Number(user?.id)} // ¿Soy yo?
+                isCurrentUser={lobby.player2Id === Number(user?.id)}
                 onToggleReady={handleToggleReady}
             />
         ) : (
             <div className="waiting-card">Esperando rival...</div>
         )}
       </div>
+      
       <footer className="lobby-footer">
         <div className="footer-info">
           <span>Estado: </span>
           <span className="status-text">
-            {lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores..."}
-            </span>
+            {/* --- NUEVO: Mostrar que la partida está en curso --- */}
+            {lobby.status === 'ONGOING' 
+                ? "PARTIDA EN CURSO" 
+                : (lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores...")}
+          </span>
         </div>
         
-        {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
-            <button className="start-btn" onClick={handleStartGame}>
-                COMENZAR PARTIDA
+        {/* --- NUEVO: Renderizado condicional de los botones --- */}
+        {lobby.status === 'ONGOING' ? (
+            <button className="start-btn" onClick={() => navigate(`/game/${id}`)} style={{backgroundColor: '#2ecc71'}}>
+                RECONECTAR A LA PARTIDA
             </button>
-        )
-        : (<div></div>)}
-
+        ) : (
+            lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
+                <button className="start-btn" onClick={handleStartGame}>
+                    COMENZAR PARTIDA
+                </button>
+            ) : null
+        )}
 
         <button className="exit-btn" onClick={handleLeave}>
-            SALIR DEL LOBBY
+            VOLVER A LA LISTA
         </button>
       </footer>
     </div>

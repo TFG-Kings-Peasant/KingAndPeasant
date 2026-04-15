@@ -21,6 +21,19 @@ const createLobby = async (data) => {
     });
 };
 
+const setLobbyOngoing = async (id) => {
+    const lobby = await getLobbyById(id);
+
+    if (!lobby) {
+        throw new Error('Lobby no encontrado');
+    }
+
+    return await prisma.lobby.update({
+        where: { id : id },
+        data: { status: 'ONGOING' }
+    });
+};
+
 const joinLobby = async ({ lobbyId, player2Id }) => {
     const lobby = await getLobbyById(lobbyId);
 
@@ -52,6 +65,10 @@ const leaveLobby = async ({ lobbyId, playerId }) => {
 
     if (lobby.player1Id !== playerId && lobby.player2Id !== playerId) {
         throw new Error('El jugador no está en el lobby');
+    }
+
+    if (lobby.status === 'ONGOING') {
+        return lobby; 
     }
 
     let updateData = {};
@@ -100,11 +117,24 @@ const setPlayerReady = async ({ lobbyId, playerId, isReady }) => {
     });
 }
 
+const getUserActiveLobby = async (userId) => {
+    return await prisma.lobby.findFirst({
+        where: {
+            OR: [
+                { player1Id: Number(userId) },
+                { player2Id: Number(userId) }
+            ]
+        }
+    });
+};
+
 export const lobbyService = {
     getAllLobbies,
     getLobbyById,
     createLobby,
     joinLobby,
     leaveLobby,
-    setPlayerReady
+    setPlayerReady,
+    setLobbyOngoing,
+    getUserActiveLobby
 };

@@ -47,6 +47,8 @@ const AuxLeaveLobby = async (userId, lobbyId, socket, io) => {
         try {
             await lobbyService.leaveLobby({ lobbyId: Number(lobbyId), playerId: Number(userId) });
             io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
+            io.emit('lobbyUpdated');
+
         } catch (error) {
             // Silenciamos los errores de "Jugador no está en el lobby" o "Lobby no encontrado"
             // ya que ocurren normalmente cuando el juego ya ha empezado o el usuario navega.
@@ -57,7 +59,7 @@ const AuxLeaveLobby = async (userId, lobbyId, socket, io) => {
         } finally {
             pendingLeaves.delete(userId);
         }
-    }, 3000);
+    }, 5000);
 
     pendingLeaves.set(userId, timeoutId);
 }

@@ -1,5 +1,6 @@
 import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
+import { lobbyService } from './LobbyService.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
 import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
@@ -55,6 +56,8 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         [player1Id]: 0,
         [player2Id]: 0
     };
+
+    await lobbyService.setLobbyOngoing(lobbyId);
 
     const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
     

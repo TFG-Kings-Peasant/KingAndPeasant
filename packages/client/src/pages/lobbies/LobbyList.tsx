@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import './LobbyList.css'
-import { createLobby, getAllLobbies, joinLobby, type LobbyBackend } from "./components/LobbyFetch";
+import { createLobby, getAllLobbies, joinLobby, getMyLobby, type LobbyBackend } from "./components/LobbyFetch";
 import { useNavigate } from "react-router";
 import { useUser } from "../../hooks/useUser";
+import { useAuth } from "../../hooks/useAuth"; // <-- Importamos useAuth para los sockets
 
 import { Modal } from "../../components/Modal";
 
 function LobbyList() {
     const [lobbies, setLobbies] = useState<LobbyBackend[]>([]);
+    const [myLobby, setMyLobby] = useState<LobbyBackend | null>(null); // <-- Estado para Mi Lobby
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const { user, isLogin} = useUser();
+    const { socket, user } = useAuth(); 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newLobbyName, setNewLobbyName] = useState("");
@@ -21,13 +23,24 @@ function LobbyList() {
 
     useEffect(() => {
         fetchLobbies();
-    }, []);
+
+        if (socket) {
+            socket.on('lobbyUpdated', fetchLobbies);
+            return () => {
+                socket.off('lobbyUpdated', fetchLobbies);
+            };
+        }
+    }, [socket, user]);
 
     const fetchLobbies = async () => {
         setLoading(true);
         try {
-            const data = await getAllLobbies();
-            setLobbies(data);
+            // Cargamos todos los lobbies y "Mi Lobby" en paralelo si estamos logueados
+            const allData = await getAllLobbies();
+            const myData = (user && user.authToken) ? await getMyLobby(user.authToken) : null;
+            
+            setLobbies(allData);
+            setMyLobby(myData);
             setError("");
         } catch (err) {
             setError("Error cargando salas");
@@ -38,30 +51,32 @@ function LobbyList() {
     };
 
     const openCreateModal = () => {
-        setNewLobbyName(""); // Limpiar nombre anterior
-        setNewLobbyPrivacy('PUBLIC'); // Resetear privacidad
+        if (myLobby) {
+            alert("Ya estás en una sala. Sal de ella para poder crear una nueva.");
+            return;
+        }
+        setNewLobbyName(""); 
+        setNewLobbyPrivacy('PUBLIC'); 
         setIsModalOpen(true);
     };
 
-    // 2. Función que llama al backend cuando das a "Confirmar" en el modal
     const handleConfirmCreate = async (e: React.FormEvent) => {
-        e.preventDefault(); // Evita que se recargue la página
+        e.preventDefault(); 
         
         if (!newLobbyName.trim()) {
             alert("El nombre de la sala es obligatorio");
             return;
         }
 
-        if(!isLogin) {
+        if(!user) {
             alert("Debes iniciar sesión para crear una sala");
             return;
         }
 
         try {
-            // Llamamos a tu servicio pasando AMBOS datos
-            const newLobby = await createLobby(newLobbyName, newLobbyPrivacy, user?.id || null); // Pasamos el ID del usuario actual
-            setIsModalOpen(false); // Cerrar modal
-            fetchLobbies(); // Recargar lista
+            const newLobby = await createLobby(newLobbyName, newLobbyPrivacy, user?.id || null); 
+            setIsModalOpen(false); 
+            fetchLobbies(); 
             navigate(`/lobby/${newLobby.id}`);
         } catch (err) {
             if (err instanceof Error) {
@@ -70,28 +85,42 @@ function LobbyList() {
                 alert("Ocurrió un error desconocido");
             }
         }
-    };;
+    };
 
     const handleJoinLobby = async (lobbyId: number) => {
-        if(!isLogin) {
+        if(!user) {
             alert("Debes iniciar sesión para unirte a una sala");
             return;
-        }else{
-            try {
-                await joinLobby(lobbyId, user?.id || null); // Pasamos el ID del usuario actual
-                navigate(`/lobby/${lobbyId}`); // Redirige a la página de la sala
-            } catch (err) {
-                if (err instanceof Error) {
-                    alert(err.message);
-                } else {
-                    alert("Ocurrió un error desconocido al intentar unirse a la sala");
-                }
-            }
         }
 
+        // Si ya es mi sala, simplemente redirigimos (no llamamos al backend para unirnos de nuevo)
+        if (myLobby && myLobby.id === lobbyId) {
+            navigate(`/lobby/${lobbyId}`);
+            return;
+        }
+
+        try {
+            await joinLobby(lobbyId, user?.id || null); 
+            navigate(`/lobby/${lobbyId}`); 
+        } catch (err) {
+            if (err instanceof Error) {
+                alert(err.message);
+            } else {
+                alert("Ocurrió un error desconocido al intentar unirse a la sala");
+            }
+        }
     }
 
-    const joinLobbyCheck = (player2Id: number | null, privacy: string, status: string) => {
+    const joinLobbyCheck = (lobbyId: number, player2Id: number | null, privacy: string, status: string) => {
+        // Validación 1: Si es tu propia sala, puedes volver
+        if (myLobby && myLobby.id === lobbyId) {
+            return {allowed: "allowed", reason: "VOLVER"};
+        }
+        // Validación 2: Si estás en OTRA sala, no puedes unirte a esta
+        if (myLobby && myLobby.id !== lobbyId) {
+            return {allowed: "not-allowed", reason: "YA ESTÁS EN OTRA SALA"};
+        }
+        // Validaciones normales
         if (status === 'ONGOING') {
             return {allowed: "not-allowed", reason: "EN JUEGO"};
         }
@@ -106,8 +135,56 @@ function LobbyList() {
 
     return <div>
         <div className="body-container">
+
+            {/* --- NUEVO: BANNER DE MI LOBBY --- */}
+            {myLobby && (
+                <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '2px solid #ceb379',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                }}>
+                    <div>
+                        <h3 style={{ margin: 0, color: '#f1c40f', textShadow: '1px 1px 2px black' }}>
+                            Estás actualmente en esta sala
+                            Si la partida no ha comenzado, se te sacará de ella en 5 segundos.
+                        </h3>
+
+                        <p style={{ margin: '5px 0 0 0', color: 'white' }}>
+                            {myLobby.name} - {myLobby.status === 'ONGOING' ? 'Partida en curso' : 'Esperando jugadores'}
+                        </p>
+                    </div>
+                    <button 
+                        onClick={() => navigate(`/lobby/${myLobby.id}`)}
+                        style={{
+                            backgroundColor: '#2ecc71',
+                            color: 'white',
+                            padding: '10px 20px',
+                            border: '1px solid #27ae60',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        VOLVER A MI SALA
+                    </button>
+                </div>
+            )}
+            {/* ------------------------------- */}
+
             <div className="button-container">
-                <button onClick={openCreateModal}>Crear Sala</button>
+                {/* Deshabilitamos crear sala si ya estás en una */}
+                <button 
+                    onClick={openCreateModal} 
+                    style={{ opacity: myLobby ? 0.5 : 1, cursor: myLobby ? 'not-allowed' : 'pointer' }}
+                >
+                    Crear Sala
+                </button>
                 <button onClick={fetchLobbies} disabled={loading}>
                         {loading ? "Cargando..." : "Refrescar"}
                 </button>
@@ -125,7 +202,8 @@ function LobbyList() {
                 </div>
                 <div className="table-body">
                     {lobbies.map((lobby) => {
-                        const joinStatus = joinLobbyCheck(lobby.player2Id, lobby.privacy, lobby.status);
+                        // Pasamos el ID del lobby también a la comprobación
+                        const joinStatus = joinLobbyCheck(lobby.id, lobby.player2Id, lobby.privacy, lobby.status);
                         return(
                             <div key={lobby.id} className="table-row">
                             <span className="col-name">{lobby.name}</span>
@@ -143,6 +221,7 @@ function LobbyList() {
                 </div>
             </div>
         </div>
+
         <Modal 
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)} 
@@ -184,4 +263,4 @@ function LobbyList() {
     </div>;
 }
 
-export default LobbyList
+export default LobbyList;
