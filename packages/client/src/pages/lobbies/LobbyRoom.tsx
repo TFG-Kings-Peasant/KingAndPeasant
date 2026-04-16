@@ -128,52 +128,65 @@ function LobbyRoom() {
     }
   };
 
-  if (loading || !lobby) return <div>Cargando...</div>;
-  if (error) return <div className="error-msg">{error}</div>;
+  if (loading || !lobby) return <div className="page-shell page-shell--centered">Cargando...</div>;
+  if (error) return <div className="page-shell page-shell--centered"><div className="status-message">{error}</div></div>;
 
   return (
-    <div className="lobby-page">
-      <h1>SALA #{lobby.id}</h1>
-      <div className="lobby-body">
-        <PlayerCard playerId={lobby.player1Id} 
-            isReady={lobby.player1Ready}
-            isCurrentUser={lobby.player1Id === Number(user?.id)} // ¿Soy yo?
-            onToggleReady={handleToggleReady}/>
+    <div className="page-shell lobby-shell">
+      <div className="page-content lobby-room-content">
+        <header className="lobby-room-header page-panel">
+          <span className="page-eyebrow">Lobby #{lobby.id}</span>
+          <h1 className="page-title">Preparad el duelo</h1>
+          <p className="page-subtitle">
+            Revisa los jugadores presentes, confirma que ambos estáis listos y lanza la partida cuando todo
+            esté preparado.
+          </p>
+          <div className="info-chip-row">
+            <span className="info-chip"><strong>Estado:</strong> {lobby.player1Ready && lobby.player2Ready ? "Iniciando..." : "Esperando jugadores"}</span>
+            <span className="info-chip"><strong>Privacidad:</strong> {lobby.privacy}</span>
+          </div>
+        </header>
 
-        <h1 className="vs-divider">VS</h1>
-        
-        {lobby.player2Id ? (
-            <PlayerCard 
-                playerId={lobby.player2Id} 
-                isReady={lobby.player2Ready}
-                isCurrentUser={lobby.player2Id === Number(user?.id)} // ¿Soy yo?
-                onToggleReady={handleToggleReady}
-            />
-        ) : (
-            <div className="waiting-card">Esperando rival...</div>
-        )}
+        <section className="lobby-body page-panel page-panel--soft">
+          <PlayerCard playerId={lobby.player1Id} 
+              isReady={lobby.player1Ready}
+              isCurrentUser={lobby.player1Id === Number(user?.id)}
+              onToggleReady={handleToggleReady}/>
 
-      </div>
-      <footer className="lobby-footer">
-        <div className="footer-info">
-          <span>Estado: </span>
-          <span className="status-text">
-            {lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores..."}
+          <h1 className="vs-divider">VS</h1>
+          
+          {lobby.player2Id ? (
+              <PlayerCard 
+                  playerId={lobby.player2Id} 
+                  isReady={lobby.player2Ready}
+                  isCurrentUser={lobby.player2Id === Number(user?.id)}
+                  onToggleReady={handleToggleReady}
+              />
+          ) : (
+              <div className="waiting-card">Esperando rival...</div>
+          )}
+        </section>
+
+        <footer className="lobby-footer page-panel">
+          <div className="footer-info">
+            <span>Estado actual</span>
+            <span className="status-text">
+              {lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores..."}
             </span>
-        </div>
-        
-        {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
-            <button className="start-btn" onClick={handleStartGameClick}>
-                COMENZAR PARTIDA
-            </button>
-        )
-        : (<div></div>)}
+          </div>
+          
+          {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
+              <button className="start-btn" onClick={handleStartGameClick}>
+                  COMENZAR PARTIDA
+              </button>
+          )
+          : <div className="footer-spacer" />}
 
-
-        <button className="exit-btn" onClick={handleLeaveClick}>
-            SALIR DEL LOBBY
-        </button>
-      </footer>
+          <button className="exit-btn" onClick={handleLeaveClick}>
+              SALIR DEL LOBBY
+          </button>
+        </footer>
+      </div>
 
         <AnnouncementModal
           isOpen={!!announcement}

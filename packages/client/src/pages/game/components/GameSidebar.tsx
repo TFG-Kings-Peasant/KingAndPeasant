@@ -7,6 +7,7 @@ interface GameSidebarProps {
   myScore: number;
   rivalScore: number;
   myRoleName: string;
+  rivalRoleName: string;
   socket: any;
   gameId: string;
   userName: string;
@@ -22,6 +23,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
   myScore,
   rivalScore,
   myRoleName,
+  rivalRoleName,
   socket,
   gameId,
   userName,
@@ -34,47 +36,11 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
   const canPerformStandardActions = gameState.turn === myRoleName && !gameState.pendingAction;
   return (
     <div className="game-sidebar">
-      {/* Marcador */}
-      <div
-        className="score-board"
-        style={{
-          backgroundColor: "#2c2c2c",
-          padding: "15px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-          textAlign: "center",
-          border: "2px solid #d4af37",
-        }}
-      >
-        <h2 style={{ margin: "0 0 10px 0", color: "#d4af37", fontSize: "1.5rem" }}>
-          ERA {gameState.era}
-        </h2>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1rem" }}>
-          <div>
-            <span style={{ display: "block", color: "#aaa", fontSize: "0.8rem" }}>Tus Victorias</span>
-            <strong style={{ fontSize: "1.2rem" }}>{myScore} / 2</strong>
-          </div>
-          <div>
-            <span style={{ display: "block", color: "#aaa", fontSize: "0.8rem" }}>Rival</span>
-            <strong style={{ fontSize: "1.2rem" }}>{rivalScore} / 2</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* Mazo */}
-      <div className="deck-pile" onClick={() => setShowDeckModal(true)}>
-        <span>MAZO</span>
-        <strong>{gameState.deck.length}</strong>
-      </div>
-
-      {/* Descartes */}
-      <div className="discard-pile" onClick={() => setShowDiscardModal(true)}>
-        <h3>DESCARTES</h3>
-        <p>{gameState.discardPile?.length || 0}</p>
-      </div>
-
-      {/* Botones de Acción */}
       <div className="action-container">
+        <div className="sidebar-section-heading">
+          <span>Acciones</span>
+          <strong>{canPerformStandardActions ? "Disponibles" : "En espera"}</strong>
+        </div>
         {canPerformStandardActions ? (
           <div>
             <button className="button ingame" onClick={onPassTurn}>
@@ -91,11 +57,53 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
             )}
           </div>
         ) : (
-          <div></div>
+          <div>
+            <button className="button ingame" disabled>
+              ESPERA A TU TURNO
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Chat de Partida */}
+      <div className="sidebar-title-block">
+        <span className="sidebar-kicker">Battle status</span>
+        <h2 className="sidebar-title">Panel de batalla</h2>
+        <div className="sidebar-status-grid">
+          <span className="sidebar-status-pill">Tu bando: {myRoleName}</span>
+          <span className="sidebar-status-pill">Rival: {rivalRoleName}</span>
+          <span className="sidebar-status-pill">Turno: {gameState.turn}</span>
+          <span className="sidebar-status-pill">
+            {gameState.pendingAction ? `Pendiente: ${gameState.pendingAction.type}` : "Sin accion pendiente"}
+          </span>
+        </div>
+      </div>
+
+      <div className="score-board">
+        <h2 className="score-board-title">ERA {gameState.era}</h2>
+        <div className="score-board-row">
+          <div>
+            <span className="score-label">Tus Victorias</span>
+            <strong className="score-value">{myScore} / 2</strong>
+          </div>
+          <div>
+            <span className="score-label">Rival</span>
+            <strong className="score-value">{rivalScore} / 2</strong>
+          </div>
+        </div>
+      </div>
+
+      <div className="sidebar-resource-grid">
+        <div className="deck-pile" onClick={() => setShowDeckModal(true)}>
+          <span>MAZO</span>
+          <strong>{gameState.deck.length}</strong>
+        </div>
+
+        <div className="discard-pile" onClick={() => setShowDiscardModal(true)}>
+          <h3>DESCARTES</h3>
+          <p>{gameState.discardPile?.length || 0}</p>
+        </div>
+      </div>
+
       <GameChat socket={socket} gameId={gameId} userName={userName} />
     </div>
   );

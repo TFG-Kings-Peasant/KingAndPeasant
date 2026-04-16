@@ -1,19 +1,32 @@
-.menu-container {
-  min-height: 100vh;
-  width: 100%;
-  box-sizing: border-box;
+/* =============================================
+   Home Page
+   ============================================= */
+
+.home-shell {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2rem;
+}
+
+.home-content {
+  display: grid;
+  gap: 2.25rem;
+}
+
+.home-hero {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .cards-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding-top: 2rem;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
   width: 100%;
-  max-width: 1200px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    gap: 1.5rem;
+  }
 }

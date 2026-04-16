@@ -65,17 +65,22 @@ const EditProfile = () => {
     };
 
     return (
-        <div className="menu-container">
+        <div className="page-shell page-shell--centered">
+            <div className="page-content page-content--narrow">
             <div className="menu-card">
-                <h2 className="menu-title">Edit Profile</h2>
+                <div className="menu-header">
+                    <h2 className="menu-title">Edit Profile</h2>
+                    <p className="menu-subtitle">
+                        Ajusta tus datos con una distribución más limpia y centrada en lo importante.
+                    </p>
+                </div>
 
                 {success && <div style={{ color: 'green', marginBottom: '10px' }}>¡Changes saved!</div>}
                 {error && <div className="menu-error">{error}</div>}
 
                 <form className="menu-form" onSubmit={handleSubmit}>
-                    
-                    <div style={{ textAlign: "left", marginBottom: "10px" }}>
-                        <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>Lord's Name</label>
+                    <div className="menu-section">
+                        <label className="menu-field-label">Lord's Name</label>
                         <input
                             className="menu-input"
                             type="text"
@@ -85,8 +90,8 @@ const EditProfile = () => {
                         />
                     </div>
 
-                    <div style={{ textAlign: "left", marginBottom: "10px" }}>
-                        <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>Lord's Email</label>
+                    <div className="menu-section">
+                        <label className="menu-field-label">Lord's Email</label>
                         <input
                             className="menu-input"
                             type="email"
@@ -96,8 +101,8 @@ const EditProfile = () => {
                         />
                     </div>
 
-                    <div style={{ textAlign: "left", marginBottom: "20px" }}>
-                        <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>New Password</label>
+                    <div className="menu-section">
+                        <label className="menu-field-label">New Password</label>
                         <input
                             className="menu-input"
                             type="password"
@@ -105,7 +110,7 @@ const EditProfile = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                        <small style={{ color: "#666", fontSize: "0.8rem" }}>
+                        <small className="menu-helper">
                             * Leave empty to keep the current one.
                         </small>
                     </div>
@@ -114,10 +119,14 @@ const EditProfile = () => {
                         Save Changes
                     </button>
 
-                    <Link to="/profile" className="menu-link" style={{ display: 'block', marginTop: '15px' }}>
+                </form>
+
+                <div className="menu-links">
+                    <Link to="/profile" className="menu-link">
                         Cancel
                     </Link>
-                </form>
+                </div>
+            </div>
             </div>
         </div>
     );

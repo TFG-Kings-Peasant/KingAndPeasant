@@ -1,81 +1,121 @@
-/* --- Estilos para el Perfil (User.tsx) --- */
-
-.profile-info {
-    text-align: left;
-    margin-bottom: 20px;
+.profile-card {
+    display: grid;
+    gap: 1.5rem;
 }
 
-.profile-text {
-    margin: 10px 0;
-    font-size: 1.1rem;
-    color: #444;
+.profile-eyebrow {
+    color: rgba(74, 59, 42, 0.65);
+    text-align: center;
 }
 
+.profile-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.profile-info-card {
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(139, 90, 43, 0.3);
+    background: rgba(255, 250, 240, 0.55);
+}
+
+.profile-meta-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: rgba(74, 59, 42, 0.7);
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.profile-text,
 .profile-date {
-    margin: 10px 0;
-    font-size: 0.9rem;
-    color: #444;
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--color-text-dark);
 }
 
 .profile-divider {
-    border: 0; /* Quitamos borde por defecto */
-    border-top: 1px solid #eee;
-    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid rgba(139, 90, 43, 0.28);
+    margin: 0;
+}
+
+.profile-stats-heading {
+    margin-bottom: 0;
 }
 
 .stats-title {
-    margin-bottom: 15px;
-    color: #222;
-    font-weight: bold;
+    color: var(--color-text-dark);
+    font-weight: 700;
 }
 
 .stats-grid {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
 }
 
 .stat-box {
     text-align: center;
-    /* Opcional: Añadir un pequeño hover */
-    transition: transform 0.2s;
+    padding: 1.15rem 0.9rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 250, 240, 0.55);
+    border: 1px solid rgba(139, 90, 43, 0.26);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .stat-box:hover {
-    transform: scale(1.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-icon {
     display: block;
     font-size: 2rem;
-    margin-bottom: 5px;
+    margin-bottom: 0.4rem;
 }
 
 .stat-number {
-    font-size: 1.2rem;
-    font-weight: bold;
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
 }
 
-/* Modificadores de color para los números */
-.stat-number.win { color: #2e7d32; } /* Verde oscuro */
-.stat-number.loss { color: #c62828; } /* Rojo oscuro */
+.stat-number.win { color: #2e7d32; }
+.stat-number.loss { color: #c62828; }
 
 .stat-label {
-    font-size: 0.8rem;
-    color: #333;
-    margin-top: 2px;
+    font-size: 0.82rem;
+    color: rgba(74, 59, 42, 0.78);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
-/* Para convertir el Link en un bloque botón */
+.profile-actions {
+    display: grid;
+    gap: 0.75rem;
+}
+
 .btn-block {
     display: block;
     text-align: center;
     text-decoration: none;
-    margin-bottom: 10px;
 }
 
 .link-block {
     display: block;
-    margin-top: 15px;
+    margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    .profile-info-grid,
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
 }

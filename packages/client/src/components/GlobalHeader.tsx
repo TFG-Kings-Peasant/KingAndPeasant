@@ -1,11 +1,13 @@
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import './GlobalHeader.css';
 
 export const GlobalHeader = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { user, logout } = useAuth();
+  const isGamePage = location.pathname.startsWith('/game/');
 
   const handleLogout = () => {
     if (logout) logout(); // Limpia el estado y el token
@@ -13,7 +15,7 @@ export const GlobalHeader = () => {
   };
 
   return (
-    <header className="global-header">
+    <header className={`global-header ${isGamePage ? 'global-header--game' : ''}`}>
       <button 
         className="header-btn back-btn" 
         onClick={() => navigate(-1)}
@@ -21,8 +23,8 @@ export const GlobalHeader = () => {
         ⬅ Volver
       </button>
 
-      <Link to="/" className="header-logo">
-        King and Peasant
+      <Link to="/" className={`header-logo ${isGamePage ? 'header-logo--game' : ''}`}>
+        {isGamePage ? 'K&P' : 'King and Peasant'}
       </Link>
 
       <div className="header-actions">

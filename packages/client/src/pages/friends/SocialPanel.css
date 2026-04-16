@@ -1,62 +1,79 @@
-/* packages/client/src/pages/friends/SocialPanel.css */
-
-/* --- Contenedores Generales (ESTILO PERGAMINO) --- */
 .social-panel {
-    /* Fondo Pergamino */
-    background-color: #f5e6c8; 
-    
-    /* Borde Madera */
-    border: 3px solid #8b5a2b; 
-    border-radius: 8px;
-    padding: 20px;
-    height: 100%; 
-    
-    /* Sombra fuerte para dar profundidad */
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    
-    /* Texto Marrón Oscuro (Tinta) */
-    color: #4a3b2a; 
+    background-color: var(--color-parchment);
+    border: 1px solid rgba(139, 90, 43, 0.55);
+    border-radius: var(--radius-lg);
+    padding: 1.4rem;
+    height: 100%;
+    box-shadow:
+        0 0 0 1px rgba(196, 164, 132, 0.7),
+        var(--shadow-lg);
+    color: var(--color-text-dark);
 }
 
 .social-panel h3, .social-panel h2 {
-    color: #4a3b2a; /* Tinta oscura */
+    color: var(--color-text-dark);
     margin-top: 0;
-    border-bottom: 2px solid #c4a484; /* Línea separadora suave */
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-size: 1.4rem;
+    border-bottom: 1px solid rgba(139, 90, 43, 0.28);
+    padding-bottom: 0.85rem;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
+    letter-spacing: 1.4px;
+    font-weight: 700;
+    font-family: var(--font-heading);
 }
 
-/* --- Buscador e Inputs --- */
+.social-panel p {
+    color: rgba(74, 59, 42, 0.82);
+}
+
+.social-panel-intro {
+    margin: 0 0 1rem;
+    font-size: 0.96rem;
+}
+
 .search-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+    align-items: end;
+}
+
+.search-field {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.social-label {
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--color-text-dark);
 }
 
 .social-input {
     flex: 1;
-    /* Fondo papel blanco antiguo */
-    background-color: #fffaf0; 
+    background-color: var(--color-parchment-light);
     border: 2px solid #c4a484;
-    color: #4a3b2a;
-    padding: 10px 12px;
-    border-radius: 4px;
+    color: var(--color-text-dark);
+    padding: 0.85rem 0.9rem;
+    border-radius: var(--radius-sm);
     outline: none;
-    transition: border-color 0.3s;
-    font-family: 'Georgia', serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-family: var(--font-body);
     font-size: 1rem;
 }
 
 .social-input:focus {
-    border-color: #8b5a2b; /* Foco madera oscura */
+    border-color: #8b5a2b;
     background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.12);
 }
 
 .social-input::placeholder {
@@ -64,17 +81,15 @@
     font-style: italic;
 }
 
-/* --- Lista de Tarjetas --- */
 .user-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0.75rem;
     max-height: 400px;
     overflow-y: auto;
-    padding-right: 5px;
+    padding-right: 0.35rem;
 }
 
-/* Scrollbar personalizada (Estilo rústico) */
 .user-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -88,20 +103,16 @@
     border: 1px solid #5d4037;
 }
 
-/* --- La Tarjeta de Usuario (Papel sobre el pergamino) --- */
 .user-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
-    /* Fondo un poco más claro que el pergamino base */
-    background-color: #fff8e1; 
+    gap: 1rem;
+    background-color: #fff8e1;
     border: 1px solid #c4a484;
-    padding: 12px;
-    border-radius: 4px;
-    
-    /* Mantenemos el borde izquierdo de color para identificar */
-    border-left: 5px solid transparent; 
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-sm);
+    border-left: 5px solid transparent;
     transition: transform 0.1s ease, box-shadow 0.2s;
 }
 
@@ -112,17 +123,19 @@
 }
 
 /* Variantes de borde (Colores medievales un poco más apagados) */
-.user-card.result { border-left-color: #b8860b; } /* Búsqueda: Oro oscuro */
-.user-card.request { border-left-color: #1e3a8a; } /* Solicitud: Azul real */
-.user-card.friend { border-left-color: #14532d; } /* Amigo: Verde bosque */
+.user-card.result { border-left-color: #b8860b; }
+.user-card.request { border-left-color: #1e3a8a; }
+.user-card.friend { border-left-color: #14532d; }
 
 .user-info {
     display: flex;
     flex-direction: column;
+    gap: 0.18rem;
+    min-width: 0;
 }
 
 .user-name {
-    font-weight: bold;
+    font-weight: 700;
     font-size: 1.1rem;
     color: #2c2c2c;
 }
@@ -133,15 +146,14 @@
     font-style: italic;
 }
 
-/* --- Botones (Estilo Lacre/Sello Real) --- */
-.action-btn {
+.social-panel .action-btn {
     border: 2px solid rgba(0,0,0,0.2);
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 0.7rem 0.95rem;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9rem;
-    font-family: 'Georgia', serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    font-family: var(--font-heading);
     text-transform: uppercase;
     transition: all 0.2s;
     display: flex;
@@ -149,49 +161,74 @@
     gap: 5px;
     color: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    width: fit-content;
+    min-width: 96px;
+    justify-content: center;
 }
 
-.action-btn:hover { 
+.social-panel .action-btn:hover {
     filter: brightness(1.1);
     transform: translateY(-1px);
 }
-.action-btn:active { transform: scale(0.98); }
-.action-btn:disabled { 
+.social-panel .action-btn:active { transform: scale(0.98); }
+.social-panel .action-btn:disabled {
     opacity: 0.6; 
     cursor: not-allowed; 
     filter: grayscale(1); 
     background-color: #5d4037 !important;
 }
 
-/* Colores de botones (Temática Medieval) */
-
-/* Botón Dorado (Buscar) */
 .btn-gold { 
-    background-color: #b8860b; /* Dark Goldenrod */
+    background-color: #b8860b;
     color: #fff;
     border-color: #8b6508;
 }
 
-/* Botón Verde (Aceptar/Amigo) */
 .btn-green { 
-    background-color: #2e7d32; /* Forest Green */
+    background-color: #2e7d32;
     border-color: #1b5e20;
 }
 
-/* Botón Rojo (Rechazar/Auth style) */
 .btn-red { 
-    background-color: #8b0000; /* Dark Red */
+    background-color: #8b0000;
     border-color: #5a0000;
 }
 
-/* Botón Azul (Retar) */
 .btn-blue { 
-    background-color: #1565c0; /* Imperial Blue */
+    background-color: #1565c0;
     border-color: #0d47a1;
 }
 
-/* Grupo de botones */
 .actions-group {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+}
+
+.social-empty {
+    padding: 1rem;
+    text-align: center;
+    color: rgba(74, 59, 42, 0.72);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 250, 240, 0.55);
+}
+
+@media (max-width: 640px) {
+    .search-form {
+        grid-template-columns: 1fr;
+    }
+
+    .user-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .social-panel .action-btn,
+    .actions-group {
+        width: 100%;
+    }
+
+    .actions-group .action-btn {
+        flex: 1;
+    }
 }

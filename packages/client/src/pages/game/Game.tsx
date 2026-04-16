@@ -38,6 +38,7 @@ function Game() {
   const [showDeckModal, setShowDeckModal] = useState(false);
 
   const [infiltrateCard, setInfiltrateCard] = useState<SelectedCard | null>(null);
+  const [draggedCard, setDraggedCard] = useState<CardState | null>(null);
   useEffect(() => {
     setActionTargets([]);
   }, [gameState?.pendingAction?.type]);
@@ -97,10 +98,59 @@ function Game() {
     setSelectedCard(card);
   }
 
+  const canDragCard = (card: CardState, position: CardPosition) => {
+    const cardWithPosition = { ...card, position };
+    return Boolean(
+      gameState.turn === myRoleName &&
+      !gameState.pendingAction &&
+      getPosibleActions(cardWithPosition, isKing)
+    );
+  };
+
+  const handleDropAction = async () => {
+    if (!draggedCard || !draggedCard.position) return;
+    await handlePlayCard(draggedCard, isKing);
+    setDraggedCard(null);
+  };
+
+  const getDraggedActionCopy = () => {
+    if (!draggedCard) {
+      return {
+        title: "Altar de accion",
+        text: "Arrastra una carta jugable hasta aqui para ejecutar su accion principal sin abrir el modal.",
+      };
+    }
+
+    const action = getPosibleActions(draggedCard, isKing);
+    if (action.includes("guardia")) {
+      return {
+        title: action,
+        text: "Los guardias del rey se preparan o movilizan desde este altar segun su estado actual.",
+      };
+    }
+    if (action.includes("acción")) {
+      return {
+        title: action,
+        text: "Las cartas de accion se juegan directamente desde tu mano al soltarla sobre este altar.",
+      };
+    }
+    if (action.includes("rebelde")) {
+      return {
+        title: action,
+        text: "Los rebeldes pueden esconderse, activarse o volver a la mano segun la situacion del tablero.",
+      };
+    }
+    return {
+      title: action || "Accion no disponible",
+      text: "Suelta la carta aqui para intentar ejecutar su efecto principal.",
+    };
+  };
+
+  const altarCopy = getDraggedActionCopy();
+
   return (
   <div className="game-board">
     <div className="game-main-area">
-      
       <RivalArea 
         rivalRoleName={rivalRoleName}
         rivalPlayer={rivalPlayer}
@@ -108,7 +158,26 @@ function Game() {
         gameState={gameState}
         activeConfig={activeConfig}
         onSelectCard={handleSelectCard}
+        canDragCard={canDragCard}
+        onDragCard={setDraggedCard}
       />
+
+      <section className="battle-middle">
+        <div
+          className={`action-altar ${draggedCard ? "action-altar--active" : ""}`}
+          onDragOver={(e) => {
+            if (draggedCard) e.preventDefault();
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            void handleDropAction();
+          }}
+        >
+          <span className="action-altar-kicker">Drag And Drop</span>
+          <h2 className="action-altar-title">{altarCopy.title}</h2>
+          <p className="action-altar-text">{altarCopy.text}</p>
+        </div>
+      </section>
 
       <PlayerArea 
         myRoleName={myRoleName}
@@ -117,6 +186,8 @@ function Game() {
         gameState={gameState}
         activeConfig={activeConfig}
         onSelectCard={handleSelectCard}
+        canDragCard={canDragCard}
+        onDragCard={setDraggedCard}
       />
 
     </div>
@@ -126,6 +197,7 @@ function Game() {
         myScore={myScore}
         rivalScore={rivalScore}
         myRoleName={myRoleName}
+        rivalRoleName={rivalRoleName}
         socket={socket}
         gameId={id}
         userName={user.name}

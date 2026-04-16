@@ -1,69 +1,106 @@
+/* =============================================
+   Action Card — Home Page Menu Cards
+   ============================================= */
+
 .card {
-    width: 360px;          
-    height: 540px;         
-    border-radius: 20px;   
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
-    
-    display: flex;
-    flex-direction: column;
-    
-    overflow: hidden; 
-    background-color: transparent;
-    transition: transform 0.2s ease;
+  width: 100%;
+  min-height: 430px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+  position: relative;
 }
 
 .card:hover {
-    transform: translateY(-5px); 
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl), var(--shadow-gold);
+  border-color: var(--color-gold-dark);
 }
 
 .card-top {
-    background-color: #e5e5e5; 
-    flex: 2;                 
-    display: flex;
-    justify-content: center;  
-    align-items: center;       
-    width: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-medium) 0%,
+    var(--color-bg-elevated) 100%
+  );
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle pattern overlay */
+.card-top::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(139, 90, 43, 0.06) 0%, transparent 50%);
 }
 
 .card-icon {
-    font-size: 4rem;          
+  font-size: 5rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  z-index: 1;
 }
 
 .card-bottom {
-    background-color: white;
-    flex: 1;                   
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
+  background-color: var(--color-bg-card);
+  flex: 1;
+  padding: 1.65rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
 }
 
-h2 {
-  margin: 0.2rem 0;
-  font-size: 2rem;
+.card-bottom h2 {
+  font-family: var(--font-heading);
+  color: var(--color-gold);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
 }
 
-p {
-  color: #666;
+.card-bottom p {
+  color: var(--color-text-muted);
   margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  max-width: 28ch;
 }
 
 .action-btn {
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px; 
+  font-family: var(--font-heading);
+  background: linear-gradient(135deg, var(--color-danger) 0%, #6d0000 100%);
+  color: var(--color-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
   width: 100%;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all var(--transition-base);
+  text-transform: uppercase;
 }
 
 .action-btn:hover {
-  background-color: #555;
+  background: linear-gradient(135deg, var(--color-danger-light) 0%, var(--color-danger) 100%);
+  box-shadow: 0 4px 16px rgba(139, 0, 0, 0.4);
+  transform: translateY(-1px);
+  border-color: var(--color-gold);
 }

@@ -46,32 +46,51 @@ const Profile = () => {
 
     if (error) {
         return (
-            <div className="menu-container">
+            <div className="page-shell page-shell--centered">
+                <div className="page-content page-content--narrow">
                 <div className="menu-card">
                     <div className="menu-error">{error}</div>
-                    <Link to="/" className="menu-link">Return to the Kingdom</Link>
+                    <div className="menu-links">
+                        <Link to="/" className="menu-link">Return to the Kingdom</Link>
+                    </div>
+                </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="menu-container">
-            <div className="menu-card">
-                <h2 className="menu-title">Lord Profile {name}</h2>
+        <div className="page-shell">
+            <div className="page-content page-content--narrow">
+            <div className="menu-card profile-card">
+                <div className="menu-header">
+                    <span className="page-eyebrow profile-eyebrow">Profile</span>
+                    <h2 className="menu-title">Lord Profile {name}</h2>
+                    <p className="menu-subtitle">
+                        Toda tu información importante queda reunida aquí, con más aire visual y estadísticas
+                        mejor agrupadas.
+                    </p>
+                </div>
 
-                <div className="profile-info">
-                    <p className="profile-text">
-                        <strong>Email:</strong> {email}
-                    </p>
-                    <p className="profile-date">
-                        <strong>Joined on the:</strong> {createdAt ? new Date(createdAt).toLocaleDateString() : 'Desconocido'}
-                    </p>
+                <div className="profile-info-grid">
+                    <div className="profile-info-card">
+                        <span className="profile-meta-label">Email</span>
+                        <p className="profile-text">{email}</p>
+                    </div>
+                    <div className="profile-info-card">
+                        <span className="profile-meta-label">Joined on</span>
+                        <p className="profile-date">
+                            {createdAt ? new Date(createdAt).toLocaleDateString() : 'Desconocido'}
+                        </p>
+                    </div>
                 </div>
 
                 <hr className="profile-divider" />
 
-                <h3 className="stats-title">War statistics</h3>
+                <div className="section-heading profile-stats-heading">
+                    <h3 className="stats-title">War statistics</h3>
+                    <p>Consulta tu actividad reciente y tus resultados de un vistazo.</p>
+                </div>
                 
                 <div className="stats-grid">
 
@@ -94,14 +113,17 @@ const Profile = () => {
                     </div>
                 </div>
 
-                <Link to="/editProfile" state={{name, email}} className="menu-button btn-block">
-                    Edit my profile.
-                </Link>
+                <div className="profile-actions">
+                    <Link to="/editProfile" state={{name, email}} className="menu-button btn-block">
+                        Edit my profile
+                    </Link>
 
-                <Link to="/" className="menu-link link-block">
-                    Return to the Kingdom.
-                </Link>
+                    <Link to="/" className="menu-link link-block">
+                        Return to the Kingdom
+                    </Link>
+                </div>
 
+            </div>
             </div>
         </div>
     );

@@ -1,93 +1,182 @@
-/* PlayerCard.css */
+/* =============================================
+   Player Card — Lobby Room
+   ============================================= */
 
-/* 1. El contenedor principal (La tarjeta) */
 .player-card {
-    background-color: #252525; /* Fondo oscuro */
-    border: 2px solid #333;    /* Borde sutil */
-    width: 360px;          
-    height: 540px;         
-    border-radius: 20px;  
-    padding: 20px;
-    color: white;
-    transition: all 0.3s ease; /* Suavizar animaciones */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  width: 340px;
+  height: 480px;
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  color: var(--color-text-light);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Efecto Hover: La tarjeta se eleva y se ilumina al pasar el ratón */
+/* Decorative corner accent */
+.player-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
 .player-card:hover {
-    transform: translateY(-5px);
-    border-color: #ffd700;     /* Dorado */
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
+  transform: translateY(-5px);
+  border-color: var(--color-gold-dark);
+  box-shadow: var(--shadow-xl), var(--shadow-gold);
 }
 
-/* 2. El contenedor de información (Alineación interna) */
+/* Ready state glow */
+.player-card.card-ready {
+  border-color: var(--color-success);
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(46, 125, 50, 0.2);
+}
+
+.player-card.card-ready::before {
+  background: linear-gradient(90deg, transparent, var(--color-success), transparent);
+}
+
 .player-info {
-    display: flex;
-    flex-direction: column;    /* Apilar Avatar arriba, Texto abajo */
-    align-items: center;       /* Centrar todo horizontalmente */
-    height: 100%;
-    width: 100%;
-    gap: 1rem;                 /* Espacio entre el avatar y el texto */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  gap: 1.5rem;
 }
 
-/* 3. El círculo del avatar */
 .player-avatar {
-    width: 100%;
-    flex: 0.5;
-    padding-top: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.img-container{
-    width: 180px;  
-    height: 180px;
-    border-radius: 50%;        /* Esto lo hace redondo */
-    border: 3px solid #555;    /* Borde del círculo */
-    overflow: hidden;          /* ¡IMPORTANTE! Recorta la imagen sobrante */
-    background-color: #1a1a1a; /* Fondo por si la imagen tarda en cargar */
+.img-container {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  overflow: hidden;
+  background-color: var(--color-bg-medium);
+  transition: border-color var(--transition-base);
 }
 
 .player-card:hover .img-container {
-    border-color: #ffd700;
+  border-color: var(--color-gold);
 }
 
-/* 4. La imagen en sí misma */
-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* ¡CLAVE! Hace que la imagen llene el círculo sin estirarse ni deformarse */
+.player-card.card-ready .img-container {
+  border-color: var(--color-success);
 }
 
-/* 5. Contenedor de texto */
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .player-details {
-    text-align: center;
-    flex: 2rem;
-    padding: 1.5rem;
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    justify-content: baseline;
-    align-items: center;
+  text-align: center;
+  padding: 1rem;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-/* El nombre del jugador */
+.player-details h1 {
+  font-family: var(--font-heading);
+  color: var(--color-gold);
+  font-size: 1rem;
+  letter-spacing: 3px;
+  margin: 0;
+}
+
 .player-details h3 {
-    margin: 0;
-    margin-bottom: 5px;
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #fff;
-    text-transform: capitalize;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-parchment);
+  text-transform: capitalize;
+  letter-spacing: 1px;
 }
 
-/* El estado (Status) */
 .player-details p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #aaa;              /* Gris claro */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* Ready / Not Ready button */
+.ready-btn {
+  font-family: var(--font-heading);
+  padding: 0.7rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  border: 2px solid transparent;
+}
+
+.ready-btn.btn-green {
+  background: linear-gradient(135deg, var(--color-success) 0%, #1b5e20 100%);
+  color: white;
+  border-color: rgba(46, 125, 50, 0.5);
+}
+
+.ready-btn.btn-green:hover {
+  box-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+}
+
+.ready-btn.btn-gray {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.ready-btn.btn-gray:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-light);
+}
+
+/* Status badge for rival */
+.status-badge {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Empty card */
+.player-card.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  border-style: dashed;
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"; 
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth} from "../../../hooks/useAuth.ts";
 import "../SocialPanel.css";
 
@@ -7,7 +7,6 @@ const SearchUsers = () => {
     const [searchQuery, setQuery] = useState("");
     const [users, setUsers] = useState<SearchResult[] | []>([]);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [sentRequests, setSentRequests] = useState<number[]>([]);
 
@@ -27,7 +26,6 @@ const SearchUsers = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        setSuccess(false);
         setHasSearched(true);
 
         if (!searchQuery.trim()) {
@@ -95,20 +93,27 @@ const SearchUsers = () => {
 
     return (<div className="social-panel">
                 <h2>Search for a user</h2>
+                <p className="social-panel-intro">
+                    Localiza jugadores por nombre y envía solicitudes sin salir del panel principal.
+                </p>
                 <form className="search-form" onSubmit={handleSubmit}>
-                    <label style={{ fontWeight: "bold", fontSize: "0.9rem" }}>Lord's Name</label>
-                    <input
-                        className="social-input"
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setQuery(e.target.value)}
-                        required
-                    />
+                    <div className="search-field">
+                        <label className="social-label">Lord's Name</label>
+                        <input
+                            className="social-input"
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setQuery(e.target.value)}
+                            required
+                        />
+                    </div>
                 
                     <button className="action-btn btn-gold" type="submit">
                         Find Users
                     </button>
                 </form>
+
+                {error && <p className="social-empty">{error}</p>}
 
                 <div className="user-list">
                     {users.length > 0 ? (
@@ -128,7 +133,7 @@ const SearchUsers = () => {
                             </div>
                         ))
                     ) : (
-                        hasSearched && !error && <p className="no-results">Users not found!</p>
+                        hasSearched && !error && <p className="social-empty">Users not found!</p>
                     )}
                 </div>
             </div>

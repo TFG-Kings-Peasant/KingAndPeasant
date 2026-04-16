@@ -1,84 +1,195 @@
-.body-container{
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 2rem;
-    gap: 2rem;
-    width: 100%;
+/* =============================================
+   Lobby List — Medieval Dark Table
+   ============================================= */
+
+.body-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: clamp(1.2rem, 2vw, 1.75rem);
+  gap: 1.5rem;
+  box-sizing: border-box;
 }
 
-.body-container > div{
-    width: 90%;  
-    width: 100%;
-    max-width: 1200px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.button-container{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #e5e5e5;
-    padding: 1rem;
-    box-sizing: border-box;
-}
-
-.lobby-table{
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* --- LÓGICA DE LA TABLA (CSS GRID) --- */
-/* Usamos Grid en lugar de <table> nativa para mayor control del espaciado */
-.table-header, .table-row {
+.lobby-list-page {
   display: grid;
-  /* Definimos 5 columnas. La primera (Nombre) ocupa más espacio (2fr) */
+  gap: 1.5rem;
+}
+
+.lobby-list-hero {
+  text-align: center;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background-color: rgba(13, 11, 8, 0.16);
+  border: 1px solid rgba(139, 90, 43, 0.35);
+  padding: 1rem 1.2rem;
+  box-sizing: border-box;
+  border-radius: var(--radius-md);
+}
+
+.lobby-actions-copy {
+  margin-bottom: 0;
+}
+
+.button-container button {
+  font-family: var(--font-heading);
+  padding: 0.6rem 1.5rem;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-gold);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.button-container button:hover {
+  background-color: var(--color-border);
+  border-color: var(--color-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+.button-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lobby-table {
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.table-header,
+.table-row {
+  display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   gap: 1rem;
 }
 
 .table-header {
-  font-weight: bold;
-  background-color: #e5e5e5;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  background-color: var(--color-bg-medium);
   text-transform: uppercase;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  color: var(--color-gold);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table-body {
+  background-color: var(--color-bg-card);
 }
 
 .table-row {
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-bottom: 1px solid rgba(93, 64, 55, 0.3);
+  transition: background-color var(--transition-fast);
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+}
+
+.table-row:last-child {
+  border-bottom: none;
 }
 
 .table-row:hover {
-  background-color: #e5e5e5; /* Efecto hover para interactividad */
+  background-color: var(--color-bg-elevated);
 }
 
-/* --- ESTILOS DE BOTONES (ESTADO) --- */
+.col-name {
+  font-weight: 600;
+  color: var(--color-parchment);
+}
+
+.col-players,
+.col-privacy,
+.col-status {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* --- Join Buttons --- */
 .join-btn {
+  font-family: var(--font-heading);
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
-  font-weight: bold;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
   cursor: pointer;
   width: 100%;
   text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  transition: all var(--transition-base);
 }
 
-/* Estilo para "UNIRSE" */
 .join-btn.allowed {
-  background-color: #4CAF50; /* Verde */
+  background: linear-gradient(135deg, var(--color-success) 0%, #1b5e20 100%);
   color: white;
+  border: 1px solid rgba(46, 125, 50, 0.5);
 }
 
-/* Estilo para "LLENA" */
+.join-btn.allowed:hover {
+  box-shadow: 0 0 12px rgba(46, 125, 50, 0.4);
+  transform: translateY(-1px);
+}
+
 .join-btn.not-allowed {
-  background-color: #F44336; /* Rojo */
-  color: white;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-muted);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
+  border: 1px solid var(--color-border);
 }
 
+.lobby-table .table-body:empty::after {
+  content: 'No hay salas disponibles...';
+  display: block;
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.body-container .error-text {
+  color: #e57373;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .button-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-actions {
+    width: 100%;
+  }
+
+  .page-actions button {
+    flex: 1;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 2fr 1fr 1.2fr;
+  }
+
+  .col-privacy,
+  .col-status {
+    display: none;
+  }
+}

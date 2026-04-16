@@ -41,7 +41,7 @@ export default function FriendsList() {
             <h3>My Friends ({friends.length})</h3>
             
             {friends.length === 0 ? (
-                <p style={{ color: '#888' }}>You do not have any friends yet</p>
+                <p className="social-empty">You do not have any friends yet.</p>
             ) : (
                 <div className="user-list">
                     {friends.map((friend) => (

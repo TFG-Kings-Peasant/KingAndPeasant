@@ -81,22 +81,27 @@ export default function FriendRequestsList() {
         }
     };
 
-    if (requests.length === 0) return null; 
-
     return (
         <div className="social-panel">
             <h3>Friend Requests({requests.length})</h3>
-            <div className="user-list">
-                {requests.map((req) => (
-                    <div key={req.idFriendship} className="user-card request">
-                        <p><strong>{req.sender.name}</strong></p>
-                        <div className="user-info">
-                            <button onClick={() => handleResponse(req.idFriendship, "ACCEPTED")} className="action-btn btn-green">✔</button>
-                            <button onClick={() => handleResponse(req.idFriendship, "DENIED")} className="action-btn btn-red">✖</button>
+            {requests.length === 0 ? (
+                <p className="social-empty">No tienes solicitudes pendientes ahora mismo.</p>
+            ) : (
+                <div className="user-list">
+                    {requests.map((req) => (
+                        <div key={req.idFriendship} className="user-card request">
+                            <div className="user-info">
+                                <span className="user-name">{req.sender.name}</span>
+                                <span className="user-email">Quiere unirse a tu lista de aliados</span>
+                            </div>
+                            <div className="actions-group">
+                                <button onClick={() => handleResponse(req.idFriendship, "ACCEPTED")} className="action-btn btn-green">Accept</button>
+                                <button onClick={() => handleResponse(req.idFriendship, "DENIED")} className="action-btn btn-red">Decline</button>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

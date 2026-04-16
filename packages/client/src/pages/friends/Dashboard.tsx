@@ -18,10 +18,14 @@ const Dashboard = () => {
     }, [isLogin, navigate]);
 
     return (
-        <div className="dashboard-container">
-            <header className="dashboard-header">
-                <h1>Welcome, {user?.name || "Viajero"} .</h1>
-                <p className="dashboard-subtitle"></p>
+        <div className="page-shell dashboard-shell">
+            <div className="page-content">
+            <header className="dashboard-header page-panel">
+                <span className="page-eyebrow">Social</span>
+                <h1 className="page-title">Welcome, {user?.name || "Viajero"}</h1>
+                <p className="page-subtitle">
+                    Busca jugadores, responde solicitudes pendientes y mantén a tus amistades siempre a mano.
+                </p>
             </header>
 
             <div className="dashboard-grid">
@@ -42,10 +46,13 @@ const Dashboard = () => {
 
             </div>
             
-            <Link to="/" className="auth-link link-block">
-                Return to the Kingdom.
-            </Link>
+            <div className="dashboard-footer">
+                <Link to="/" className="page-link">
+                    Return to the Kingdom
+                </Link>
+            </div>
 
+            </div>
         </div>
     );
 };

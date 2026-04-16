@@ -39,40 +39,53 @@ const Register = () => {
     };
 
     return (
-        <ParchmentCard title="New Lord">
+        <ParchmentCard
+            title="New Lord"
+            subtitle="Crea tu cuenta con una disposición más clara y entra al juego con lo esencial a mano."
+        >
             <form className="menu-form" onSubmit={handleSubmit}>
-                <FormInput
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                />
-                <FormInput
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <FormInput
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                <div className="menu-section">
+                    <label className="menu-field-label">Name</label>
+                    <FormInput
+                        type="text"
+                        placeholder="Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="menu-section">
+                    <label className="menu-field-label">Email</label>
+                    <FormInput
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="menu-section">
+                    <label className="menu-field-label">Password</label>
+                    <FormInput
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
                 <MenuButton type="submit">Register</MenuButton>
             </form>
             {error && <div className="menu-error">{error}</div>}
 
-            <Link to="/login" className="menu-link">
-                Do you already have a crown? Enter here
-            </Link>
-
-            <Link to="/" className="menu-link">
-                Return to the kingdom
-            </Link>
+            <div className="menu-links">
+                <Link to="/login" className="menu-link">
+                    Do you already have a crown? Enter here
+                </Link>
+                <Link to="/" className="menu-link">
+                    Return to the kingdom
+                </Link>
+            </div>
         </ParchmentCard>
     );      
 }

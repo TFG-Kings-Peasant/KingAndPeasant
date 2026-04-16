@@ -104,42 +104,59 @@ function LobbyList() {
         return {allowed: "allowed", reason: "UNIRSE"};
     };
 
-    return <div>
-        <div className="body-container">
-            <div className="button-container">
-                <button onClick={openCreateModal}>Crear Sala</button>
-                <button onClick={fetchLobbies} disabled={loading}>
-                        {loading ? "Cargando..." : "Refrescar"}
-                </button>
-            </div>
+    return <div className="page-shell">
+        <div className="page-content lobby-list-page">
+            <header className="page-panel lobby-list-hero">
+                <span className="page-eyebrow">Lobbies</span>
+                <h1 className="page-title">Salas disponibles</h1>
+                <p className="page-subtitle">
+                    Encuentra una partida en curso, actualiza la lista cuando quieras o crea una nueva sala
+                    desde una cabecera más limpia y accesible.
+                </p>
+            </header>
 
-            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-
-            <div className="lobby-table">
-                <div className="table-header">
-                    <span>NOMBRE DE LA SALA</span>
-                    <span>JUGADORES</span>
-                    <span>PRIVACIDAD</span>
-                    <span>ESTADO</span>
-                    <span>UNIRSE</span>
+            <div className="body-container page-panel page-panel--soft">
+                <div className="button-container">
+                    <div className="section-heading lobby-actions-copy">
+                        <h3>Acciones rápidas</h3>
+                        <p>Gestiona las salas desde aquí sin perder de vista la tabla.</p>
+                    </div>
+                    <div className="page-actions">
+                        <button onClick={openCreateModal}>Crear Sala</button>
+                        <button onClick={fetchLobbies} disabled={loading}>
+                                {loading ? "Cargando..." : "Refrescar"}
+                        </button>
+                    </div>
                 </div>
-                <div className="table-body">
-                    {lobbies.map((lobby) => {
-                        const joinStatus = joinLobbyCheck(lobby.player2Id, lobby.privacy, lobby.status);
-                        return(
-                            <div key={lobby.id} className="table-row">
-                            <span className="col-name">{lobby.name}</span>
-                            <span className="col-players">{lobby.player2Id ? "2/2" : "1/2"}</span>
-                            <span className="col-privacy">{lobby.privacy}</span>
-                            <span className="col-status">{lobby.status}</span>
-                            <span className="col-join">
-                                <button className={`join-btn ${joinStatus.allowed}`} onClick={() => handleJoinLobby(lobby.id)} disabled={joinStatus.allowed === "not-allowed"}>
-                                    {joinStatus.reason}
-                                </button>
-                            </span>
-                        </div>
-                        )
-                    })}     
+
+                {error && <p className="status-message">{error}</p>}
+
+                <div className="lobby-table">
+                    <div className="table-header">
+                        <span>NOMBRE DE LA SALA</span>
+                        <span>JUGADORES</span>
+                        <span>PRIVACIDAD</span>
+                        <span>ESTADO</span>
+                        <span>UNIRSE</span>
+                    </div>
+                    <div className="table-body">
+                        {lobbies.map((lobby) => {
+                            const joinStatus = joinLobbyCheck(lobby.player2Id, lobby.privacy, lobby.status);
+                            return(
+                                <div key={lobby.id} className="table-row">
+                                <span className="col-name">{lobby.name}</span>
+                                <span className="col-players">{lobby.player2Id ? "2/2" : "1/2"}</span>
+                                <span className="col-privacy">{lobby.privacy}</span>
+                                <span className="col-status">{lobby.status}</span>
+                                <span className="col-join">
+                                    <button className={`join-btn ${joinStatus.allowed}`} onClick={() => handleJoinLobby(lobby.id)} disabled={joinStatus.allowed === "not-allowed"}>
+                                        {joinStatus.reason}
+                                    </button>
+                                </span>
+                            </div>
+                            )
+                        })}     
+                    </div>
                 </div>
             </div>
         </div>
