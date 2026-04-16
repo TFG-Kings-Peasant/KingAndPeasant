@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import './LobbyList.css'
 import { createLobby, getAllLobbies, joinLobby, getMyLobby, type LobbyBackend } from "./components/LobbyFetch";
 import { useNavigate } from "react-router";
-import { useUser } from "../../hooks/useUser";
 import { useAuth } from "../../hooks/useAuth"; // <-- Importamos useAuth para los sockets
 
-import { Modal } from "../../components/Modal";
+import { ErrorToast } from "../game/components/ErrorToast";
+import { FormInput } from "../../components/FormInput";
+import { MenuButton } from "../../components/MenuButton";
 
 function LobbyList() {
     const [lobbies, setLobbies] = useState<LobbyBackend[]>([]);
@@ -52,7 +53,7 @@ function LobbyList() {
 
     const openCreateModal = () => {
         if (myLobby) {
-            alert("Ya estás en una sala. Sal de ella para poder crear una nueva.");
+            setError("Ya estás en una sala. Sal de ella para poder crear una nueva.");
             return;
         }
         setNewLobbyName(""); 
@@ -64,12 +65,12 @@ function LobbyList() {
         e.preventDefault(); 
         
         if (!newLobbyName.trim()) {
-            alert("El nombre de la sala es obligatorio");
+            setError("El nombre de la sala es obligatorio");
             return;
         }
 
         if(!user) {
-            alert("Debes iniciar sesión para crear una sala");
+            setError("Debes iniciar sesión para crear una sala");
             return;
         }
 
@@ -80,16 +81,16 @@ function LobbyList() {
             navigate(`/lobby/${newLobby.id}`);
         } catch (err) {
             if (err instanceof Error) {
-                alert(err.message);
+                setError(err.message);
             } else {
-                alert("Ocurrió un error desconocido");
+                setError("Ocurrió un error desconocido");
             }
         }
     };
 
     const handleJoinLobby = async (lobbyId: number) => {
         if(!user) {
-            alert("Debes iniciar sesión para unirte a una sala");
+            setError("Debes iniciar sesión para unirte a una sala");
             return;
         }
 
@@ -104,9 +105,9 @@ function LobbyList() {
             navigate(`/lobby/${lobbyId}`); 
         } catch (err) {
             if (err instanceof Error) {
-                alert(err.message);
+                setError(err.message);
             } else {
-                alert("Ocurrió un error desconocido al intentar unirse a la sala");
+                setError("Ocurrió un error desconocido al intentar unirse a la sala");
             }
         }
     }
@@ -190,8 +191,6 @@ function LobbyList() {
                 </button>
             </div>
 
-            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-
             <div className="lobby-table">
                 <div className="table-header">
                     <span>NOMBRE DE LA SALA</span>
@@ -222,44 +221,62 @@ function LobbyList() {
             </div>
         </div>
 
-        <Modal 
-            isOpen={isModalOpen} 
-            onClose={() => setIsModalOpen(false)} 
-            title="Crear Nueva Sala"
-        >
-            <form onSubmit={handleConfirmCreate}>
-                <div className="form-group">
-                    <label>Nombre de la sala:</label>
-                    <input 
-                        type="text" 
-                        value={newLobbyName}
-                        onChange={(e) => setNewLobbyName(e.target.value)}
-                        placeholder="Ej: Batalla Épica"
-                        autoFocus
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label>Privacidad:</label>
-                    <select 
-                        value={newLobbyPrivacy} 
-                        onChange={(e) => setNewLobbyPrivacy(e.target.value as 'PUBLIC' | 'PRIVATE')}
-                    >
-                        <option value="PUBLIC">🌐 Pública</option>
-                        <option value="PRIVATE">🔒 Privada</option>
-                    </select>
-                </div>
+        {isModalOpen && (
+            <div 
+                className="parchment-modal-overlay" 
+                onClick={() => setIsModalOpen(false)}
+            >
+                <div onClick={(e) => e.stopPropagation()}>
+                    <div className="menu-card">
+                        <h2 className="menu-title">Crear Nueva Sala</h2>
+                        
+                        <form className="menu-form" onSubmit={handleConfirmCreate}>
+                            <div className="parchment-form-group">
+                                <label>Nombre de la sala:</label>
+                                <FormInput 
+                                    type="text" 
+                                    value={newLobbyName}
+                                    onChange={(e) => setNewLobbyName(e.target.value)}
+                                    placeholder="Ej: Batalla Épica"
+                                    autoFocus
+                                />
+                            </div>
+                            
+                            <div className="parchment-form-group">
+                                <label>Privacidad:</label>
+                                <select 
+                                    className="menu-input"
+                                    value={newLobbyPrivacy} 
+                                    onChange={(e) => setNewLobbyPrivacy(e.target.value as 'PUBLIC' | 'PRIVATE')}
+                                >
+                                    <option value="PUBLIC">Pública</option>
+                                    <option value="PRIVATE">Privada</option>
+                                </select>
+                            </div>
 
-                <div className="modal-actions">
-                    <button type="button" onClick={() => setIsModalOpen(false)} className="cancel-btn">
-                        Cancelar
-                    </button>
-                    <button type="submit" className="confirm-btn">
-                        Crear Sala
-                    </button>
+                            <div className="parchment-form-actions">
+                                <MenuButton 
+                                    type="button" 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="cancel-menu-btn"
+                                >
+                                    Cancelar
+                                </MenuButton>
+                                <MenuButton 
+                                    type="submit"
+                                >
+                                    Crear Sala
+                                </MenuButton>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
-        </Modal>
+            </div>
+        )}
+        <ErrorToast 
+            error={error} 
+            onClose={() => setError("")} 
+        />
     </div>;
 }
 

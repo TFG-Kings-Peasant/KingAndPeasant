@@ -524,7 +524,8 @@ const endGameByTimeout = async (gameId, winnerId) => {
 
     // Borramos la partida de Redis definitivamente
     await redisClient.del(`game:${gameId}`);
-    
+    await lobbyService.setLobbyWaiting(Number(gameId));
+
     return result;
 };
 

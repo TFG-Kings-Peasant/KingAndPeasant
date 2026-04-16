@@ -11,6 +11,14 @@ const getLobbyById = async (id) => {
 };
 
 const createLobby = async (data) => {
+    const existingLobby = await prisma.lobby.findUnique({
+        where: { name : data.name },
+    });
+
+    if (existingLobby) {
+        throw new Error('Ya existe una sala con ese nombre. Por favor elige otro nombre.');
+    }
+
     return await prisma.lobby.create({
         data: {
             name: data.name,
@@ -31,6 +39,19 @@ const setLobbyOngoing = async (id) => {
     return await prisma.lobby.update({
         where: { id : id },
         data: { status: 'ONGOING' }
+    });
+};
+
+const setLobbyWaiting = async (id) => {
+    const lobby = await getLobbyById(id);
+
+    if (!lobby) {
+        throw new Error('Lobby no encontrado');
+    }
+
+    return await prisma.lobby.update({
+        where: { id : id },
+        data: { status: 'WAITING' }
     });
 };
 
@@ -136,5 +157,6 @@ export const lobbyService = {
     leaveLobby,
     setPlayerReady,
     setLobbyOngoing,
-    getUserActiveLobby
+    getUserActiveLobby,
+    setLobbyWaiting
 };
