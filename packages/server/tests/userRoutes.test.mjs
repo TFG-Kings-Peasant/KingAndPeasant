@@ -61,10 +61,10 @@ describe('User routes', () => {
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Validation error');
     expect(response.body.errors).toEqual(expect.arrayContaining([
-      'Name must be at least 3 characters',
-      'Email must be a valid email address',
-      'Password must be at least 8 characters',
-    ]));
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Name must be at least 3 characters' }),
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Email must be a valid email address' }),
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Password must be at least 8 characters' })
+      ]));
     expect(mockUserService.checkIfUserExists).not.toHaveBeenCalled();
   });
 
@@ -141,9 +141,9 @@ describe('User routes', () => {
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Validation error');
     expect(response.body.errors).toEqual(expect.arrayContaining([
-      'Email must be a valid email address',
-      'Password is required',
-    ]));
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Email must be a valid email address' }),
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Password is required' }),
+      ]));
     expect(mockUserService.getUserByEmail).not.toHaveBeenCalled();
   });
 
@@ -236,7 +236,9 @@ describe('User routes', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Validation error');
-    expect(response.body.errors).toContain('At least one field (name, email, password) must be provided');
+    expect(response.body.errors).toContainEqual(
+      expect.objectContaining({ code: 'INVALID_FIELD', message: 'At least one field (name, email, password) must be provided' })
+    );    
     expect(mockUserService.updateUserById).not.toHaveBeenCalled();
   });
 
@@ -249,7 +251,9 @@ describe('User routes', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Validation error');
-    expect(response.body.errors).toContain('Email must be a valid email address');
+    expect(response.body.errors).toContainEqual(
+      expect.objectContaining({ code: 'INVALID_FIELD', message: 'Email must be a valid email address' })
+    );
     expect(mockUserService.updateUserById).not.toHaveBeenCalled();
   });
 
@@ -263,9 +267,10 @@ describe('User routes', () => {
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Validation error');
     expect(response.body.errors).toEqual(expect.arrayContaining([
-      'Name must be at least 3 characters',
-      'Password must be at least 8 characters',
-    ]));
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Name must be at least 3 characters' }),
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Password must be at least 8 characters' }),
+        expect.objectContaining({ code: 'INVALID_FIELD', message: 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a symbol' })
+      ]));
     expect(mockUserService.updateUserById).not.toHaveBeenCalled();
   });
 
@@ -297,15 +302,15 @@ describe('User routes', () => {
       name: 'Updated',
       email: 'updated@test.com',
     });
-
+    const token = jwt.sign({ id: 1, name: 'TestUser' }, process.env.JWT_SECRET);
     const app = buildApp();
     const response = await request(app)
       .put('/api/auth/edit-profile')
-      .set('Authorization', authHeader(1, 'Tester'))
-      .send({ name: '  Updated  ', email: '  UPDATED@TEST.COM ', password: '  secret123  ' });
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: '  Updated  ', email: '  UPDATED@TEST.COM ', password: '  Secret.123  ' });
 
     expect(response.status).toBe(200);
-    expect(mockUserService.updateUserById).toHaveBeenCalledWith(1, 'Updated', 'updated@test.com', 'secret123');
+    expect(mockUserService.updateUserById).toHaveBeenCalledWith(1, 'Updated', 'updated@test.com', 'Secret.123');
   });
 
   test('GET /api/auth/search devuelve 404 cuando no hay usuarios', async () => {
