@@ -1,5 +1,28 @@
 import { lobbyService } from '../services/LobbyService.js';
 
+// Función de ayuda para clasificar los errores del servicio y devolver el status HTTP correcto
+const handleLobbyError = (res, error) => {
+    const msg = error.message;
+
+    // Errores de conflicto (409 Conflict)
+    if (msg.includes('Ya existe una sala') || msg.includes('ya está lleno')) {
+        return res.status(409).json({ error: msg });
+    }
+    
+    // Errores de permisos/reglas de negocio (403 Forbidden)
+    if (msg.includes('otra sala') || msg.includes('partida privada') || msg.includes('no está en el lobby')) {
+        return res.status(403).json({ error: msg });
+    }
+
+    // Errores de recursos no encontrados (404 Not Found)
+    if (msg.includes('Lobby no encontrado')) {
+        return res.status(404).json({ error: msg });
+    }
+
+    // Por defecto, si es un error no controlado
+    return res.status(500).json({ error: 'Error interno del servidor', details: msg });
+};
+
 const getLobbies = async (req, res) => {
     try {
         const lobbies = await lobbyService.getAllLobbies();
@@ -13,19 +36,20 @@ const getLobbyById = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-        return res.status(400).json({ message: "No se ha proporcionado un ID de lobby" });
+            return res.status(400).json({ message: "No se ha proporcionado un ID de lobby" });
         }
+        
         const lobbyId = Number(id);
-
         const lobby = await lobbyService.getLobbyById(lobbyId);
+        
         if (!lobby) {
             return res.status(404).json({ message: 'Lobby no encontrado' });
         }
         res.status(200).json(lobby);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleLobbyError(res, error);
     }
-}
+};
 
 const createLobby = async (req, res) => {
     try {
@@ -42,7 +66,7 @@ const createLobby = async (req, res) => {
 
         res.status(201).json(newLobby);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleLobbyError(res, error);
     }
 };
 
@@ -63,9 +87,9 @@ const joinLobby = async (req, res) => {
 
         res.status(200).json(updatedLobby);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleLobbyError(res, error);
     }
-}
+};
 
 const leaveLobby = async (req, res) => {
     try {
@@ -81,44 +105,45 @@ const leaveLobby = async (req, res) => {
 
         const io = req.app.get('io');
         io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
+        
         res.status(200).json(updatedLobby);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleLobbyError(res, error);
     }
-}
+};
 
 const setPlayerReady = async (req, res) => { 
     try {
         const { id } = req.params;
         const lobbyId = Number(id);
-        
         const { playerId, isReady } = req.body;
-        console.log("📥 Datos recibidos para setPlayerReady:", req.body);
+        
         if (!lobbyId || !playerId || isReady === undefined) {
             return res.status(400).json({ message: "Faltan datos requeridos" });
         }
+        
         const updatedLobby = await lobbyService.setPlayerReady({ lobbyId, playerId, isReady });
 
         const io = req.app.get('io');
         io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
+        
         res.status(200).json(updatedLobby);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleLobbyError(res, error);
     }
-}
+};
 
 const getMyLobby = async (req, res) => {
     try {
         const userId = req.user.id;
-        if(!userId) {
+        if (!userId) {
             return res.status(400).json({ message: "No se ha proporcionado un ID de usuario" });
         }
-        console.log("userId:", userId);
-        const lobby = await lobbyService.getUserActiveLobby(userId);
         
+        const lobby = await lobbyService.getUserActiveLobby(userId);
         res.status(200).json(lobby || null); 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Error al obtener tu lobby', details: error.message });
     }
 };
 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import PlayerCard from "./components/PlayerCard";
 import "./LobbyRoom.css";
-import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "./components/LobbyFetch";
+import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "./components/LobbyService";
 import { startGame } from "../game/components/GameService";
 import { useNavigate, useParams } from "react-router";
 import { useUser } from "../../hooks/useUser";
@@ -47,10 +47,12 @@ function LobbyRoom() {
     }, [socket, id, user?.id]);
 
   const fetchLobby = async (showLoading = false) => {
+    if(!user) return;
+    if (!user.authToken) return;
     if (showLoading) setLoading(true);
       
     try {
-        const data = await getLobbyById(Number(id));   
+        const data = await getLobbyById(Number(id), user.authToken);   
         setLobby(data);
           
         if (!data) {
@@ -69,13 +71,15 @@ function LobbyRoom() {
     if (!lobby) return;
     if (!isLogin) return;
     if (!socket) return;
+    if(!user) return;
+    if (!user.authToken) return;
     
     if (lobby.status === 'ONGOING') return;
 
     try {
         const isPlayer1 = lobby.player1Id === Number(user?.id);
         const currentReadyStatus = isPlayer1 ? lobby.player1Ready : lobby.player2Ready;
-        await setPlayerReady(lobby.id, user?.id || null,!currentReadyStatus);
+        await setPlayerReady(lobby.id, user?.id || null,!currentReadyStatus, user.authToken);
         fetchLobby();
     } catch (err) {
         setError("Error al cambiar estado");

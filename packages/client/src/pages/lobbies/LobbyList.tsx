@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import './LobbyList.css'
-import { createLobby, getAllLobbies, joinLobby, getMyLobby, type LobbyBackend } from "./components/LobbyFetch";
+import { createLobby, getAllLobbies, joinLobby, getMyLobby, type LobbyBackend } from "./components/LobbyService";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth"; // <-- Importamos useAuth para los sockets
 
@@ -69,13 +69,13 @@ function LobbyList() {
             return;
         }
 
-        if(!user) {
+        if(!user || !user.authToken) {
             setError("Debes iniciar sesión para crear una sala");
             return;
         }
 
         try {
-            const newLobby = await createLobby(newLobbyName, newLobbyPrivacy, user?.id || null); 
+            const newLobby = await createLobby(newLobbyName, newLobbyPrivacy, user?.id || null, user.authToken); 
             setIsModalOpen(false); 
             fetchLobbies(); 
             navigate(`/lobby/${newLobby.id}`);
@@ -89,7 +89,7 @@ function LobbyList() {
     };
 
     const handleJoinLobby = async (lobbyId: number) => {
-        if(!user) {
+        if(!user || !user.authToken) {
             setError("Debes iniciar sesión para unirte a una sala");
             return;
         }
@@ -101,7 +101,7 @@ function LobbyList() {
         }
 
         try {
-            await joinLobby(lobbyId, user?.id || null); 
+            await joinLobby(lobbyId, user?.id || null, user.authToken); 
             navigate(`/lobby/${lobbyId}`); 
         } catch (err) {
             if (err instanceof Error) {
