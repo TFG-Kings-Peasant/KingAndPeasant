@@ -26,10 +26,11 @@ const getUserById = async (req, res) => {
 const editUser = async (req, res) => {
     //Por Hacer: El email tendría que ir por otro lado ahora mismo junto con la contraseña.
     const userId = req.user.id;
-    const {name, email, password} = req.body;
+    const {name, email, password} = req.validatedBody;
+
     console.log(parseInt(userId));
     try{
-        const user = await userService.updateUserById(userId, name, email,password);
+        const user = await userService.updateUserById(userId, name, email, password);
         console.log(user);
         if(user == null) {
             return res.status(401).send({message: "The User you are trying to Edit is not found"});
@@ -42,7 +43,8 @@ const editUser = async (req, res) => {
 }
 
 const registerUser = async (req, res) => {
-    const data = req.body;
+    const data = req.validatedBody;
+
     try {
         const exists = await userService.checkIfUserExists(data.name, data.email);
         if (exists) {
@@ -65,7 +67,8 @@ const registerUser = async (req, res) => {
 }; 
 
 const loginUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password } = req.validatedBody;
+
     try {
         const user = await userService.getUserByEmail(email, password)
         if(user == null) {
