@@ -6,8 +6,10 @@ const EMAIL_MAX_LENGTH = 254;
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim() !== '';
 const isValidEmail = (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-const normalizeName = (value) => typeof value === 'string' ? value.trim() : value;
-const normalizeEmail = (value) => typeof value === 'string' ? value.trim().toLowerCase() : value;
+const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
+const normalizeName = (value) => typeof value === 'string' ? value.normalize('NFC').trim() : value;
+const normalizeEmail = (value) => typeof value === 'string' ? value.normalize('NFC').trim().toLowerCase() : value;
 const normalizePassword = (value) => typeof value === 'string' ? value.trim() : value;
 
 export const validateRegisterBody = (body) => {
@@ -124,8 +126,13 @@ export const validateEditProfileBody = (body) => {
     errors.push(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`);
   }
 
-  if (hasPassword && isNonEmptyString(normalizedData.password) && normalizedData.password.length > PASSWORD_MAX_LENGTH) {
-    errors.push(`Password must be at most ${PASSWORD_MAX_LENGTH} characters`);
+  if (hasPassword) {
+    if (!isNonEmptyString(normalizedData.password)) {
+      errors.push('Password must be a non-empty string');
+    } else {
+      if (normalizedData.password.length > PASSWORD_MAX_LENGTH) errors.push(`Password must be at most ${PASSWORD_MAX_LENGTH} characters`);
+      if (!passwordRegex.test(normalizedData.password)) errors.push('Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a symbol');
+    }
   }
 
   return { data: normalizedData, errors };

@@ -1,7 +1,11 @@
 const sendValidationError = (res, errors) => {
-  return res.status(400).send({
+  return res.status(400).json({
     message: 'Validation error',
-    errors,
+    code: 'VALIDATION_ERROR',
+    errors: errors.map(err => ({
+      code: 'INVALID_FIELD',
+      message: err
+    })),
   });
 };
 

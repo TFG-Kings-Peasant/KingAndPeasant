@@ -11,6 +11,11 @@ import { createServer } from 'http';
 import { lobbySocket } from './src/sockets/LobbySocket.js';
 import { gameSocket } from './src/sockets/GameSocket.js';
 
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables.');
+  process.exit(1);
+}
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server,{

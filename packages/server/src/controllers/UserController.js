@@ -24,19 +24,28 @@ const getUserById = async (req, res) => {
 }
 
 const editUser = async (req, res) => {
-    //Por Hacer: El email tendría que ir por otro lado ahora mismo junto con la contraseña.
     const userId = req.user.id;
     const {name, email, password} = req.validatedBody;
 
-    console.log(parseInt(userId));
     try{
         const user = await userService.updateUserById(userId, name, email, password);
-        console.log(user);
         if(user == null) {
             return res.status(401).send({message: "The User you are trying to Edit is not found"});
         }
         res.status(200).json(user);
     } catch (err) {
+        if (err.code === 'P2002') {
+            const field = err.meta?.target?.includes('email') ? 'email' : 'name';
+            return res.status(409).json({
+                message: `The ${field} is already in use`,
+                code: 'CONFLICT',
+                errors: [{
+                    code: field === 'email' ? 'EMAIL_ALREADY_EXISTS' : 'NAME_ALREADY_EXISTS',
+                    field: field,
+                    message: `This ${field} has already been registered by another user`
+                }]
+            });
+        }
         console.error("Error updating user information: ", err);
         res.status(500).send({message: "Error updating user information"});
     }
@@ -61,6 +70,18 @@ const registerUser = async (req, res) => {
             authToken: token
         });
     } catch (err) {
+        if (err.code === 'P2002') {
+            const field = err.meta?.target?.includes('email') ? 'email' : 'name';
+            return res.status(409).json({
+                message: `The ${field} is already in use`,
+                code: 'CONFLICT',
+                errors: [{
+                    code: field === 'email' ? 'EMAIL_ALREADY_EXISTS' : 'NAME_ALREADY_EXISTS',
+                    field: field,
+                    message: `This ${field} has already been registered`
+                }]
+            });
+        }
         console.error("Error creating user:", err);
         res.status(500).send({message: "Error creating user"});
     }
