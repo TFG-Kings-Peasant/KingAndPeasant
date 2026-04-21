@@ -83,7 +83,7 @@ const updateUserById = async (id, name, email, password) => {
         email: email
     };
 
-    if (password && password.trim !== "") {
+    if (password && password.trim() !== "") {
         dataToUpdate.password = await bcrypt.hash(password, 10);
     }
 

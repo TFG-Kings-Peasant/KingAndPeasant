@@ -48,8 +48,8 @@ const registerUser = async (req, res) => {
         if (exists) {
             return res.status(409).send({message: "This user is already registered!"});
         }
-        const user = userService.createUser(data);
-        const token = jwt.sign({ id: (await user).idUser, name: user.name }, process.env.JWT_SECRET)
+        const user = await userService.createUser(data);
+        const token = jwt.sign({ id: user.idUser, name: user.name }, process.env.JWT_SECRET)
         console.log("User Registered: ", user);
         return res.status(200).send({
             message: "Successful Registration!",

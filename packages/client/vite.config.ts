@@ -7,7 +7,8 @@ export default defineConfig({
   // @ts-expect-error: Vite no conoce la propiedad 'test', pero Vitest sí la leerá
   test: {
     environment: 'jsdom',
-    globals: true
+    globals: true,
+    setupFiles: './src/test/setup.ts'
   },
   server: {
     host: true,
