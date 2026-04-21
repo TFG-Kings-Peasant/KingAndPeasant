@@ -11,6 +11,14 @@ const getLobbyById = async (id) => {
 };
 
 const createLobby = async (data) => {
+    const existingLobby = await prisma.lobby.findUnique({
+        where: { name : data.name },
+    });
+
+    if (existingLobby) {
+        throw new Error('Ya existe una sala con ese nombre. Por favor elige otro nombre.');
+    }
+
     return await prisma.lobby.create({
         data: {
             name: data.name,
@@ -18,6 +26,32 @@ const createLobby = async (data) => {
             privacy: data.privacy,
             player1Id: data.player1Id
         },
+    });
+};
+
+const setLobbyOngoing = async (id) => {
+    const lobby = await getLobbyById(id);
+
+    if (!lobby) {
+        throw new Error('Lobby no encontrado');
+    }
+
+    return await prisma.lobby.update({
+        where: { id : id },
+        data: { status: 'ONGOING' }
+    });
+};
+
+const setLobbyWaiting = async (id) => {
+    const lobby = await getLobbyById(id);
+
+    if (!lobby) {
+        throw new Error('Lobby no encontrado');
+    }
+
+    return await prisma.lobby.update({
+        where: { id : id },
+        data: { status: 'WAITING' }
     });
 };
 
@@ -52,6 +86,10 @@ const leaveLobby = async ({ lobbyId, playerId }) => {
 
     if (lobby.player1Id !== playerId && lobby.player2Id !== playerId) {
         throw new Error('El jugador no está en el lobby');
+    }
+
+    if (lobby.status === 'ONGOING') {
+        return lobby; 
     }
 
     let updateData = {};
@@ -100,11 +138,25 @@ const setPlayerReady = async ({ lobbyId, playerId, isReady }) => {
     });
 }
 
+const getUserActiveLobby = async (userId) => {
+    return await prisma.lobby.findFirst({
+        where: {
+            OR: [
+                { player1Id: Number(userId) },
+                { player2Id: Number(userId) }
+            ]
+        }
+    });
+};
+
 export const lobbyService = {
     getAllLobbies,
     getLobbyById,
     createLobby,
     joinLobby,
     leaveLobby,
-    setPlayerReady
+    setPlayerReady,
+    setLobbyOngoing,
+    getUserActiveLobby,
+    setLobbyWaiting
 };

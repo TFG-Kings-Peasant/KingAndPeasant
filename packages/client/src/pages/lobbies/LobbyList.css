@@ -82,3 +82,51 @@
   opacity: 0.7;
 }
 
+/* --- MODAL DE PERGAMINO --- */
+.parchment-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.parchment-form-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 8px;
+}
+
+.parchment-form-group label {
+    color: #4a3b2a;
+    font-weight: bold;
+}
+
+.parchment-form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px; /* Espacio entre botones */
+    margin-top: 1.5rem;
+    width: 100%; /* Asegura que ocupe todo el ancho del pergamino */
+}
+
+/* Fuerza a que todos los hijos directos (MenuButton) midan lo mismo */
+.parchment-form-actions > * {
+    flex: 1;
+    margin: 0 !important; /* Quita márgenes externos que puedan descuadrar */
+}
+
+.cancel-menu-btn {
+    background-color: #6d4c41 !important;
+    border-color: #4e342e !important;
+    text-transform: uppercase;
+    font-weight: bold;
+    
+}
+

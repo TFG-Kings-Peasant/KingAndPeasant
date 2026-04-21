@@ -98,3 +98,20 @@ export const setPlayerReady = async (lobbyId: number, playerId: string | null, i
     }
     return await response.json();
 };
+
+// packages/client/src/pages/lobbies/components/LobbyFetch.tsx (o similar)
+
+export const getMyLobby = async (token: string) => {
+    const response = await fetch(API_URL + '/myLobby', {
+        method: 'GET',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        }
+    });
+
+    if (!response.ok) {
+        return null;
+    }
+    return await response.json();
+};

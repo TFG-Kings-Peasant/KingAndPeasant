@@ -5,8 +5,6 @@ const getLobbies = async (req, res) => {
         const lobbies = await lobbyService.getAllLobbies();
         res.status(200).json(lobbies);
     } catch (error) {
-        console.error("🔴 ERROR CRÍTICO EN GET LOBBIES:");
-        console.error(error);
         res.status(500).json({ error: 'Error al obtener lobbies', details: error.message });
     }
 };
@@ -32,14 +30,16 @@ const getLobbyById = async (req, res) => {
 const createLobby = async (req, res) => {
     try {
         const { name, privacy, player1Id } = req.body;
-        
-        console.log("📥 Datos recibidos para crear lobby:", req.body);
 
         if (!name || !player1Id) {
             return res.status(400).json({ message: "Faltan datos requeridos" });
         }
 
         const newLobby = await lobbyService.createLobby({ name, privacy, player1Id });
+
+        const io = req.app.get('io');
+        io.emit('lobbyUpdated');
+
         res.status(201).json(newLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -57,6 +57,10 @@ const joinLobby = async (req, res) => {
         }
 
         const updatedLobby = await lobbyService.joinLobby({ lobbyId, player2Id });
+
+        const io = req.app.get('io');
+        io.emit('lobbyUpdated');
+
         res.status(200).json(updatedLobby);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -103,11 +107,27 @@ const setPlayerReady = async (req, res) => {
     }
 }
 
+const getMyLobby = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        if(!userId) {
+            return res.status(400).json({ message: "No se ha proporcionado un ID de usuario" });
+        }
+        console.log("userId:", userId);
+        const lobby = await lobbyService.getUserActiveLobby(userId);
+        
+        res.status(200).json(lobby || null); 
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const lobbyController = {
     getLobbies,
     getLobbyById,
     createLobby,
     joinLobby,
     leaveLobby,
-    setPlayerReady
+    setPlayerReady,
+    getMyLobby
 };

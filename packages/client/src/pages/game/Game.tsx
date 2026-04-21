@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
-import { getPosibleActions, type CardPosition, type CardState } from "./components/GameService";
 import "./GameChat.css";
+import { getPosibleActions, type CardPosition, type CardState } from "./components/GameService";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import "./Game.css";
+import { useGameData } from "../../hooks/useGameData";
+import { useGameActions } from "../../hooks/useGameActions";
 import { CARDS_THAT_CAN_INFILTRATE, peasantPendingUI, kingPendingUI } from "./components/pendingActionsUI";
 import type { SelectedCard } from "./components/pendingActionsUI";
+
+// Componentes
+import { DisconnectBanner } from "./components/DisconnectBanner"; // <-- NUEVO
 import { InfiltrateModal } from "./components/InfiltrateModal";
 import { CardDetailModal } from "./components/CardDetailModal";
 import { DiscardModal } from "./components/DiscardModal";
 import { DeckModal } from "./components/DeckModal";
 import { PendingActionModal } from "./components/PendingActionModal";
-import { useGameData } from "../../hooks/useGameData";
-import { useGameActions } from "../../hooks/useGameActions";
 import { RivalArea } from "./components/RivalArea";
 import { PlayerArea } from "./components/PlayerArea";
 import { GameSidebar } from "./components/GameSidebar";
 import { ErrorToast } from "./components/ErrorToast";
 import { AnnouncementModal } from "./components/AnnouncementModal";
+
+import "./Game.css";
+import "./GameChat.css";
 
 function Game() {
   const { id } = useParams();
@@ -29,15 +34,16 @@ function Game() {
   const [selectedCard, setSelectedCard] = useState<CardState | null>(null);
   const [actionTargets, setActionTargets] = useState<SelectedCard[]>([]);
   const [numberInput, setNumberInput] = useState<number | null>(null);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [showDeckModal, setShowDeckModal] = useState(false);
+  const [infiltrateCard, setInfiltrateCard] = useState<SelectedCard | null>(null);
+
   const activeConfig = gameState?.pendingAction
     ? (gameState.pendingAction.player === "king" 
         ? kingPendingUI[gameState.pendingAction.type] 
         : peasantPendingUI[gameState.pendingAction.type])
     : null;
-  const [showDiscardModal, setShowDiscardModal] = useState(false);
-  const [showDeckModal, setShowDeckModal] = useState(false);
 
-  const [infiltrateCard, setInfiltrateCard] = useState<SelectedCard | null>(null);
   useEffect(() => {
     setActionTargets([]);
   }, [gameState?.pendingAction?.type]);
@@ -56,7 +62,8 @@ function Game() {
   const isWinner = gameOverData ? Number(user?.id) === gameOverData.winnerId : false;
   const myRoleName = isKing ? "king" : "peasant";
   const rivalRoleName = isKing ? "peasant" : "king";
-  const pendingAction = gameState.pendingAction && gameState.pendingAction.player == myRoleName? true: false;
+  const pendingAction = gameState.pendingAction && gameState.pendingAction.player === myRoleName;
+  
   
   const myScore = gameState.scores[String(user.id)] || 0;
   const rivalScore = gameState.scores[String(rivalPlayer.id)] || 0;
@@ -98,28 +105,30 @@ function Game() {
   }
 
   return (
-  <div className="game-board">
-    <div className="game-main-area">
+    <div className="game-board">
       
-      <RivalArea 
-        rivalRoleName={rivalRoleName}
-        rivalPlayer={rivalPlayer}
-        actionTargets={actionTargets}
-        gameState={gameState}
-        activeConfig={activeConfig}
-        onSelectCard={handleSelectCard}
-      />
+      {/* Componente del Temporizador Aislado */}
+      <DisconnectBanner socket={socket} />
 
-      <PlayerArea 
-        myRoleName={myRoleName}
-        myPlayer={myPlayer}
-        actionTargets={actionTargets}
-        gameState={gameState}
-        activeConfig={activeConfig}
-        onSelectCard={handleSelectCard}
-      />
+      <div className="game-main-area">
+        <RivalArea 
+          rivalRoleName={rivalRoleName}
+          rivalPlayer={rivalPlayer}
+          actionTargets={actionTargets}
+          gameState={gameState}
+          activeConfig={activeConfig}
+          onSelectCard={handleSelectCard}
+        />
 
-    </div>
+        <PlayerArea 
+          myRoleName={myRoleName}
+          myPlayer={myPlayer}
+          actionTargets={actionTargets}
+          gameState={gameState}
+          activeConfig={activeConfig}
+          onSelectCard={handleSelectCard}
+        />
+      </div>
 
     <GameSidebar
         gameState={gameState}

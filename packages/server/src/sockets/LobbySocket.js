@@ -28,7 +28,7 @@ export const lobbySocket = (io, socket) => {
     socket.on('disconnecting', async () => {
         const rooms = Array.from(socket.rooms).filter(r => r !== socket.id);
         for (const room of rooms) {
-            if (room.startsWith('lobby')) {
+           if (typeof room === 'string' && room.startsWith('lobby')) {
                 const lobbyId = room.replace('lobby', '');
                 const userId = socket.userId;
 
@@ -41,20 +41,26 @@ export const lobbySocket = (io, socket) => {
 };
 
 const AuxLeaveLobby = async (userId, lobbyId, socket, io) => {
-        socket.leave(`lobby${lobbyId}`);
+    socket.leave(`lobby${lobbyId}`);
 
-        const timeoutId = setTimeout(async () => {
-            try {
-                await lobbyService.leaveLobby({ lobbyId: Number(lobbyId), playerId: Number(userId) });
-                
-                io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
-            } catch (error) {
+    const timeoutId = setTimeout(async () => {
+        try {
+            await lobbyService.leaveLobby({ lobbyId: Number(lobbyId), playerId: Number(userId) });
+            io.to(`lobby${lobbyId}`).emit('lobbyUpdated');
+            io.emit('lobbyUpdated');
+
+        } catch (error) {
+            // Silenciamos los errores de "Jugador no está en el lobby" o "Lobby no encontrado"
+            // ya que ocurren normalmente cuando el juego ya ha empezado o el usuario navega.
+            const message = error.message;
+            if (message !== 'El jugador no está en el lobby' && message !== 'Lobby no encontrado') {
                 console.error("Error al procesar salida del lobby:", error);
-            } finally {
-                pendingLeaves.delete(userId);
             }
-        }, 3000);
+        } finally {
+            pendingLeaves.delete(userId);
+        }
+    }, 5000);
 
-        pendingLeaves.set(userId, timeoutId);
+    pendingLeaves.set(userId, timeoutId);
 }
     
