@@ -104,6 +104,9 @@ const saveAndFormatGameState = async (gameId, gameState) => {
                 where: {idUser: loserId},
                 data: { games: {increment: 1}, losses: {increment: 1}}
             });
+
+            await lobbyService.setLobbyWaiting(Number(gameId));
+
             await redisClient.del(`game:${gameId}`);
             return winStatus;
         } else {
