@@ -283,8 +283,6 @@ export const peasantPendingActions = {
         }
         targetCard.isRevealed = true
         gameState.discardPile.push(targetCard);
-        
-        gameState.turn = 'king';
         return gameState;
     }
 }

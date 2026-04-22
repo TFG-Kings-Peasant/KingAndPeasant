@@ -27,8 +27,10 @@ export function canInfiltrate(card){
 
 export function drawCardFromDeck(gameState, userRol){
     if (gameState.deck.length <= 0) {
-        //TODO: CONDICION DE VICTORIA: No quedan cartas en la deck, condicion de victoria
-        console.log("CONDICION DE VICTORIA: No quedan cartas en la deck")
+        if (userRol === 'king') {
+            gameState.lastEvent = 'KING_EMPTY_DECK';
+        }
+        return gameState;
     }
     const card = gameState.deck.pop();
     if(userRol==='king'){

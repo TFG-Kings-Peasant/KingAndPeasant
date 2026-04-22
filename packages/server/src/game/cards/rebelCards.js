@@ -140,7 +140,7 @@ export const rebelCards = {
     },
     10: (gameState) => {
         //"King discards 2 cards, then Peasant takes 1 of them"
-        const kingHandLength = gameState.players.king.hand.lenth;
+        const kingHandLength = gameState.players.king.hand.length;
 
         if (kingHandLength === 0) {
             throw new Error('El rey no tiene cartas en la mano');

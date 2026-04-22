@@ -238,7 +238,7 @@ const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) =
             gameState.discardPile.push(playedCard); 
         }
     }   
-    if (!gameState.pendingAction) {
+    if (!gameState.pendingAction && !gameState.lastEvent) {
         gameState = changeTurnAndCheckDraw(gameState, userRol);
     }
     return await saveAndFormatGameState(gameId, gameState);
@@ -350,7 +350,7 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
     } else {
         throw new Error('No hay acciones pendientes para este jugador');
     }
-    if (!gameState.pendingAction) {
+    if (!gameState.pendingAction && !gameState.lastEvent) {
         gameState = changeTurnAndCheckDraw(gameState, userRol);
     }
     return await saveAndFormatGameState(gameId, gameState);
@@ -362,6 +362,9 @@ const checkWinCondition = async (gameState) => {
     const kingHand = gameState.players.king.hand;
     const kingTown = gameState.players.king.town;
     const peasantTown = gameState.players.peasant.town;
+    if (gameState.lastEvent === 'KING_EMPTY_DECK') {
+        return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'KING_DECK_EMPTY' };
+    }
     if (gameState.lastEvent === 'KING_REVEALED_ASSASSIN') {
         return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
     }
@@ -369,9 +372,6 @@ const checkWinCondition = async (gameState) => {
     if (discardPile.some(card => Number(card.templateId) === 16)) {
         return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'ASSASSIN_EXPOSED' };
     } 
-    if (deckCount === 0 && !gameState.pendingAction) {
-        return { isGameOver: true, winnerId: gameState.players.king.id, reason: 'PEASANT_DECK_EMPTY' };
-    }
     if (kingHand.some(card => Number(card.templateId) === 16) || 
         peasantTown.some(card => Number(card.templateId) === 16 && card.isRevealed && kingTown.length === 0)) {
         return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
