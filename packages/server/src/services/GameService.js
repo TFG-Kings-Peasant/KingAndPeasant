@@ -3,7 +3,7 @@ import { prisma } from '../../config/db.js';
 import { lobbyService } from './LobbyService.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
-import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
+import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, shuffleArray, checkTownGuards } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 import {rebelCards} from '../game/cards/rebelCards.js'
@@ -390,6 +390,7 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
             playedCard.isRevealed = false
             gameState.players.peasant.town.push(playedCard);
         }else{
+            checkTownGuards(gameState);
             playedCard.isRevealed = true
             gameState.players.king.town.push(playedCard);
         }

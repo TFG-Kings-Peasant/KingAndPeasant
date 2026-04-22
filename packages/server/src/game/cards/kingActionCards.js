@@ -1,3 +1,5 @@
+import { checkTownGuards } from "../../utils/helpers.js";
+
 export const kingActionCards = {
     10: (gameState) => {
         const kingTown = gameState.players.king.town;

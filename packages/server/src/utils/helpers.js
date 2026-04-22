@@ -26,10 +26,6 @@ export function canInfiltrate(card){
 
 
 export function drawCardFromDeck(gameState, userRol){
-    if (gameState.deck.length <= 0) {
-        //TODO: CONDICION DE VICTORIA: No quedan cartas en la deck, condicion de victoria
-        console.log("CONDICION DE VICTORIA: No quedan cartas en la deck")
-    }
     const card = gameState.deck.pop();
     if(userRol==='king'){
         gameState.players.king.hand.push(card);
@@ -37,4 +33,9 @@ export function drawCardFromDeck(gameState, userRol){
         gameState.players.peasant.hand.push(card);
     }
     return gameState;
+}
+
+export function checkTownGuards(gameState){
+    const currentGuards = gameState.players.king.town.filter(c => c.typeKing === 'Guard').length;
+    if (currentGuards >= 3) throw new Error('El rey no puede tener más de 3 guardias en el pueblo');
 }
