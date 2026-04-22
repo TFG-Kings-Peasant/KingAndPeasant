@@ -172,13 +172,13 @@ describe('gameService', () => {
     const strike = makeCard({ uid: 'strike-1', templateId: 10, typeKing: 'Action' });
     const guard1 = makeCard({
       uid: 'guard-1',
-      templateId: 1,
+      templateId: 2,
       typeKing: 'Guard',
       isRevealed: true,
     });
     const guard2 = makeCard({
       uid: 'guard-2',
-      templateId: 7,
+      templateId: 2,
       typeKing: 'Guard',
       isRevealed: true,
     });
@@ -210,33 +210,48 @@ describe('gameService', () => {
     ]);
   });
 
-  test('resolvePendingAction de Strike descarta dos guardias, roba una carta y pasa el turno', async () => {
-    const drawCard = makeCard({
-      uid: 'draw-1',
-      templateId: 12,
+  test('resolvePendingAction de Strike moviliza dos guardias, aplica sus efectos y luego roba', async () => {
+    const deckCard1 = makeCard({
+      uid: 'strike-deck-1',
+      templateId: 21,
       typeKing: 'Action',
     });
-    const fillerDeckCard = makeCard({
-      uid: 'draw-2',
-      templateId: 98,
+    const deckCard2 = makeCard({
+      uid: 'strike-deck-2',
+      templateId: 22,
+      typeKing: 'Action',
+    });
+    const deckCard3 = makeCard({
+      uid: 'strike-deck-3',
+      templateId: 23,
+      typeKing: 'Action',
+    });
+    const deckCard4 = makeCard({
+      uid: 'strike-deck-4',
+      templateId: 24,
+      typeKing: 'Action',
+    });
+    const drawCard = makeCard({
+      uid: 'strike-draw',
+      templateId: 25,
       typeKing: 'Action',
     });
     const guard1 = makeCard({
       uid: 'guard-a',
-      templateId: 1,
+      templateId: 2,
       typeKing: 'Guard',
       isRevealed: true,
     });
     const guard2 = makeCard({
       uid: 'guard-b',
-      templateId: 8,
+      templateId: 2,
       typeKing: 'Guard',
       isRevealed: true,
     });
 
     await saveState('game-resolve-strike', createState({
       turn: 'king',
-      deck: [fillerDeckCard, drawCard],
+      deck: [drawCard, deckCard4, deckCard3, deckCard2, deckCard1],
       pendingAction: {
         player: 'king',
         type: 'STRIKE',
@@ -258,15 +273,90 @@ describe('gameService', () => {
     expect(result.dtoKing.players.king.town).toEqual([]);
     expect(result.dtoKing.players.king.hand).toEqual([
       expect.objectContaining({
-        uid: 'draw-1',
-        templateId: 12,
+        uid: 'strike-draw',
+        templateId: 25,
       }),
     ]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
+      expect.objectContaining({ uid: 'strike-deck-1', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-deck-2', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-deck-3', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-deck-4', isRevealed: true }),
       expect.objectContaining({ uid: 'guard-a', isRevealed: true }),
       expect.objectContaining({ uid: 'guard-b', isRevealed: true }),
     ]));
-    expect(result.dtoKing.discardPile).toHaveLength(2);
+    expect(result.dtoKing.discardPile).toHaveLength(6);
+  });
+
+  test('resolvePendingAction de Strike conserva el segundo guardia si el primero abre una accion pendiente', async () => {
+    const spyGuard = makeCard({
+      uid: 'strike-spy',
+      templateId: 4,
+      typeKing: 'Guard',
+      isRevealed: true,
+    });
+    const millGuard = makeCard({
+      uid: 'strike-mill',
+      templateId: 2,
+      typeKing: 'Guard',
+      isRevealed: true,
+    });
+    const hiddenRebel = makeCard({
+      uid: 'strike-hidden-rebel',
+      templateId: 5,
+      typePeasant: 'Rebel',
+      isRevealed: false,
+    });
+    const deckCard1 = makeCard({ uid: 'strike-queued-1', templateId: 31 });
+    const deckCard2 = makeCard({ uid: 'strike-queued-2', templateId: 32 });
+    const drawCard = makeCard({ uid: 'strike-queued-draw', templateId: 33, typeKing: 'Action' });
+
+    await saveState('game-strike-chain', createState({
+      turn: 'king',
+      deck: [drawCard, deckCard2, deckCard1],
+      pendingAction: {
+        player: 'king',
+        type: 'STRIKE',
+      },
+      players: {
+        king: {
+          town: [spyGuard, millGuard],
+        },
+        peasant: {
+          town: [hiddenRebel],
+        },
+      },
+    }));
+
+    const step1 = await gameService.resolvePendingAction('game-strike-chain', 1, {
+      guardUid1: 'strike-spy',
+      guardUid2: 'strike-mill',
+    });
+
+    expect(step1.dtoKing.turn).toBe('king');
+    expect(step1.dtoKing.pendingAction).toEqual({
+      player: 'king',
+      type: 'SPY',
+    });
+
+    const result = await gameService.resolvePendingAction('game-strike-chain', 1, {
+      targetUid: 'strike-hidden-rebel',
+    });
+
+    expect(result.dtoKing.turn).toBe('peasant');
+    expect(result.dtoKing.pendingAction).toBeNull();
+    expect(result.dtoKing.players.peasant.town).toEqual([
+      expect.objectContaining({ uid: 'strike-hidden-rebel', isRevealed: true }),
+    ]);
+    expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
+      expect.objectContaining({ uid: 'strike-spy', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-mill', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-queued-1', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-queued-2', isRevealed: true }),
+    ]));
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'strike-queued-draw' }),
+    ]);
   });
 
   test('playHandCard con Rally roba dos cartas y deja la seleccion de ocultarlas como accion pendiente', async () => {

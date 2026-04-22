@@ -219,6 +219,36 @@ const infiltrateRebel = async (gameId, cardIndex, gameState) => {
     return await saveAndFormatGameState(gameId, gameState);
 }
 
+const mobilizeKingGuard = (gameState, playedCard) => {
+    const action = guardCards[playedCard.templateId];
+    if (!action) {
+        throw new Error('Carta de Guard no existe');
+    }
+
+    gameState = action(gameState, playedCard);
+    if (playedCard.templateId !== 9) {
+        gameState.discardPile.push(playedCard);
+    }
+    return gameState;
+}
+
+const continueQueuedKingMobilize = (gameState) => {
+    const queuedGuards = gameState.queuedKingMobilize || [];
+
+    while (queuedGuards.length > 0 && !gameState.pendingAction && !gameState.lastEvent) {
+        const nextGuard = queuedGuards.shift();
+        gameState = mobilizeKingGuard(gameState, nextGuard);
+    }
+
+    if (queuedGuards.length === 0) {
+        delete gameState.queuedKingMobilize;
+    } else {
+        gameState.queuedKingMobilize = queuedGuards;
+    }
+
+    return gameState;
+}
+
 const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) => {
     if (userRol === "peasant") {
         const action = rebelCards[playedCard.templateId];
@@ -229,14 +259,7 @@ const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) =
         gameState = action(gameState, playedCard);
 
     } else {
-        const action = guardCards[playedCard.templateId];
-        if (!action) {
-            throw new Error('Carta de Guard no existe');
-        }
-        gameState = action(gameState, playedCard)
-        if(playedCard.templateId !== 9){
-            gameState.discardPile.push(playedCard); 
-        }
+        gameState = mobilizeKingGuard(gameState, playedCard);
     }   
     if (!gameState.pendingAction && !gameState.lastEvent) {
         gameState = changeTurnAndCheckDraw(gameState, userRol);
@@ -349,6 +372,9 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
         }    
     } else {
         throw new Error('No hay acciones pendientes para este jugador');
+    }
+    if (!gameState.pendingAction && gameState.queuedKingMobilize?.length) {
+        gameState = continueQueuedKingMobilize(gameState);
     }
     if (!gameState.pendingAction && !gameState.lastEvent) {
         gameState = changeTurnAndCheckDraw(gameState, userRol);

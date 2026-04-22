@@ -47,16 +47,16 @@ export const kingPendingActions = {
         if (guardIndex1 === -1 || guardIndex2 === -1) {
             throw new Error('Carta no encontrada en el pueblo del rey');
         }
-        
-        const indices = [guardIndex1, guardIndex2].sort((a, b) => b - a);
 
-        const [guardCard1] = gameState.players.king.town.splice(indices[0], 1);
-        const [guardCard2] = gameState.players.king.town.splice(indices[1], 1);
+        const orderedIndices = [guardIndex1, guardIndex2].sort((a, b) => b - a);
+        const removedGuards = orderedIndices.map(index => gameState.players.king.town.splice(index, 1)[0]);
+        const guardCard1 = removedGuards.find(card => card.uid === guardUid1);
+        const guardCard2 = removedGuards.find(card => card.uid === guardUid2);
+
         guardCard1.isRevealed = true;
         guardCard2.isRevealed = true;
-        
-        gameState.discardPile.push(guardCard1, guardCard2);
-        //Aquí se llamaría a la función de efectos de cartas
+
+        gameState.queuedKingMobilize = [guardCard1, guardCard2];
         return gameState;
     },
     'ARREST': (gameState, targetData) => {
@@ -237,5 +237,4 @@ export const kingPendingActions = {
         return gameState;
     }
 }
-
 
