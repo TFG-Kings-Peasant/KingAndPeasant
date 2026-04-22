@@ -34,6 +34,14 @@ export const createLobby = async (name: string, privacy: string, player1Id: stri
     });
     if (!response.ok) {
         const error = await response.json();
+        
+        // NUEVO: Comprobamos si el backend envió un array de errores específicos
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            // Unimos todos los mensajes de error específicos en un solo string
+            const detailedErrors = error.errors.map((err: any) => err.message).join(', ');
+            throw new Error(detailedErrors);
+        }
+
         const errorMessage = error.message || error.error || 'Error desconocido del servidor';
         throw new Error(errorMessage);
     }
@@ -62,6 +70,12 @@ export const joinLobby = async (lobbyId: number, player2Id: string | null, token
     });
     if (!response.ok) {
         const error = await response.json();
+        
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            const detailedErrors = error.errors.map((err: any) => err.message).join(', ');
+            throw new Error(detailedErrors);
+        }
+
         const errorMessage = error.message || error.error || 'Error desconocido del servidor';
         throw new Error(errorMessage);
     }
@@ -95,6 +109,12 @@ export const setPlayerReady = async (lobbyId: number, playerId: string | null, i
     });
     if (!response.ok) {
         const error = await response.json();
+        
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            const detailedErrors = error.errors.map((err: any) => err.message).join(', ');
+            throw new Error(detailedErrors);
+        }
+
         const errorMessage = error.message || error.error || 'Error desconocido del servidor';
         throw new Error(errorMessage);
     }
