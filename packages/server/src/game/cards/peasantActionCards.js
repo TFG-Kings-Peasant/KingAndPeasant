@@ -58,7 +58,7 @@ export const peasantActionCards = {
     15: (gameState) => {
         for (let i = 0; i < 2; i++) {
             if (gameState.deck.length > 0){
-                const card = gameState.deck.shift();
+                const card = gameState.deck.pop();
                 gameState.players.peasant.hand.push(card);
             }
         }

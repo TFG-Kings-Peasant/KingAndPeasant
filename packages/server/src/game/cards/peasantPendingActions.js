@@ -1,4 +1,4 @@
-import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, sendCardToDiscard, shuffleArray } from "../../utils/helpers.js";
 
 
 export const peasantPendingActions = {
@@ -82,7 +82,8 @@ export const peasantPendingActions = {
         rebelCard.isRevealed = true;
         guardCard.isRevealed = true;
         
-        gameState.discardPile.push(rebelCard, guardCard);
+        gameState = sendCardToDiscard(gameState, rebelCard);
+        gameState = sendCardToDiscard(gameState, guardCard);
 
         return gameState;
     },
@@ -131,7 +132,7 @@ export const peasantPendingActions = {
             throw new Error('La carta ya estaba revelada');
         }
         targetCard.isRevealed = true;
-        gameState.discardPile.push(targetCard)
+        gameState = sendCardToDiscard(gameState, targetCard)
         
         return gameState;
     },
@@ -148,7 +149,7 @@ export const peasantPendingActions = {
 
         const [targetCard] = gameState.players.king.town.splice(cardIndex, 1);
         targetCard.isRevealed = true
-        gameState.discardPile.push(targetCard)
+        gameState = sendCardToDiscard(gameState, targetCard)
 
         // // 2. Robar 1 carta para el Peasant
         drawCardFromDeck(gameState, 'peasant')
@@ -282,7 +283,7 @@ export const peasantPendingActions = {
             throw new Error(`La carta seleccionada no es un Guard`);
         }
         targetCard.isRevealed = true
-        gameState.discardPile.push(targetCard);
+        gameState = sendCardToDiscard(gameState, targetCard);
         return gameState;
     }
 }

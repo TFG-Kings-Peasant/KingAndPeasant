@@ -1,4 +1,4 @@
-import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, sendCardToDiscard, shuffleArray } from "../../utils/helpers.js";
 
 export const rebelCards = {
     1: (gameState, playedCard) => {
@@ -90,7 +90,7 @@ export const rebelCards = {
             if (card.typeKing === "Guard") {
                 guardsInTown = true;
                 card.isRevealed = true;     
-                gameState.discardPile.push(card);     
+                gameState = sendCardToDiscard(gameState, card);     
                 gameState.players.king.town.splice(i, 1);     
 
             }
@@ -102,7 +102,7 @@ export const rebelCards = {
             if (card.typePeasant === "Rebel") {
                 rebelsInTown = true;
                 card.isRevealed = true;     
-                gameState.discardPile.push(card);     
+                gameState = sendCardToDiscard(gameState, card);     
                 gameState.players.peasant.town.splice(i, 1);   
 
             }
@@ -142,7 +142,7 @@ export const rebelCards = {
         //"King discards 2 cards, then Peasant takes 1 of them"
         const kingHandLength = gameState.players.king.hand.length;
 
-        if (kingHandLength === 0) {
+        if (kingHandLength < 2) {
             throw new Error('El rey no tiene cartas en la mano');
 
         }

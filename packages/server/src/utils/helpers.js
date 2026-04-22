@@ -24,6 +24,17 @@ export function canInfiltrate(card){
     return card.templateId === 13 || card.templateId === 16;
 }
 
+export function isExileCard(card){
+    return Number(card?.templateId) === 9 || Number(card?.templateId) === 13;
+}
+
+export function sendCardToDiscard(gameState, card){
+    if (!card) return gameState;
+    if (!isExileCard(card)) {
+        gameState.discardPile.push(card);
+    }
+    return gameState;
+}
 
 export function drawCardFromDeck(gameState, userRol){
     if (gameState.deck.length <= 0) {

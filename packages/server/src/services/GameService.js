@@ -2,7 +2,7 @@ import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
-import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, shuffleArray } from '../utils/helpers.js';
+import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, sendCardToDiscard, shuffleArray } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 import {rebelCards} from '../game/cards/rebelCards.js'
@@ -122,15 +122,15 @@ const saveAndFormatGameState = async (gameId, gameState) => {
         if (decoyIndex !== -1) {
             // Exiliar el DECOY: Lo eliminamos directamente de la partida
             gameState.players.king.hand.splice(decoyIndex, 1);
-            
-            // Le damos una acción obligatoria al campesino para que elimine un guardia
-            gameState.pendingAction = {
-                type: 'DECOY',
-                player: 'peasant'
-            };
-            
-            // Aseguramos que el turno lo tiene el campesino para que pueda actuar
-            gameState.turn = 'peasant';
+
+            if (gameState.players.king.town.length > 0) {
+                gameState.pendingAction = {
+                    type: 'DECOY',
+                    player: 'peasant'
+                };
+                
+                gameState.turn = 'peasant';
+            }
         }
     }
 
@@ -162,7 +162,7 @@ const transformGameStateDTO = (gameState) => {
         card.isRevealed ? card : {uid: card.uid}
     );
     dtoKing.players.peasant.town = dtoKing.players.peasant.town.map(card => 
-        card.isRevealed ? card : {uid: card.uid}
+        (card.isRevealed || card.seenByKing) ? card : {uid: card.uid}
     );
 
     dtoPeasant.players.king.hand = dtoPeasant.players.king.hand.map(card =>
@@ -226,9 +226,7 @@ const mobilizeKingGuard = (gameState, playedCard) => {
     }
 
     gameState = action(gameState, playedCard);
-    if (playedCard.templateId !== 9) {
-        gameState.discardPile.push(playedCard);
-    }
+    gameState = sendCardToDiscard(gameState, playedCard);
     return gameState;
 }
 
@@ -262,7 +260,7 @@ const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) =
         gameState = mobilizeKingGuard(gameState, playedCard);
     }   
     if (!gameState.pendingAction && !gameState.lastEvent) {
-        gameState = changeTurnAndCheckDraw(gameState, userRol);
+        changeTurn(gameState);
     }
     return await saveAndFormatGameState(gameId, gameState);
 }
@@ -377,13 +375,12 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
         gameState = continueQueuedKingMobilize(gameState);
     }
     if (!gameState.pendingAction && !gameState.lastEvent) {
-        gameState = changeTurnAndCheckDraw(gameState, userRol);
+        changeTurn(gameState);
     }
     return await saveAndFormatGameState(gameId, gameState);
 }
 
 const checkWinCondition = async (gameState) => {
-    const deckCount = gameState.deck.length;
     const discardPile = gameState.discardPile;
     const kingHand = gameState.players.king.hand;
     const kingTown = gameState.players.king.town;
@@ -402,9 +399,6 @@ const checkWinCondition = async (gameState) => {
         peasantTown.some(card => Number(card.templateId) === 16 && card.isRevealed && kingTown.length === 0)) {
         return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
     }
-    if (gameState.lastEvent === 'CONDEMN_FAIL') {
-        return { isGameOver: true, winnerId: gameState.players.peasant.id, reason: 'ASSASSIN_STRIKE' };
-    }
     return { isGameOver: false};
 }
 
@@ -413,11 +407,14 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
             playedCard.isRevealed = false
             gameState.players.peasant.town.push(playedCard);
         }else{
+            if (gameState.players.king.town.length >= 3) {
+                throw new Error('El rey no puede tener mas de 3 guardias en el pueblo');
+            }
             playedCard.isRevealed = true
             gameState.players.king.town.push(playedCard);
         }
         gameState.pendingAction = null;
-        gameState = changeTurnAndCheckDraw(gameState, userRol);
+        changeTurn(gameState);
 
         return await saveAndFormatGameState(gameId, gameState);
 }
@@ -453,11 +450,7 @@ const condemnARebel = async (gameId, isDeck, cardUid, userId) => {
         throw new Error('No se puede condenar a un rebelde revelado');
     }
     card.isRevealed = true;
-    gameState.discardPile.push(card);
-
-    if (Number(card.templateId) !== 16) {
-        gameState.lastEvent = 'CONDEMN_FAIL';
-    }
+    gameState = sendCardToDiscard(gameState, card);
 
     return await saveAndFormatGameState(gameId, gameState);
 

@@ -1,4 +1,4 @@
-import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, sendCardToDiscard, shuffleArray } from "../../utils/helpers.js";
 
 
 export const kingPendingActions = {
@@ -29,6 +29,9 @@ export const kingPendingActions = {
     'REASSEMBLE2': (gameState, targetData) => {
         if (!targetData || !targetData.guardUid) {
             return gameState;
+        }
+        if (gameState.players.king.town.length >= 3) {
+            throw new Error('El rey no puede tener mas de 3 guardias en el pueblo');
         }
         const guardIndex = gameState.players.king.hand.findIndex(c => c.uid === targetData.guardUid);
         if (guardIndex === -1) throw new Error('Guardia no encontrado en la mano del jugador');
@@ -69,7 +72,7 @@ export const kingPendingActions = {
             }
             const card = gameState.deck.pop();
             card.isRevealed = true;
-            gameState.discardPile.push(card);
+            gameState = sendCardToDiscard(gameState, card);
         } else if (targetData.option === 'TOWN') {
             if (gameState.players.peasant.town.length === 0) {
                 throw new Error('No hay cartas en el pueblo para descartar');
@@ -83,7 +86,7 @@ export const kingPendingActions = {
             }
             const card = gameState.players.peasant.town.splice(cardIndex, 1)[0];
             card.isRevealed = true;
-            gameState.discardPile.push(card);
+            gameState = sendCardToDiscard(gameState, card);
         }
         else {
             throw new Error('Opción no válida');
@@ -106,7 +109,7 @@ export const kingPendingActions = {
             }
             const [handCard] = gameState.players.king.hand.splice(index, 1);
             handCard.isRevealed = true
-            gameState.discardPile.push(handCard);
+            gameState = sendCardToDiscard(gameState, handCard);
         });
         const amount = discardUids
         gameState.pendingAction = {
@@ -122,6 +125,9 @@ export const kingPendingActions = {
         //"Draw 1 card, then Ready up to 1 Guard"
         const targetUid = targetData.targetUid || -1
         if(targetUid !== -1){
+            if (gameState.players.king.town.length >= 3) {
+                throw new Error('El rey no puede tener mas de 3 guardias en el pueblo');
+            }
             const index = gameState.players.king.hand.findIndex(c => c.uid === targetUid);
             if (index === -1) {
                 throw new Error(`La carta con UID ${uid} no está en la mano del rey`);
@@ -159,7 +165,7 @@ export const kingPendingActions = {
             throw new Error(`La carta con UID ${targetUid} no está en la mano del rey`);
         }
         const townCard = gameState.players.peasant.town[index];
-        townCard.isRevealed = true
+        townCard.seenByKing = true;
 
         if (Number(townCard.templateId) === 16) {
             gameState.lastEvent = 'KING_REVEALED_ASSASSIN';
@@ -193,7 +199,7 @@ export const kingPendingActions = {
         gameState.deck[cardIndex].isRevealed = true;
         if(Number(gameState.deck[cardIndex].templateId) === 16){
             const [assassinCard] = gameState.deck.splice(cardIndex, 1);
-            gameState.discardPile.push(assassinCard);
+            gameState = sendCardToDiscard(gameState, assassinCard);
             gameState.lastEvent = 'KING_REVEALED_ASSASSIN';
             gameState.pendingAction = null;
             return gameState;
@@ -237,4 +243,3 @@ export const kingPendingActions = {
         return gameState;
     }
 }
-

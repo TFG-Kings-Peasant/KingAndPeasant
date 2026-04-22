@@ -96,6 +96,50 @@ describe('gameService', () => {
     prismaMock.card.findMany.mockResolvedValue([]);
   });
 
+  test('startGame inicializa la partida correctamente con las reglas de King and Peasant', async () => {
+    const mockCatalog = [
+      { id: 1, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 2, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 3, copies: 1, typeKing: 'Guard', typePeasant: 'Action' },
+      { id: 4, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 5, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 6, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 7, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 8, copies: 1, typeKing: 'Guard', typePeasant: 'Rebel' },
+      { id: 9, copies: 1, typeKing: 'Guard', typePeasant: 'None' },
+      { id: 13, copies: 1, typeKing: 'None', typePeasant: 'Rebel' },
+      { id: 16, copies: 1, typeKing: 'None', typePeasant: 'Rebel' },
+    ];
+
+    prismaMock.card.findMany.mockResolvedValue(mockCatalog);
+
+    await gameService.createGame('game-new', 1, 2);
+
+    expect(redisMock.set).toHaveBeenCalledWith('game:game-new', expect.any(String));
+
+    const savedStateStr = redisStore.get('game:game-new');
+    const initialState = JSON.parse(savedStateStr);
+
+    expect(initialState.era).toBe(1);
+    expect(initialState.turnNumber).toBe(1);
+    expect(initialState.turn).toBe('peasant');
+    expect(initialState.discardPile).toHaveLength(0);
+    expect(initialState.pendingAction).toBeNull();
+    expect(initialState.players.king.id).toBe(1);
+    expect(initialState.players.peasant.id).toBe(2);
+    expect(initialState.players.king.hand).toHaveLength(5);
+    expect(initialState.players.peasant.hand).toHaveLength(5);
+
+    const kingHasSentinel = initialState.players.king.hand.some(c => c.templateId === 9);
+    const peasantHasAssassin = initialState.players.peasant.hand.some(c => c.templateId === 16);
+    const peasantHasDecoy = initialState.players.peasant.hand.some(c => c.templateId === 13);
+
+    expect(kingHasSentinel).toBe(true);
+    expect(peasantHasAssassin).toBe(true);
+    expect(peasantHasDecoy).toBe(true);
+    expect(initialState.deck).toHaveLength(1);
+  });
+
   test('playHandCard oculta un rebelde del campesino en el pueblo y devuelve el estado esperado', async () => {
     const hiddenRebel = makeCard({
       uid: 'rebel-1',
@@ -210,7 +254,7 @@ describe('gameService', () => {
     ]);
   });
 
-  test('resolvePendingAction de Strike moviliza dos guardias, aplica sus efectos y luego roba', async () => {
+  test('resolvePendingAction de Strike moviliza dos guardias y aplica sus efectos', async () => {
     const deckCard1 = makeCard({
       uid: 'strike-deck-1',
       templateId: 21,
@@ -271,12 +315,7 @@ describe('gameService', () => {
     expect(result.dtoKing.turn).toBe('peasant');
     expect(result.dtoKing.pendingAction).toBeNull();
     expect(result.dtoKing.players.king.town).toEqual([]);
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({
-        uid: 'strike-draw',
-        templateId: 25,
-      }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'strike-deck-1', isRevealed: true }),
       expect.objectContaining({ uid: 'strike-deck-2', isRevealed: true }),
@@ -346,7 +385,7 @@ describe('gameService', () => {
     expect(result.dtoKing.turn).toBe('peasant');
     expect(result.dtoKing.pendingAction).toBeNull();
     expect(result.dtoKing.players.peasant.town).toEqual([
-      expect.objectContaining({ uid: 'strike-hidden-rebel', isRevealed: true }),
+      expect.objectContaining({ uid: 'strike-hidden-rebel', isRevealed: false, seenByKing: true }),
     ]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'strike-spy', isRevealed: true }),
@@ -354,9 +393,7 @@ describe('gameService', () => {
       expect.objectContaining({ uid: 'strike-queued-1', isRevealed: true }),
       expect.objectContaining({ uid: 'strike-queued-2', isRevealed: true }),
     ]));
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'strike-queued-draw' }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
   });
 
   test('playHandCard con Rally roba dos cartas y deja la seleccion de ocultarlas como accion pendiente', async () => {
@@ -467,9 +504,7 @@ describe('gameService', () => {
 
     expect(result.dtoKing.turn).toBe('peasant');
     expect(result.dtoKing.pendingAction).toBeNull();
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'king-draw-after-arrest' }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
     expect(result.dtoKing.players.peasant.town).toEqual([]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'arrest-1', templateId: 11, isRevealed: true }),
@@ -587,7 +622,7 @@ describe('gameService', () => {
     ]);
   });
 
-  test('Spy revela un rebelde oculto del pueblo campesino y roba una carta al terminar', async () => {
+  test('Spy deja al rey ver un rebelde oculto sin revelarlo publicamente', async () => {
     const spy = makeCard({
       uid: 'spy-1',
       templateId: 4,
@@ -630,11 +665,11 @@ describe('gameService', () => {
     });
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'spy-draw' }),
-    ]);
     expect(result.dtoKing.players.peasant.town).toEqual([
-      expect.objectContaining({ uid: 'spy-target', isRevealed: true }),
+      expect.objectContaining({ uid: 'spy-target', isRevealed: false, seenByKing: true }),
+    ]);
+    expect(result.dtoPeasant.players.peasant.town).toEqual([
+      expect.objectContaining({ uid: 'spy-target', isRevealed: false, seenByKing: true }),
     ]);
   });
 
@@ -884,9 +919,7 @@ describe('gameService', () => {
     expect(result.dtoKing.players.king.town).toEqual([
       expect.objectContaining({ uid: 'king-discard-guard', isRevealed: true }),
     ]);
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'king-reassemble-deck' }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
   });
 
   test('Revolt inserta rebeldes en el mazo y revela el resto del pueblo', async () => {
@@ -1159,16 +1192,14 @@ describe('gameService', () => {
     const result = await gameService.resolvePendingAction('game-watchman', 1, {});
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'watchman-draw' }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
     expect(result.dtoKing.players.peasant.hand).toEqual([
       { uid: 'watch-hand-1' },
       { uid: 'watch-hand-2' },
     ]);
   });
 
-  test('Crier roba una carta, permite bajar un guardia y roba otra al finalizar', async () => {
+  test('Crier roba una carta y permite bajar un guardia', async () => {
     const crier = makeCard({
       uid: 'crier-1',
       templateId: 1,
@@ -1214,10 +1245,9 @@ describe('gameService', () => {
     expect(result.dtoKing.players.king.town).toEqual([
       expect.objectContaining({ uid: 'crier-guard', isRevealed: true }),
     ]);
-    expect(result.dtoKing.players.king.hand).toEqual(expect.arrayContaining([
+    expect(result.dtoKing.players.king.hand).toEqual([
       expect.objectContaining({ uid: 'crier-draw-1' }),
-      expect.objectContaining({ uid: 'crier-draw-2' }),
-    ]));
+    ]);
   });
 
   test('Inquisitor moviliza un guardia de la mano y activa su efecto', async () => {
@@ -1311,10 +1341,11 @@ describe('gameService', () => {
 
       expect(result.dtoKing.turn).toBe('peasant');
       expect(result.dtoKing.pendingAction).toBeNull();
-      expect(result.dtoKing.players.king.hand).toEqual([
-        expect.objectContaining({ uid: 'advisor-a' }),
+      expect(result.dtoKing.players.king.hand).toEqual([]);
+      expect(result.dtoKing.deck).toEqual([
+        { uid: 'advisor-b' },
+        { uid: 'advisor-a' },
       ]);
-      expect(result.dtoKing.deck).toEqual([{ uid: 'advisor-b' }]);
     } finally {
       Math.random = originalRandom;
     }
@@ -1353,12 +1384,10 @@ describe('gameService', () => {
     });
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'sentinel-a' }),
-    ]);
     expect(result.dtoKing.deck).toEqual([
       { uid: 'sentinel-b' },
       { uid: 'sentinel-c' },
+      { uid: 'sentinel-a' },
     ]);
   });
 
@@ -1459,7 +1488,7 @@ describe('gameService', () => {
     }
   });
 
-  test('Mill descarta dos cartas del mazo y el rey roba una al terminar', async () => {
+  test('Mill descarta dos cartas del mazo', async () => {
     const mill = makeCard({
       uid: 'mill-1',
       templateId: 2,
@@ -1483,9 +1512,7 @@ describe('gameService', () => {
     const result = await gameService.playTownCard('game-mill', 'mill-1', {}, 1);
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'mill-a' }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'mill-1', isRevealed: true }),
       expect.objectContaining({ uid: 'mill-c', isRevealed: true }),
@@ -1493,7 +1520,7 @@ describe('gameService', () => {
     ]));
   });
 
-  test('Mass reveal muestra todos los rebeldes y roba una carta al rey si no hay Assassin', async () => {
+  test('Mass reveal muestra todos los rebeldes sin robar carta extra', async () => {
     const massReveal = makeCard({
       uid: 'reveal-1',
       templateId: 6,
@@ -1534,9 +1561,7 @@ describe('gameService', () => {
     const result = await gameService.playTownCard('game-mass-reveal', 'reveal-1', {}, 1);
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([
-      expect.objectContaining({ uid: 'reveal-draw' }),
-    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([]);
     expect(result.dtoKing.players.peasant.town).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'reveal-r1', isRevealed: true }),
       expect.objectContaining({ uid: 'reveal-r2', isRevealed: true }),
