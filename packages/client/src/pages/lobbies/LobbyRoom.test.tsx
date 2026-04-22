@@ -40,7 +40,7 @@ vi.mock('../game/components/GameService', () => ({
   startGame: vi.fn(),
 }));
 
-// 4. Mock del Modal para interceptar fácilmente sus eventos (onClose, onConfirm)
+// 4. Mock del Modal
 vi.mock('../game/components/AnnouncementModal', () => ({
   AnnouncementModal: ({ isOpen, onClose, onConfirm, confirmText, title, message }: any) => {
     if (!isOpen) return null;
@@ -57,22 +57,20 @@ vi.mock('../game/components/AnnouncementModal', () => ({
 
 describe('LobbyRoom Component', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks(); 
     
-    // Usuario logueado por defecto
     (useUser as any).mockReturnValue({ 
         user: { id: 1, name: 'TestUser', authToken: 'fake-token' }, 
         isLogin: true 
     });
     
-    // Socket conectado por defecto
     (useAuth as any).mockReturnValue({ 
       socket: { emit: vi.fn(), on: vi.fn(), off: vi.fn() } 
     });
   });
 
   test('Renderiza la información de la sala y los jugadores', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
       id: 1, name: 'Sala Épica', player1Id: 1, player1Ready: false, player2Id: 2, player2Ready: true, status: 'WAITING'
     });
 
@@ -80,10 +78,8 @@ describe('LobbyRoom Component', () => {
     expect(await screen.findByText(/SALA #1/i)).toBeInTheDocument();
   });
 
-  // --- NUEVOS TESTS PARA CUBRIR TODAS LAS LÍNEAS FALTANTES ---
-
   test('Línea cubierta: onClick={() => navigate(`/game/${id}`)} - Reconectar partida', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, name: 'Sala Épica', player1Id: 1, player2Id: 2, status: 'ONGOING'
     });
 
@@ -96,9 +92,8 @@ describe('LobbyRoom Component', () => {
   });
 
   test('Línea cubierta: if (!isLogin) return; en handleToggleReady', async () => {
-    (useUser as any).mockReturnValue({ user: { id: 1 }, isLogin: false });
-    
-    (getLobbyById as any).mockResolvedValueOnce({
+    (useUser as any).mockReturnValue({ user: { id: 1, authToken: 'fake-token' }, isLogin: false });
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, player1Ready: false, status: 'WAITING'
     });
     
@@ -109,10 +104,10 @@ describe('LobbyRoom Component', () => {
 
     expect(setPlayerReady).not.toHaveBeenCalled(); 
   });
-  
+
   test('Línea cubierta: if (!socket) return; en handleToggleReady', async () => {
     (useAuth as any).mockReturnValue({ socket: null });
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, player1Ready: false, status: 'WAITING'
     });
     
@@ -125,13 +120,12 @@ describe('LobbyRoom Component', () => {
   });
 
   test('Línea cubierta: if (lobby.status === "ONGOING") return; en handleToggleReady', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, player1Ready: false, status: 'ONGOING'
     });
     
     render(<BrowserRouter><LobbyRoom /></BrowserRouter>);
 
-    // Si status es ONGOING, el componente ignora el click de listarse
     const btnReady = await screen.findByRole('button', { name: /NO LISTO/i });
     fireEvent.click(btnReady);
 
@@ -139,7 +133,7 @@ describe('LobbyRoom Component', () => {
   });
 
   test('Línea cubierta: catch de handleToggleReady (Error al cambiar estado)', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, player1Ready: false, status: 'WAITING'
     });
     
@@ -147,7 +141,6 @@ describe('LobbyRoom Component', () => {
 
     const btnReady = await screen.findByRole('button', { name: /NO LISTO/i });
     
-    // Simulamos fallo en la petición
     (setPlayerReady as any).mockRejectedValueOnce(new Error('API Error'));
     fireEvent.click(btnReady);
 
@@ -157,20 +150,17 @@ describe('LobbyRoom Component', () => {
   });
 
   test('Línea cubierta: catch de executeLeave (No se pudo salir del lobby)', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, status: 'WAITING'
     });
     
     render(<BrowserRouter><LobbyRoom /></BrowserRouter>);
 
-    // Click en salir abre el modal
     const btnLeave = await screen.findByRole('button', { name: /SALIR DEL LOBBY/i });
     fireEvent.click(btnLeave);
 
-    // Simulamos que el hook navigate falle para forzar el bloque catch de executeLeave
     mockNavigate.mockImplementationOnce(() => { throw new Error('Simulated Navigation Error'); });
     
-    // Confirmar en el modal
     const btnConfirmLeave = await screen.findByRole('button', { name: /ABANDONAR/i });
     fireEvent.click(btnConfirmLeave);
 
@@ -180,26 +170,32 @@ describe('LobbyRoom Component', () => {
   });
 
   test('Línea cubierta: if (!lobby || !user || !user.authToken) return; en executeStartGame', async () => {
-    // Simulamos un usuario logueado PERO sin authToken
-    (useUser as any).mockReturnValue({ user: { id: 1, authToken: null }, isLogin: true });
+    // 1. Empezamos con el usuario validado y con TOKEN para que la página cargue correctamente
+    const activeUser = { id: 1, authToken: 'fake-token' };
+    (useUser as any).mockReturnValue({ user: activeUser, isLogin: true });
     
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, player2Id: 2, player1Ready: true, player2Ready: true, status: 'WAITING'
     });
     
     render(<BrowserRouter><LobbyRoom /></BrowserRouter>);
 
+    // Esperamos a que pase la pantalla de carga
     const btnStart = await screen.findByRole('button', { name: /COMENZAR PARTIDA/i });
     fireEvent.click(btnStart);
+
+    // 2. ¡HACEMOS TRAMPA! Le robamos el token al usuario en memoria justo antes de darle al modal
+    activeUser.authToken = null as any;
 
     const btnConfirm = await screen.findByRole('button', { name: /¡A LA BATALLA!/i });
     fireEvent.click(btnConfirm);
 
-    expect(startGame).not.toHaveBeenCalled(); // Corta por no tener token
+    // 3. Verificamos que el return cortó la ejecución
+    expect(startGame).not.toHaveBeenCalled(); 
   });
 
   test('Línea cubierta: catch de executeStartGame (No se pudo comenzar la partida)', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, player2Id: 2, player1Ready: true, player2Ready: true, status: 'WAITING'
     });
     
@@ -208,7 +204,6 @@ describe('LobbyRoom Component', () => {
     const btnStart = await screen.findByRole('button', { name: /COMENZAR PARTIDA/i });
     fireEvent.click(btnStart);
 
-    // Simulamos que startGame lanza un error
     (startGame as any).mockRejectedValueOnce(new Error('Game start error'));
     
     const btnConfirm = await screen.findByRole('button', { name: /¡A LA BATALLA!/i });
@@ -220,7 +215,7 @@ describe('LobbyRoom Component', () => {
   });
 
   test('Línea cubierta: () => setAnnouncement(null) al cerrar el Modal', async () => {
-    (getLobbyById as any).mockResolvedValueOnce({
+    (getLobbyById as any).mockResolvedValue({
         id: 1, player1Id: 1, status: 'WAITING'
     });
     
@@ -229,14 +224,11 @@ describe('LobbyRoom Component', () => {
     const btnLeave = await screen.findByRole('button', { name: /SALIR DEL LOBBY/i });
     fireEvent.click(btnLeave);
 
-    // Comprobamos que se abre
     expect(screen.getByTestId('mock-announcement-modal')).toBeInTheDocument();
 
-    // Pulsamos el botón onClose de nuestro Mock (que invoca la función setAnnouncement(null) del padre)
     const closeBtn = screen.getByRole('button', { name: /CERRAR_MOCK/i });
     fireEvent.click(closeBtn);
 
-    // Verificamos que desaparece el modal (porque su estado ahora es null)
     await waitFor(() => {
         expect(screen.queryByTestId('mock-announcement-modal')).not.toBeInTheDocument();
     });
