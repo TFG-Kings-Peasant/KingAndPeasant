@@ -110,12 +110,18 @@ export const peasantPendingActions = {
                 gameState.deck.splice(item.position, 0, card);
             }
         }
+        const rebelsToDispatch = [];
         gameState.players.peasant.town.forEach(card => {
             if (!card.isRevealed) {
                 card.isRevealed = true;
-                //Aquí se llamara a la función de efectos de cartas
+                rebelsToDispatch.push(card);
             }
         });
+
+        if (rebelsToDispatch.length > 0) {
+            gameState.queuedPeasantDispatch = rebelsToDispatch;
+        }
+
         return gameState;
     },
 //REBEL Cards

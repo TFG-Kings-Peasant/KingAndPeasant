@@ -967,8 +967,11 @@ describe('gameService', () => {
       deckPositions: [0],
     });
 
-    expect(result.dtoPeasant.turn).toBe('king');
-    expect(result.dtoPeasant.pendingAction).toBeNull();
+    expect(result.dtoPeasant.turn).toBe('peasant');
+    expect(result.dtoPeasant.pendingAction).toEqual({
+      type: 'RAT',
+      player: 'peasant',
+    });
     expect(result.dtoPeasant.players.peasant.town).toEqual([
       expect.objectContaining({ uid: 'revolt-stays', isRevealed: true }),
     ]);

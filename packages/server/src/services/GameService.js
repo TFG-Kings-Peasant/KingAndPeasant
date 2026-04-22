@@ -247,6 +247,34 @@ const continueQueuedKingMobilize = (gameState) => {
     return gameState;
 }
 
+const dispatchPeasantRebel = (gameState, playedCard) => {
+    const action = rebelCards[playedCard.templateId];
+    if (!action) {
+        throw new Error('Carta de Rebel no existe');
+    }
+    
+    gameState = action(gameState, playedCard);
+    
+    return gameState;
+}
+
+const continueQueuedPeasantDispatch = (gameState) => {
+    const queuedRebels = gameState.queuedPeasantDispatch || [];
+
+    while (queuedRebels.length > 0 && !gameState.pendingAction && !gameState.lastEvent) {
+        const nextRebel = queuedRebels.shift();
+        gameState = dispatchPeasantRebel(gameState, nextRebel);
+    }
+
+    if (queuedRebels.length === 0) {
+        delete gameState.queuedPeasantDispatch;
+    } else {
+        gameState.queuedPeasantDispatch = queuedRebels;
+    }
+
+    return gameState;
+}
+
 const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) => {
     if (userRol === "peasant") {
         const action = rebelCards[playedCard.templateId];
@@ -373,6 +401,9 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
     }
     if (!gameState.pendingAction && gameState.queuedKingMobilize?.length) {
         gameState = continueQueuedKingMobilize(gameState);
+    }
+    if (!gameState.pendingAction && gameState.queuedPeasantDispatch?.length) {
+        gameState = continueQueuedPeasantDispatch(gameState);
     }
     if (!gameState.pendingAction && !gameState.lastEvent) {
         changeTurn(gameState);
