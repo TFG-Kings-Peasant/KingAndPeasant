@@ -1,5 +1,5 @@
 import { gameService } from '../services/GameService.js';
-
+import { cancelLobbyLeave } from './LobbySocket.js'
 
 
 const disconnectTimers = new Map();
@@ -14,6 +14,8 @@ export const gameSocket = (io, socket) => {
         socket.join(`${roomName}_user_${numericUserId}`);
         socket.userId = numericUserId; 
         socket.roomName = roomName;
+
+        cancelLobbyLeave(numericUserId);
 
         console.log(`Socket ${socket.id} (Usuario ${userId}) se unió a: ${roomName}`);
 

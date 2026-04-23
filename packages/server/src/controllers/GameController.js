@@ -145,6 +145,27 @@ const passTurn = async (req, res) => {
     }
 }
 
+const surrender = async (req, res) => {
+    try {
+        const gameId = req.params.id;
+        const userId  = Number(req.user.id);
+
+        const result = await gameService.surrender(gameId, userId);
+        const io = req.app.get('io');
+        
+         if (result.isGameOver) {
+            io.to(`game_${gameId}`).emit('game:finished', result);
+        } else {
+            sendGameStateUpdate(req, result.dtoKing, result.dtoPeasant, gameId);
+        }
+
+        res.status(200).json({ message: "Rendición exitosa" });
+    } catch (error) {
+        console.error("Error al rendirse:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const gameController = {
     createGame,
     getGameStatus,
@@ -152,5 +173,6 @@ export const gameController = {
     resolveAction,
     peasantDrawACard,
     passTurn,
-    condemnARebel
+    condemnARebel,
+    surrender
 }

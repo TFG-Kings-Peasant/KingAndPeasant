@@ -15,6 +15,7 @@ interface GameSidebarProps {
   onPassTurn: () => void;
   onDrawCard: () => void;
   onCondemnDeckCard: () => void;
+  onSurrenderClick: () => void;
 }
 
 export const GameSidebar: React.FC<GameSidebarProps> = ({
@@ -30,10 +31,19 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({
   onPassTurn,
   onDrawCard,
   onCondemnDeckCard,
+  onSurrenderClick,
 }) => {
   const canPerformStandardActions = gameState.turn === myRoleName && !gameState.pendingAction;
   return (
     <div className="game-sidebar">
+      {/* Botón de rendición */}
+        <button 
+          className="surrender-button" 
+          onClick={onSurrenderClick}
+          style={{ marginTop: 'auto', backgroundColor: '#5c0000', color: 'white' }}
+        >
+          Rendirse
+        </button>
       {/* Marcador */}
       <div
         className="score-board"

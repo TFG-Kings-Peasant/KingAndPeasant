@@ -30,7 +30,7 @@ function LobbyRoom() {
     useEffect(() => {
         if (!socket || !id || !user) return;
 
-        socket.emit('joinLobby', `lobby${id}`);
+        socket.emit('joinLobby', `lobby${id}`, user.id);
 
         socket.on('lobbyUpdated', () => fetchLobby(false));
         socket.on('gameStarted', () => {navigate(`/game/${id}`)});
@@ -100,6 +100,9 @@ function LobbyRoom() {
     if(!lobby || !user) return;
     
     try {
+        if (socket) {
+            socket.emit('leaveLobby', user.id, id, true);
+        }
         navigate("/lobbyList");
     } catch (err) {
         setError("No se pudo salir del lobby");

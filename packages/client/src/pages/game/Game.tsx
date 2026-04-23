@@ -37,6 +37,7 @@ function Game() {
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   const [showDeckModal, setShowDeckModal] = useState(false);
   const [infiltrateCard, setInfiltrateCard] = useState<SelectedCard | null>(null);
+  const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
 
   const activeConfig = gameState?.pendingAction
     ? (gameState.pendingAction.player === "king" 
@@ -74,6 +75,7 @@ function Game() {
     handlePlayCard,
     handleCondemnDeckCard,
     handleResolvePending,
+    handleSurrender,
   } = useGameActions(id, user, myRoleName, gameState, setError, setSelectedCard);
 
   const handleSelectCard = (card: CardState, position: CardPosition | null) => {
@@ -143,6 +145,7 @@ function Game() {
         onPassTurn={handlePassTurn}
         onDrawCard={handleDrawCard}
         onCondemnDeckCard={handleCondemnDeckCard}
+        onSurrenderClick={() => setShowSurrenderConfirm(true)}
       />
     
     {pendingAction && activeConfig && (
@@ -208,10 +211,19 @@ function Game() {
       />
     )}
 
+    {/* Modal para confirmar rendición */}
+      <AnnouncementModal
+        isOpen={showSurrenderConfirm}
+        onClose={() => setShowSurrenderConfirm(false)}
+        title="¿Rendirse?"
+        message="¿Estás seguro de que quieres abandonar la partida? Se te contará como una derrota."
+        onConfirm={handleSurrender} 
+      />
+
     <AnnouncementModal
       isOpen={!!announcement || !!gameOverData}
       onClose={() => {
-        if (gameOverData) navigate('/');
+        if (gameOverData) navigate(`/lobby/${id}`);
         setAnnouncement(null);
       }}
       title={
