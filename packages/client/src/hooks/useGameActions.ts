@@ -1,4 +1,4 @@
-import { passTurn, drawACard, playCard, condemnRebel, resolvePendingAction, type CardState } from "../pages/game/components/GameService";
+import { passTurn, drawACard, playCard, condemnRebel, resolvePendingAction, type CardState, surrenderGame } from "../pages/game/components/GameService";
 
 export const useGameActions = (
   id: string | undefined, 
@@ -78,11 +78,20 @@ export const useGameActions = (
     }
   };
 
+  const handleSurrender = async () => {
+      try {
+        await surrenderGame(Number(id), user.authToken);
+      } catch (err: any) {
+        setError(err.message);
+      }
+  };
+
   return {
     handlePassTurn,
     handleDrawCard,
     handlePlayCard,
     handleCondemnDeckCard,
     handleResolvePending,
+    handleSurrender,
   };
 };

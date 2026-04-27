@@ -217,6 +217,29 @@ export const drawACard = async (gameId: number, token: string) => {
     return await response.json();
 }
 
+export const surrenderGame = async (gameId: number, token: string) => {
+    const response = await fetch(`${API_URL}/${gameId}/surrender`, {
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        }
+    });
+    if (!response.ok) { 
+        let errorMessage = "Ocurrió un error en el servidor al intentar rendirse";
+        try {
+            const errorJson = await response.json();    
+            if (errorJson.error) {
+                errorMessage = errorJson.error;
+            }
+        } catch {
+            errorMessage = await response.text();
+        } 
+        throw new Error(errorMessage);
+    }
+    return await response.json();
+}
+
 export const getPosibleActions = (card: CardState, isKing: boolean) => {
     if(isKing){
         switch(card.typeKing){

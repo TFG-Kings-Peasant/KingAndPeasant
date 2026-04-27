@@ -22,10 +22,10 @@ export const getAllLobbies = async (): Promise<LobbyBackend[]> => {
     return await response.json();
 };
 
-export const createLobby = async (name: string, privacy: string, player1Id: string | null) => {
+export const createLobby = async (name: string, privacy: string, player1Id: string | null, token: string) => {
     const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ 
             name, 
             privacy,
@@ -34,14 +34,24 @@ export const createLobby = async (name: string, privacy: string, player1Id: stri
     });
     if (!response.ok) {
         const error = await response.json();
+        
+        // NUEVO: Comprobamos si el backend envió un array de errores específicos
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            // Unimos todos los mensajes de error específicos en un solo string
+            const detailedErrors = error.errors.map((err: any) => err.message).join(', ');
+            throw new Error(detailedErrors);
+        }
+
         const errorMessage = error.message || error.error || 'Error desconocido del servidor';
         throw new Error(errorMessage);
     }
     return await response.json();
 };
 
-export const getLobbyById = async (lobbyId : number) => {
-    const response = await fetch(API_URL + `/${lobbyId}`);
+export const getLobbyById = async (lobbyId : number, token: string) => {
+    const response = await fetch(API_URL + `/${lobbyId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!response.ok) {
         const errorText = await response.text(); // Leemos qué nos ha respondido el servidor
         console.error("❌ ERROR DEL SERVER:", response.status, errorText);
@@ -50,26 +60,32 @@ export const getLobbyById = async (lobbyId : number) => {
     return await response.json();
 }
 
-export const joinLobby = async (lobbyId: number, player2Id: string | null) => {
+export const joinLobby = async (lobbyId: number, player2Id: string | null, token: string) => {
     const response = await fetch(API_URL + `/${lobbyId}/join`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ 
             player2Id: player2Id
         }),
     });
     if (!response.ok) {
         const error = await response.json();
+        
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            const detailedErrors = error.errors.map((err: any) => err.message).join(', ');
+            throw new Error(detailedErrors);
+        }
+
         const errorMessage = error.message || error.error || 'Error desconocido del servidor';
         throw new Error(errorMessage);
     }
     return await response.json();
 };
 
-export const leaveLobby = async (lobbyId: number, playerId: string | null) => {
+export const leaveLobby = async (lobbyId: number, playerId: string | null, token: string) => {
     const response = await fetch(API_URL + `/${lobbyId}/leave`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ 
             playerId: playerId
         }),
@@ -82,10 +98,10 @@ export const leaveLobby = async (lobbyId: number, playerId: string | null) => {
     return await response.json();
 };
 
-export const setPlayerReady = async (lobbyId: number, playerId: string | null, isReady: boolean) => {
+export const setPlayerReady = async (lobbyId: number, playerId: string | null, isReady: boolean, token: string) => {
     const response = await fetch(API_URL + `/${lobbyId}/setReady`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ 
             playerId: playerId,
             isReady: isReady
@@ -93,8 +109,29 @@ export const setPlayerReady = async (lobbyId: number, playerId: string | null, i
     });
     if (!response.ok) {
         const error = await response.json();
+        
+        if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+            const detailedErrors = error.errors.map((err: any) => err.message).join(', ');
+            throw new Error(detailedErrors);
+        }
+
         const errorMessage = error.message || error.error || 'Error desconocido del servidor';
         throw new Error(errorMessage);
+    }
+    return await response.json();
+};
+
+export const getMyLobby = async (token: string) => {
+    const response = await fetch(API_URL + '/myLobby', {
+        method: 'GET',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+        }
+    });
+
+    if (!response.ok) {
+        return null;
     }
     return await response.json();
 };

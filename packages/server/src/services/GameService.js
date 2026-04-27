@@ -1,8 +1,9 @@
 import { redisClient } from '../../config/redis.js';
 import { prisma } from '../../config/db.js';
+import { lobbyService } from './LobbyService.js';
 import { peasantActionCards } from '../game/cards/peasantActionCards.js';
 import { peasantPendingActions } from '../game/cards/peasantPendingActions.js';
-import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, sendCardToDiscard, shuffleArray } from '../utils/helpers.js';
+import { canInfiltrate, changeTurn, drawCardFromDeck, getCardType, getUserRol, sendCardToDiscard, shuffleArray, checkTownGuards } from '../utils/helpers.js';
 import { kingActionCards } from '../game/cards/kingActionCards.js';
 import { kingPendingActions } from '../game/cards/kingPendingActions.js';
 import {rebelCards} from '../game/cards/rebelCards.js'
@@ -56,6 +57,8 @@ const createGame = async ( lobbyId, player1Id, player2Id) => {
         [player2Id]: 0
     };
 
+    await lobbyService.setLobbyOngoing(lobbyId);
+
     const initialState = await setupNewEra(lobbyId, player1Id, player2Id, 0, initialScores, new Date());
     
     return await saveAndFormatGameState(lobbyId, initialState);
@@ -101,6 +104,9 @@ const saveAndFormatGameState = async (gameId, gameState) => {
                 where: {idUser: loserId},
                 data: { games: {increment: 1}, losses: {increment: 1}}
             });
+
+            await lobbyService.setLobbyWaiting(Number(gameId));
+
             await redisClient.del(`game:${gameId}`);
             return winStatus;
         } else {
@@ -438,9 +444,7 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
             playedCard.isRevealed = false
             gameState.players.peasant.town.push(playedCard);
         }else{
-            if (gameState.players.king.town.length >= 3) {
-                throw new Error('El rey no puede tener mas de 3 guardias en el pueblo');
-            }
+            checkTownGuards(gameState);
             playedCard.isRevealed = true
             gameState.players.king.town.push(playedCard);
         }
@@ -512,6 +516,122 @@ const changeTurnAndCheckDraw = (gameState, userRol) => {
     return gameState;
 }
 
+const endGameByTimeout = async (gameId, winnerId) => {
+    // Intentamos obtener el estado actual para saber quiénes eran los jugadores
+    let gameState;
+    try {
+        gameState = await getGameStateById(gameId);
+    } catch (error) {
+        return null; // La partida ya no existe
+    }
+
+    const kingId = gameState.players.king.id;
+    const peasantId = gameState.players.peasant.id;
+    
+    // Definimos el resultado
+    const result = {
+        isGameOver: true,
+        winnerId: winnerId, // Si es null, es un empate por abandono mutuo
+        reason:'DISCONNECT_TIMEOUT'
+    };
+
+    // Si hay un ganador, actualizamos estadísticas en la DB
+    if (winnerId) {
+        const loserId = winnerId === kingId ? peasantId : kingId;
+
+        await prisma.game.create({
+            data: {
+                player1Id: kingId,
+                player2Id: peasantId,
+                winnerId: winnerId,
+                reason: result.reason,
+                startedAt: new Date(gameState.startedAt)
+            }
+        });
+
+        // Sumar victoria al ganador
+        await prisma.user.update({
+            where: { idUser: winnerId },
+            data: { games: { increment: 1 }, wins: { increment: 1 } }
+        });
+
+        // Sumar derrota al perdedor
+        await prisma.user.update({
+            where: { idUser: loserId },
+            data: { games: { increment: 1 }, losses: { increment: 1 } }
+        });
+    } else {
+        // Registro de partida terminada sin ganador (ambos se fueron)
+        await prisma.game.create({
+            data: {
+                player1Id: kingId,
+                player2Id: peasantId,
+                winnerId: null,
+                reason: result.reason,
+                startedAt: new Date(gameState.startedAt)
+            }
+        });
+    }
+
+    // Borramos la partida de Redis definitivamente
+    await redisClient.del(`game:${gameId}`);
+    await lobbyService.setLobbyWaiting(Number(gameId));
+
+    return result;
+};
+
+const surrender = async (gameId, userId) => {
+    let gameState;
+    try {
+        gameState = await getGameStateById(gameId);
+    } catch (error) {
+        throw new Error('La partida no existe o ya ha terminado.');
+    }
+
+    const kingId = gameState.players.king.id;
+    const peasantId = gameState.players.peasant.id;
+    
+    // Si el que se rinde es el rey, gana el campesino, y viceversa
+    const winnerId = (Number(userId) === Number(kingId)) ? peasantId : kingId;
+    const loserId = Number(userId);
+
+    const result = {
+        isGameOver: true,
+        winnerId: winnerId,
+        reason: 'SURRENDER'
+    };
+
+    // Guardar el historial de la partida en la DB
+    await prisma.game.create({
+        data: {
+            player1Id: kingId,
+            player2Id: peasantId,
+            winnerId: winnerId,
+            reason: result.reason,
+            startedAt: new Date(gameState.startedAt)
+        }
+    });
+
+    // Actualizar estadísticas del ganador
+    await prisma.user.update({
+        where: { idUser: winnerId },
+        data: { games: { increment: 1 }, wins: { increment: 1 } }
+    });
+
+    // Actualizar estadísticas del perdedor
+    await prisma.user.update({
+        where: { idUser: loserId },
+        data: { games: { increment: 1 }, losses: { increment: 1 } }
+    });
+
+    // Borramos la partida de Redis y actualizamos el lobby
+    await redisClient.del(`game:${gameId}`);
+    await lobbyService.setLobbyWaiting(Number(gameId));
+
+    return result;
+};
+
+
 export const gameService = {
     createGame,
     getGameStateById,
@@ -523,5 +643,7 @@ export const gameService = {
     playTownCard,
     peasantDrawACard,
     passTurn,
-    condemnARebel
+    condemnARebel,
+    endGameByTimeout,
+    surrender
 };

@@ -8,7 +8,19 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './src/test/setup.ts'
+    setupFiles: './src/test/setup.ts',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/pages/**/*.tsx', 'src/components/**/*.tsx', 'src/hooks/**/*.ts'], // Qué medir
+      exclude: [
+        'src/**/*.test.tsx', 
+        'src/**/*.test.ts',
+        'src/main.tsx',
+        'src/vite-env.d.ts'
+      ],
+      all: true, 
+    }
   },
   server: {
     host: true,

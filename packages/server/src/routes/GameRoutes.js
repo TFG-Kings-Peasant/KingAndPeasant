@@ -10,6 +10,8 @@ router.post('/:id/resolveAction', authenticateToken, gameController.resolveActio
 router.post('/:id/drawACard', authenticateToken, gameController.peasantDrawACard);
 router.post('/:id/passTurn', authenticateToken, gameController.passTurn);
 router.post('/:id/condemnRebel', authenticateToken, gameController.condemnARebel);
+router.post('/:id/surrender', authenticateToken, gameController.surrender);
+
 
 
 

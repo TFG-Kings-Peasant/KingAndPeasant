@@ -1,7 +1,8 @@
+// packages/client/src/pages/lobbies/LobbyRoom.tsx
 import { useEffect, useState } from "react";
 import PlayerCard from "./components/PlayerCard";
 import "./LobbyRoom.css";
-import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "./components/LobbyFetch";
+import { getLobbyById, leaveLobby, setPlayerReady, type LobbyBackend } from "./components/LobbyService";
 import { startGame } from "../game/components/GameService";
 import { useNavigate, useParams } from "react-router";
 import { useUser } from "../../hooks/useUser";
@@ -20,7 +21,6 @@ function LobbyRoom() {
     } | null>(null);
   const { user, isLogin} = useUser();
   const { socket } = useAuth();
-
   const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,7 +30,7 @@ function LobbyRoom() {
     useEffect(() => {
         if (!socket || !id || !user) return;
 
-        socket.emit('joinLobby', `lobby${id}`);
+        socket.emit('joinLobby', `lobby${id}`, user.id);
 
         socket.on('lobbyUpdated', () => fetchLobby(false));
         socket.on('gameStarted', () => {navigate(`/game/${id}`)});
@@ -42,25 +42,23 @@ function LobbyRoom() {
             socket.emit('leaveLobby', user.id, id);
             socket.off('lobbyUpdated');
             socket.off('gameStarted');
-            
             window.removeEventListener('beforeunload', handleUnload);
         };
     }, [socket, id, user?.id]);
 
   const fetchLobby = async (showLoading = false) => {
+    if(!user) return;
+    if (!user.authToken) return;
     if (showLoading) setLoading(true);
       
     try {
-        const data = await getLobbyById(Number(id));   
+        const data = await getLobbyById(Number(id), user.authToken);   
         setLobby(data);
           
         if (!data) {
             setError("La sala ya no existe");
         }
 
-        if (data.status === 'ONGOING') {
-            navigate(`/game/${id}`);
-        }
     } catch (err) {
         console.error(err);
         if (showLoading) setError("Error al cargar el lobby");
@@ -72,21 +70,22 @@ function LobbyRoom() {
   const handleToggleReady = async () => {
     if (!lobby) return;
     if (!isLogin) return;
-    if (!socket) {
-        console.log("Socket no disponible aún...");
-        return;
-    }
+    if (!socket) return;
+    if(!user) return;
+    if (!user.authToken) return;
+    
+    if (lobby.status === 'ONGOING') return;
+
     try {
         const isPlayer1 = lobby.player1Id === Number(user?.id);
         const currentReadyStatus = isPlayer1 ? lobby.player1Ready : lobby.player2Ready;
-        await setPlayerReady(lobby.id, user?.id || null,!currentReadyStatus);
+        await setPlayerReady(lobby.id, user?.id || null,!currentReadyStatus, user.authToken);
         fetchLobby();
     } catch (err) {
         setError("Error al cambiar estado");
         console.error(err);
     }
   };
-
 
   const handleLeaveClick = () => {
     setAnnouncement({
@@ -101,6 +100,9 @@ function LobbyRoom() {
     if(!lobby || !user) return;
     
     try {
+        if (socket) {
+            socket.emit('leaveLobby', user.id, id, true);
+        }
         navigate("/lobbyList");
     } catch (err) {
         setError("No se pudo salir del lobby");
@@ -137,7 +139,7 @@ function LobbyRoom() {
       <div className="lobby-body">
         <PlayerCard playerId={lobby.player1Id} 
             isReady={lobby.player1Ready}
-            isCurrentUser={lobby.player1Id === Number(user?.id)} // ¿Soy yo?
+            isCurrentUser={lobby.player1Id === Number(user?.id)}
             onToggleReady={handleToggleReady}/>
 
         <h1 className="vs-divider">VS</h1>
@@ -146,7 +148,7 @@ function LobbyRoom() {
             <PlayerCard 
                 playerId={lobby.player2Id} 
                 isReady={lobby.player2Ready}
-                isCurrentUser={lobby.player2Id === Number(user?.id)} // ¿Soy yo?
+                isCurrentUser={lobby.player2Id === Number(user?.id)}
                 onToggleReady={handleToggleReady}
             />
         ) : (
@@ -154,21 +156,31 @@ function LobbyRoom() {
         )}
 
       </div>
+      
       <footer className="lobby-footer">
         <div className="footer-info">
           <span>Estado: </span>
           <span className="status-text">
-            {lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores..."}
-            </span>
+            {/* --- NUEVO: Mostrar que la partida está en curso --- */}
+            {lobby.status === 'ONGOING' 
+                ? "PARTIDA EN CURSO" 
+                : (lobby.player1Ready && lobby.player2Ready ? "INICIANDO..." : "Esperando jugadores...")}
+          </span>
         </div>
         
-        {lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
-            <button className="start-btn" onClick={handleStartGameClick}>
-                COMENZAR PARTIDA
-            </button>
-        )
-        : (<div></div>)}
+        {/* --- NUEVO: Renderizado condicional de los botones --- */}
+        {lobby.status === 'ONGOING' ? (
+            <button className="start-btn" onClick={() => navigate(`/game/${id}`)} style={{backgroundColor: '#2ecc71'}}>
+                RECONECTAR A LA PARTIDA
 
+            </button>
+        ) : (
+            lobby.player1Ready && lobby.player2Ready && lobby.player1Id === Number(user?.id) ? (
+                <button className="start-btn" onClick={handleStartGameClick}>
+                    COMENZAR PARTIDA
+                </button>
+            ) : null
+        )}
 
         <button className="exit-btn" onClick={handleLeaveClick}>
             SALIR DEL LOBBY

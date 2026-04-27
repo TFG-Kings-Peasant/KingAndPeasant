@@ -1,9 +1,9 @@
-import {changeTurn, drawCardFromDeck, shuffleArray } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, shuffleArray, checkTownGuards } from "../../utils/helpers.js";
 
 export const guardCards = {
     1: (gameState) => {
         //"Draw 1 card, then Ready up to 1 Guard"
-
+        checkTownGuards(gameState);
         drawCardFromDeck(gameState, 'king')
         gameState.pendingAction = {
             player: "king",
@@ -30,7 +30,7 @@ export const guardCards = {
     3: (gameState) => {
         //"Ready a Guard, then Mobilize it"
         let guardsInHand = false
-        console.log(gameState.players.king.hand.length)
+        checkTownGuards(gameState);
         for (let i = gameState.players.king.hand.length - 1; i >= 0; i--) {
             const card = gameState.players.king.hand[i];
             if (card.typeKing === "Guard") {
@@ -71,7 +71,6 @@ export const guardCards = {
         shuffleArray(gameState.deck);
         gameState.deck[gameState.deck.length - 1].isRevealed = true;
 
-        //TODO: Logica de mostrar cartas de la deck
         gameState.pendingAction = {
             player: "king",
             type: "ADVISOR"

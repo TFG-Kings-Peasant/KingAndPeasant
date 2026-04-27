@@ -1,4 +1,4 @@
-import {changeTurn, drawCardFromDeck, sendCardToDiscard, shuffleArray } from "../../utils/helpers.js";
+import {changeTurn, drawCardFromDeck, sendCardToDiscard, shuffleArray, checkTownGuards } from "../../utils/helpers.js";
 
 
 export const kingPendingActions = {
@@ -30,9 +30,7 @@ export const kingPendingActions = {
         if (!targetData || !targetData.guardUid) {
             return gameState;
         }
-        if (gameState.players.king.town.length >= 3) {
-            throw new Error('El rey no puede tener mas de 3 guardias en el pueblo');
-        }
+        checkTownGuards(gameState);
         const guardIndex = gameState.players.king.hand.findIndex(c => c.uid === targetData.guardUid);
         if (guardIndex === -1) throw new Error('Guardia no encontrado en la mano del jugador');
         const [card] = gameState.players.king.hand.splice(guardIndex,1); 

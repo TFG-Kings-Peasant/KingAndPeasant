@@ -30,11 +30,19 @@ const Register = () => {
                 navigate("/login");
             } else {
                 const data = await res.json();
-                setError(data.message || "Registration failed");
+                
+                // Comprobamos si el backend envió el array detallado de errores
+                if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+                    const detailedErrors = data.errors.map((err: { message: string }) => err.message).join(' | ');
+                    setError(detailedErrors);
+                } else {
+                    setError(data.message || data.error || "Registration failed");
+                }
             }
         })
         .catch((err) => {
-            setError("An error occurred:" + err +". Please try again.");
+            const errMsg = err instanceof Error ? err.message : err;
+            setError("An error occurred: " + errMsg + ". Please try again.");
         });
     };
 

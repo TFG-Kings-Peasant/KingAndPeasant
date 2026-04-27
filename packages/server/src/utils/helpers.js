@@ -51,3 +51,8 @@ export function drawCardFromDeck(gameState, userRol){
     }
     return gameState;
 }
+
+export function checkTownGuards(gameState){
+    const currentGuards = gameState.players.king.town.filter(c => c.typeKing === 'Guard').length;
+    if (currentGuards >= 3) throw new Error('El rey no puede tener más de 3 guardias en el pueblo');
+}
