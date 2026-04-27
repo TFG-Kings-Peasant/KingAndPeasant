@@ -24,6 +24,10 @@ const prismaMock = {
   user: {
     update: jest.fn(),
   },
+  lobby: {
+    findUnique: jest.fn(),
+    update: jest.fn(),
+  },
 };
 
 jest.unstable_mockModule('../config/redis.js', () => ({
@@ -94,6 +98,8 @@ describe('gameService', () => {
     redisStore.clear();
     jest.clearAllMocks();
     prismaMock.card.findMany.mockResolvedValue([]);
+    prismaMock.lobby.findUnique.mockResolvedValue({ id: 1, status: 'WAITING' });
+    prismaMock.lobby.update.mockResolvedValue({ id: 1, status: 'ONGOING' });
   });
 
   test('startGame inicializa la partida correctamente con las reglas de King and Peasant', async () => {
