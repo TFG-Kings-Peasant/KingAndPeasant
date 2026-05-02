@@ -321,7 +321,9 @@ describe('gameService', () => {
     expect(result.dtoKing.turn).toBe('peasant');
     expect(result.dtoKing.pendingAction).toBeNull();
     expect(result.dtoKing.players.king.town).toEqual([]);
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'strike-draw' }),
+    ]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'strike-deck-1', isRevealed: true }),
       expect.objectContaining({ uid: 'strike-deck-2', isRevealed: true }),
@@ -399,7 +401,9 @@ describe('gameService', () => {
       expect.objectContaining({ uid: 'strike-queued-1', isRevealed: true }),
       expect.objectContaining({ uid: 'strike-queued-2', isRevealed: true }),
     ]));
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'strike-queued-draw' }),
+    ]);
   });
 
   test('playHandCard con Rally roba dos cartas y deja la seleccion de ocultarlas como accion pendiente', async () => {
@@ -510,7 +514,9 @@ describe('gameService', () => {
 
     expect(result.dtoKing.turn).toBe('peasant');
     expect(result.dtoKing.pendingAction).toBeNull();
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'king-draw-after-arrest' }),
+    ]);
     expect(result.dtoKing.players.peasant.town).toEqual([]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'arrest-1', templateId: 11, isRevealed: true }),
@@ -925,7 +931,9 @@ describe('gameService', () => {
     expect(result.dtoKing.players.king.town).toEqual([
       expect.objectContaining({ uid: 'king-discard-guard', isRevealed: true }),
     ]);
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'king-reassemble-deck' }),
+    ]);
   });
 
   test('Revolt inserta rebeldes en el mazo y revela el resto del pueblo', async () => {
@@ -1201,7 +1209,9 @@ describe('gameService', () => {
     const result = await gameService.resolvePendingAction('game-watchman', 1, {});
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'watchman-draw' }),
+    ]);
     expect(result.dtoKing.players.peasant.hand).toEqual([
       { uid: 'watch-hand-1' },
       { uid: 'watch-hand-2' },
@@ -1256,6 +1266,7 @@ describe('gameService', () => {
     ]);
     expect(result.dtoKing.players.king.hand).toEqual([
       expect.objectContaining({ uid: 'crier-draw-1' }),
+      expect.objectContaining({ uid: 'crier-draw-2' }),
     ]);
   });
 
@@ -1350,10 +1361,11 @@ describe('gameService', () => {
 
       expect(result.dtoKing.turn).toBe('peasant');
       expect(result.dtoKing.pendingAction).toBeNull();
-      expect(result.dtoKing.players.king.hand).toEqual([]);
+      expect(result.dtoKing.players.king.hand).toEqual([
+        expect.objectContaining({ uid: 'advisor-a' }),
+      ]);
       expect(result.dtoKing.deck).toEqual([
         { uid: 'advisor-b' },
-        { uid: 'advisor-a' },
       ]);
     } finally {
       Math.random = originalRandom;
@@ -1396,7 +1408,9 @@ describe('gameService', () => {
     expect(result.dtoKing.deck).toEqual([
       { uid: 'sentinel-b' },
       { uid: 'sentinel-c' },
-      { uid: 'sentinel-a' },
+    ]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'sentinel-a' }),
     ]);
   });
 
@@ -1468,12 +1482,14 @@ describe('gameService', () => {
       typePeasant: 'Action',
       isRevealed: false,
     });
+    const deckCard = makeCard({ uid: 'sabotage-deck', templateId: 1 });
     const originalRandom = Math.random;
     Math.random = () => 0.999999;
 
     try {
       await saveState('game-sabotage', createState({
         turn: 'king',
+        deck: [deckCard],
         players: {
           king: {
             hand: [sabotage],
@@ -1488,6 +1504,9 @@ describe('gameService', () => {
 
       expect(result.dtoKing.turn).toBe('peasant');
       expect(result.dtoKing.players.peasant.hand).toEqual([{ uid: 'sabotage-hand-1' }]);
+      expect(result.dtoKing.players.king.hand).toEqual([
+        expect.objectContaining({ uid: 'sabotage-deck' }),
+      ]);
       expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
         expect.objectContaining({ uid: 'sabotage-1', isRevealed: true }),
         expect.objectContaining({ uid: 'sabotage-hand-2', isRevealed: true }),
@@ -1521,7 +1540,9 @@ describe('gameService', () => {
     const result = await gameService.playTownCard('game-mill', 'mill-1', {}, 1);
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'mill-a' }),
+    ]);
     expect(result.dtoKing.discardPile).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'mill-1', isRevealed: true }),
       expect.objectContaining({ uid: 'mill-c', isRevealed: true }),
@@ -1570,7 +1591,9 @@ describe('gameService', () => {
     const result = await gameService.playTownCard('game-mass-reveal', 'reveal-1', {}, 1);
 
     expect(result.dtoKing.turn).toBe('peasant');
-    expect(result.dtoKing.players.king.hand).toEqual([]);
+    expect(result.dtoKing.players.king.hand).toEqual([
+      expect.objectContaining({ uid: 'reveal-draw' }),
+    ]);
     expect(result.dtoKing.players.peasant.town).toEqual(expect.arrayContaining([
       expect.objectContaining({ uid: 'reveal-r1', isRevealed: true }),
       expect.objectContaining({ uid: 'reveal-r2', isRevealed: true }),
