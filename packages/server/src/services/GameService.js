@@ -294,7 +294,7 @@ const activateCard = async (gameId, playedCard, cardIndex, userRol, gameState) =
         gameState = mobilizeKingGuard(gameState, playedCard);
     }   
     if (!gameState.pendingAction && !gameState.lastEvent) {
-        changeTurn(gameState);
+        changeTurnAndCheckDraw(gameState, userRol);
     }
     return await saveAndFormatGameState(gameId, gameState);
 }
@@ -363,7 +363,7 @@ const playActionCard = async (gameId,targetData, playedCard, userRol, gameState)
     playedCard.isRevealed = true;
     gameState.discardPile.push(playedCard); 
     if (!gameState.pendingAction) {
-        gameState.turn = gameState.turn === 'king' ? 'peasant' : 'king';
+        changeTurnAndCheckDraw(gameState, userRol);
     }
     //Guardar estado actualizado
     return await saveAndFormatGameState(gameId, gameState);
@@ -412,7 +412,7 @@ const resolvePendingAction = async (gameId, userId, targetData) => {
         gameState = continueQueuedPeasantDispatch(gameState);
     }
     if (!gameState.pendingAction && !gameState.lastEvent) {
-        changeTurn(gameState);
+        changeTurnAndCheckDraw(gameState, userRol);
     }
     return await saveAndFormatGameState(gameId, gameState);
 }
@@ -449,7 +449,7 @@ const placeCardInTown = async (gameId, playedCard, userRol, gameState) => {
             gameState.players.king.town.push(playedCard);
         }
         gameState.pendingAction = null;
-        changeTurn(gameState);
+        changeTurnAndCheckDraw(gameState, userRol);
 
         return await saveAndFormatGameState(gameId, gameState);
 }
